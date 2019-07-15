@@ -1,0 +1,26 @@
+.fgReact_floatingfooter{
+  color: grey;
+  position: fixed;
+  bottom: 0px;
+  z-index: 9999;
+  z-index: 9999999999;
+  padding: 3px 5px 3px 5px;
+  width: 100%;
+  margin-top: 2px;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.fgReact_floatingfooter a{
+  color: rgb(51, 122, 183);
+  text-decoration: none;
+  float: left;
+}
+
+.fgReact_floatingfooter img{ 
+  display: inline;
+  height: 20px;
+}
+
+* {
+  box-sizing: border-box;
+}

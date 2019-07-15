@@ -1,0 +1,152 @@
+
+.fgReact_searchrow{
+    width: 100%;
+    /* height: 70px; */
+}
+
+.fgReact_searchInputContainer{
+    background: white;
+    height: 50px;
+}
+
+
+.fgReact_plusButton{
+    transition: 0.2s ease;
+    background: transparent;
+    color: var(--fgReact_v0_pureWhite);
+    outline: none !important;
+    width: 25px !important;
+    margin: 0 auto;
+    border-radius: 5px;
+    padding: 5px;
+    height: 22px;
+    position: relative;
+    /* bottom: 2px; */
+  }
+
+.fgReact_plusButtonOuter{
+    transition: 0.2s ease;
+    background: var(--fgReact_V0_boldGreen);
+    color: var(--fgReact_v0_pureWhite);
+    border: 1px solid #357b00 !important;
+    outline: none !important;
+    height: 35px !important;
+    cursor: pointer;
+    margin: 0 auto;
+    border-radius: 5px;
+    padding: 5px;
+  }
+  
+  .fgReact_plusButton:hover{
+    transform: scale(1.03);
+    color: white;
+  }
+  
+  .fgReact_plusButton:focus{
+    transform: scale(1.03);
+    color: white;
+  }
+  .fgReact_plusButtonOuter:hover{
+    color: white;
+    background: #91b937;
+  }
+  
+  .fgReact_plusButtonOuter:focus{
+    color: white;
+    background: #91b937;
+  }
+  
+  .fgReact_searchButton{
+    transition: 0.2s ease;
+    background: var(--fgReact_v0_atnYellow);
+    color: var(--fgReact_v0_pureWhite);
+    outline: none !important;
+    margin: 0 auto;
+    width: 22px !important;
+    height: 25px !important;
+    border-radius: 5px;
+    padding: 5px;
+  }
+
+  .fgReact_searchButtonOuter{
+    transition: 0.2s ease;
+    background: var(--fgReact_v0_atnYellow);
+    color: var(--fgReact_v0_pureWhite);
+    outline: none !important;
+    border: solid 1px #e47f00 !important;
+    height: 35px !important;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 0 auto;
+    padding: 5px;
+  }
+  
+  .fgReact_searchButton:hover{
+    transform: scale(1.03);
+    color: white;
+    background: #ffc17a;
+  }
+  
+  .fgReact_searchButton:focus{
+    transform: scale(1.03);
+    color: white;
+    background: #ffc17a;
+  }
+
+  .fgReact_searchButtonOuter:hover{
+    color: white;
+    background: #ffc17a;
+  }
+  
+  .fgReact_searchButtonOuter:focus{
+    color: white;
+    background: #ffc17a;
+  }
+  
+  .fgReact_minusButton{
+    transition: 0.2s ease;
+    background: var(--fgReact_V0_dangerRed);
+    color: var(--fgReact_v0_pureWhite);
+    outline: none !important;
+    width: 25px !important;
+    height: 25px !important;
+    border-radius: 5px;
+    padding: 5px;
+  }
+  
+  
+  .fgReact_minusButtonOuter{
+    transition: 0.2s ease;
+    background: var(--fgReact_V0_dangerRed);
+    color: var(--fgReact_v0_pureWhite);
+    border: solid 1px #b30022 !important;
+    outline: none !important;
+    height: 35px !important;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 0 auto;
+    padding: 5px;
+  }
+  
+  .fgReact_minusButton:hover{
+    transform: scale(1.03);
+    color: white;
+    background: #ff3e3e;
+  }
+  
+  .fgReact_minusButton:focus{
+    transform: scale(1.03);
+    color: white;
+    background: #ff3e3e;
+  } 
+
+  .fgReact_minusButtonOuter:hover{
+    color: white;
+    background: #ff3e3e;
+  }
+  
+  .fgReact_minusButtonOuter:focus{
+    color: white;
+    background: #ff3e3e;
+  }
+  

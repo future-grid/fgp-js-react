@@ -1,0 +1,69 @@
+{
+    "columns": [
+        {"accessor":"serialNumber", "Header":"Serial Number", "minWidth" : 210, "fgpRedirect" : "/Asset/"},
+        {"accessor":"employeeId", "Header":"Employee ID", "minWidth" : 180 },
+        {"accessor":"businessUnit", "Header":"Business Unit", "minWidth" : 120},
+        {"accessor":"orgUnit", "Header":"Organisation Unit", "minWidth" : 240},
+        {"accessor":"division", "Header":"Division", "minWidth" : 180}
+    ],
+    "searchingColumns": [{
+        "column": "serialNumber",
+        "label":"SERIAL NUMBER"
+    },{
+        "column": "employeeId",
+        "label":"EMPLOYEE ID"
+    },{
+        "column": "businessUnit",
+        "label":"BUSINESS UNIT"
+    },{
+        "column": "orgUnit",
+        "label":"ORGANISATION UNIT"
+    },{
+        "column": "division",
+        "label":"DIVISION"
+    }],
+
+    "searchingTypes": [
+        {
+            "key": "==*?*",
+            "label": "Include"
+        },{
+            "key": "==\"*?*\"",
+            "label": "Like"
+        },{
+            "key": "<?",
+            "label": "Less Than"
+        },{
+            "key": ">?",
+            "label": "Greater Than"
+        },{
+            "key": "<=?",
+            "label": "Less Than or Equal To"
+        },{
+            "key": ">=?",
+            "label": "Greater Than or Equal To"
+        },{
+            "key": "!=\"?\"",
+            "label": "Not Equal To"
+        },{
+            "key": "==\"?\"",
+            "label": "Equal To"
+        },{
+            "key": "=isnull=true",
+            "label": "Is Null"
+        },{
+            "key": "=isnull=false",
+            "label": "Not Null"
+        }
+    ],
+
+    "locationColumns":["icpLat","icpLng"] ,
+    "customer": "serial_number",
+    "reference":"asset_reference",
+    "defaultQtyRecordsToRetrieve" : 125,
+    "defaultStartFrom" : 0,
+    "hz": false,
+    "map":{
+        "centre" : [-37.569041,175.148775]
+    }
+}
