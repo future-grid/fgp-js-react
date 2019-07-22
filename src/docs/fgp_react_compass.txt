@@ -84,8 +84,7 @@ For this implementation of Compass we are using `React 16` , the file structure 
 
 
 == Search Component
-The *Search* component is integral to many use cases provided by Compass users, as such it has been built to be highly
-customisable to a configuration of your choosing. The component is driven by an external *JSON* file.
+The *Search* component is integral to many use cases provided by Compass users, as such it has been built to be highly customisable to a configuration of your choosing. The component is driven by an external *JSON* file.
 
 The Search component also comes standard with 2 child components, these are the *Search Row* and *Result Table* components, before discussing them though let's discuss the invocation and use of the Search Component.
 
@@ -297,7 +296,129 @@ There is *no configuration expected* for this component, however this is what ea
 
 
 
+== Navigation Component
+The *Navigation* component is the wrapper for the title bar located at the top of the page, as well as the side menu located at the left of the page. It is built such that all aesthetic options can be changed in an external *JSON* file.
 
+Navigation contains 2 children by default - *SideNavigation* and *TopNavigation*. As all branding options are available via `brandingconfig.json` the implementation of the Navigation component should not need to be changed.
+
+*No configuration is expected* for this component, however this will give you an overview of its implementation. Here is the implementation of the component inside *Home*.
+
+----
+<Navigation
+    history={this.props.history}
+    currentPage="/Home"
+    topNavTitle={this.props.topNavTitle}
+    sideNavLogoPath={this.props.sideNavLogoPath}
+/>
+----
+
+=== Setting up the props
+There is *no modification* to the props expected for the component
+
+* `*history*`: history throughout application, used in logout
+* `*currentPage*`: page currently displayed, used in sidebar
+* `*topNavTitle*`: the title for the top bar
+* `*sideNavLogoPath*`: the path for the image used for the logo, relative to the `public` folder
+
+=== Setting up the brandingConfig JSON
+** `sideNavLogoPath` : Defines the path to the image used for the logo
+
+NOTE: The path used is relative to the `public` folder. If no path is provided, it will default to `fgp-logo.png`.
+
+** `topNavTitle` : The title shown in the top bar present anywhere outside the Login page
+** `loginTitle` : The title of the login form
+
+Below is an example of the `brandingConfig` *JSON* file
+
+----
+{
+    "sideNavLogoPath" : "fgp-logo.png",
+    "topNavTitle" : "Compass",
+    "loginTitle" :  "Compass Login"
+}
+----
+
+== SideNavigation Component
+The *SideNavigation* component is the container for the sidebar navigation menu and logo. The SideNavigation component contains 4 children, the logo and 3 **SideNavigationItem**s.
+
+No implementation of the SideNavigation component should need to be changed, as all branding options are available via `brandingconfig.json` shown above. However, this will give you an overview of its implementation. Here is the implementation of the component inside *Navigation*.
+
+----
+<SideNavigation
+    history={this.props.history}
+    currentPage={this.props.currentPage}
+    isOpen={this.state.isOpen}
+    handler={this.toggleNav}
+    sideNavLogoPath={this.props.sideNavLogoPath}
+/>
+----
+
+NOTE: Opening and closing of the menu is handled by the *Navigation* component
+
+=== Setting up the props
+There is *no modification* to the props expected for the component
+
+* `*history*`: history throughout application, used in logout
+* `*currentPage*`: the page currently displayed, used to highlight menu options
+* `*isOpen*`: whether the menu is extended or not (displaying text as well as symbols)
+* `*handler*`: the function used to toggle isOpen
+* `*sideNavLogoPath*`: the path to the image used for the logo, relative to `public`
+
+
+=== SideNavigationItem
+The *SideNavigationItem* is a single button present in *SideNavigation*. Additional SideNavigationItems could be added to the sidebar, if extra features are desired. 
+
+The aesthetic of each SideNavigationItem (its *description* and *icon*) are hardcoded into their implementation. Below is an example implementation of the SideNavigationItem used for the Home button.
+
+----
+<SideNavigationItem
+    extensionShown={this.props.isOpen}
+    currentPage={this.props.currentPage}
+    linkTo="/Home"
+    FontAwesomeIcon="home"
+    fontAwesomeLib="fas"
+    description="Home"
+/>
+----
+
+==== SideNavigationItem Props
+These are expected to be modified for additional SideNavigationItems. Pre-existing SideNavigationItems are *not expected to be modified*.
+
+* `*extensionShown*`: whether the menu is extended or not
+
+NOTE: This is handled by the *Navigation* component
+
+* `*currentPage*`: the page currently displayed, the item will be highlighted if this value matches linkTo
+* `*linkTo*`: the page to redirect to upon clicking this item
+* `*FontAwesomeIcon*`: the icon for the button from the Font Awesome Library
+* `*fontAwesomeLib*`: the Font Awesome Library selected for the icon
+* `*description*`: page title, shown to the user while menu is extended
+
+== TopNavigation Component
+The *TopNavigation* component is the top bar featured on all pages outside the Login page. It features the title of the page.
+
+As the title can be edited via `brandingconfig.json` editing the implementation of the TopNavigation component should not be necessary. 
+
+NOTE: Aesthetic changes to TopNavigation can be made inside the `.closedheader` section of its individual CSS. Non-background edits are not recommended.
+
+However, for better understanding - below is the implementation inside *Navigation*
+
+----
+<TopNavigation
+    isOpen={this.state.isOpen}
+    isDashboard={this.props.isDashboard}
+    topNavAction={this.props.topNavAction}
+    topNavTitle={this.props.topNavTitle}
+/>
+----
+
+=== Setting up the props
+There is *no modification* to the props expected for this component
+
+* `*isOpen*`: whether the side menu is extended or not, handled by *Navigation*
+* `*isDashboard*`: no longer used
+* `*topNavAction*`: no longer used
+* `*topNavTitle*`: the title for the application, defined in `brandingconfig.json`
 
 == Network Configuration
 For the Scale Test environment at UE we will be using the following servers
