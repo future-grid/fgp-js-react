@@ -1,0 +1,7 @@
+{
+    "baseUrl" : "https://compass-api.dev.welnet.co.nz/compass/",
+    "sampleIcp" : "icp/name/0000001139WE3AA/",
+    "sampleIcpExtension" : {"extensions" : ["location", "icp_ext"]},
+    "relation_icp_tx" : "/relation/icp_transformer"
+}
+

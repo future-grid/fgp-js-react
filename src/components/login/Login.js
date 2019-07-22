@@ -46,7 +46,7 @@ export class Login extends Component {
         <button  className="btn btn-primary" onClick={
           () => {
             auth.login( this.state, () => {
-              this.props.history.push("/Dashboard")
+              this.props.history.push("/Home")
             })
           }
         } >
