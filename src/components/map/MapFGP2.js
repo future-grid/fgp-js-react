@@ -10,6 +10,7 @@ import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
 import {OSM, Vector as VectorSource} from 'ol/source.js';
 import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style.js';
 
+
 //  Sample Feature object
 // {
 //   'type' : "Feature",
@@ -39,32 +40,39 @@ export class MapFGP2 extends Component {
         this.state = {
             popupVisible:false,
             focusedFeature: null,
+            focusedGroup: null,
+            zoomLevel: 16,
+            dotRadius: 4
         };
     }
     
     buildmap(){
+      // child style
       var image = new CircleStyle({
-        radius: this.props.radius,
+        radius: this.state.dotRadius,
         fill: new Fill({
           color: 'pink'
         }),
         stroke: new Stroke({color: 'red', width: 1})
       });
-
-      var imageParent = new CircleStyle({
-        radius: this.props.radius,
-        fill: new Fill({
-          color: 'lightblue'
-        }),
-        stroke: new Stroke({color: 'blue', width: 1})
-      });
-      
       var styles = {
         'Point': new Style({
           image: image
         })
       };
-
+      var styleFunctionChildren = function(feature) {
+        return styles[feature.getGeometry().getType()];
+      };
+      
+      
+      // parent style
+      var imageParent = new CircleStyle({
+        radius: this.state.dotRadius,
+        fill: new Fill({
+          color: 'lightblue'
+        }),
+        stroke: new Stroke({color: 'blue', width: 1})
+      });
       var stylesParent = {
         'Point': new Style({
           image: imageParent
@@ -75,10 +83,6 @@ export class MapFGP2 extends Component {
         return stylesParent[feature.getGeometry().getType()];
       };      
 
-      var styleFunctionChildren = function(feature) {
-        return styles[feature.getGeometry().getType()];
-      };
-    
       // intitializing the geojson
       let points = [];
       var geojsonObjectChildren = {
@@ -126,7 +130,6 @@ export class MapFGP2 extends Component {
 
       // this will need to be tweaked from project to project depending on data structure
       // in this example I am using a list of ICP extensions/locations from a tx relation
-      console.log(this.props.featuresParent)
       // this.props.featuresParent.forEach( feature => {
         let featureObjParent = {
           'type' : "Feature",
@@ -199,7 +202,7 @@ export class MapFGP2 extends Component {
         target: 'map',
         view: new View({
           center: layerCenter,
-          zoom: this.props.zoom,
+          zoom: this.state.zoomLevel,
           projection: 'EPSG:4326'
         })
       });
@@ -209,18 +212,66 @@ export class MapFGP2 extends Component {
         featuresLayerChildren:vectorLayerChildren,
         featuresLayerParent:vectorLayerParent
       })
-      map.on('pointermove', this.handleMapHover.bind(this));      
+      // binding the hover event (popup dialogue)
+      map.on('pointermove', this.handleMapHover.bind(this));     
+      // changing the size of the features on the map with zoom level 
+      map.getView().on('change:resolution', function(evt) {
+        var currZoomLevel = map.getView().getZoom();
+        var radius
+        if(currZoomLevel>18){
+          radius = 6;
+        }else if(currZoomLevel>15){
+          radius = 4;
+        }else if(currZoomLevel>13){
+          radius = 2;
+        }else if(currZoomLevel>10){
+          radius = 2;
+        }else{
+          radius = 1;
+        }
+        var newStyle = new Style({
+            image: new CircleStyle({
+            radius: radius,
+            fill: new Fill({color: 'pink'}),
+            stroke: new Stroke({color: 'red', width: 1})
+          })
+        })
+        var newStyle2 = new Style({
+            image: new CircleStyle({
+            radius: radius,
+            fill: new Fill({color: 'lightblue'}),
+            stroke: new Stroke({color: 'blue', width: 1})
+          })
+        })
+        vectorLayerChildren.setStyle(newStyle);
+        vectorLayerParent.setStyle(newStyle2);
+      });     
       // map.on('click', this.handleMapClick.bind(this));      
-      map.updateSize() // making sure its the right dimension
+      // making sure its the right dimension
+      map.updateSize() 
     }
 
     componentDidMount(){
       this.buildmap()
-    }
-
-    buildLayers(){
       
     }
+
+    // different on click handlers
+    showDeviceExtensionPopUp(deviceId, type){
+      // gets an extension for the device and creates an overlay
+    }
+
+    goto(deviceId, type){
+      // redirects to the asset page of device type
+    }
+
+    createGroup(){
+      // creates a group of assets with a drawing shape
+      
+    }
+
+
+    
 
     handleMapClick(event){
       this.state.map.updateSize()
@@ -255,7 +306,6 @@ export class MapFGP2 extends Component {
           popupVisible: false
         })
       }
-      
     }
 
     componentDidUpdate(){

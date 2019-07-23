@@ -16,6 +16,7 @@ export class AssetData extends Component {
   componentDidUpdate(){
     console.log(this.props)
   }
+  
   render() {
     return (
       <div className="container fgReact_assetDataContainer">
@@ -45,7 +46,7 @@ export class AssetData extends Component {
                      }</label>
                   </li>
                   <li>
-                     Cost: <label className="fgReact_assetLabel">{this.props.assetExtension.cost ? "$" + this.props.assetExtension.cost / 100 : "Uknown Cost"}</label>
+                     Cost: <label className="fgReact_assetLabel">{this.props.assetExtension.cost ? "$" + this.props.assetExtension.cost / 100 : "Unknown Cost"}</label>
                   </li>
                   <li>
                      Department: <label className="fgReact_assetLabel">{this.props.assetExtension.department}</label>
