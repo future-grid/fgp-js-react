@@ -4,7 +4,8 @@ import { Navigation } from '../../navigation/Navigation';
 import { AssetData } from './assetdata/AssetData';
 import axios from "axios";
 import apiConfig from '../../../configs/apiConfig.json';
-// import Moment from 'react-moment';
+import deviceConfig from '../../../configs/deviceConfig_asset.json';
+import Moment from 'react-moment';
 
 export class AssetPage extends Component {
   constructor(props){
@@ -72,10 +73,87 @@ export class AssetPage extends Component {
           assetEvents : null,
           assetEventsLoaded: false
         })
-      }) 
+      }).finally( () => {
+        this.cleanData();
+      })
     };  
 
   } 
+
+  // iterates over the mutable columns in the JSON config and will return the thing to mutate them with, will otherwise just return 'plain'
+  getFormat(key) {
+    for(let i=0; i<deviceConfig.mutatedColumns.length; i++){
+      if(key === deviceConfig.mutatedColumns[i].key) {
+        return deviceConfig.mutatedColumns[i].style;
+      }
+    }
+    
+    return 'plain';
+  }
+
+  // iterates over the redirectable columns in the JSON config and will return its given redirect.
+  // also replaces all asterisks with the given value (for things like employeeID or whatever)
+  getRedirect(key, value) {
+    for(let i=0; i<deviceConfig.redirectColumns.length; i++){
+      if(key === deviceConfig.redirectColumns[i].key) {
+        return deviceConfig.redirectColumns[i].redirectTo.replace("*", value);
+      }
+    }
+    return null; // there is no redirect given.
+  }
+
+  // converts a camelCased string into seperate words with capitals
+  wordConvert(given) {
+    let temp = given.split(/(?=[A-Z])/); // split word at capitals
+    temp[0] = this.capitalise(temp[0]);
+    temp.map(word => this.capitalise(word));
+      
+    return temp.join(" "); // return completed string
+  }
+
+  capitalise(word) {
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }
+
+  // will return an array of pairs with titles and data for display. will remove any columns mentioned in deviceConfig.json
+  cleanData () {
+    // group all of the data from the API call into one neat little bundle thing
+    let data = [
+      this.state.assetExtension,
+      this.state.assetInfo,
+      this.state.employeeAssignedTo,
+      this.state.assetStatus,
+      this.state.computerExtension,
+      //this.state.assetEvents, do not include! it doesn't work ;(
+      this.state.assetEventsLoaded
+    ];
+
+    // new array for where the cleanedData will be stored
+    let cleanedData = new Array();
+
+    // iterate over each category
+    data.map(category => {
+      // for each key value pair in the category
+      for(let [key, value] of Object.entries(category)) {
+        // if it is not in the blacklist defined in the JSON
+        if(!deviceConfig.excludedColumns.includes(key)){
+          // add it to the list of data with some prettifying
+          console.log(`${key}, ${value}, ${this.getFormat(key)}, ${this.getRedirect(key, value)}`);
+          cleanedData.push({
+            title : this.wordConvert(key),
+            data : value,
+            style : this.getFormat(key),
+            key : Date.now() + Math.random(), // key to make React happier :)
+            redirect : this.getRedirect(key, value)
+          });
+        }
+      }
+    });
+
+    this.setState({
+      cleanData : cleanedData
+    });
+  }
 
   render() {
     return (
@@ -88,14 +166,10 @@ export class AssetPage extends Component {
         />
         <AssetData
           hasMap={false}
-          assetExtension={this.state.assetExtension}
-          assetInfo={this.state.assetInfo}
           assetName={this.state.assetName}
-          employeeAssignedTo={this.state.employeeAssignedTo}
-          assetStatus={this.state.assetStatus}
-          computerExtension={this.state.computerExtension}
-          assetEvents={this.state.assetEvents}
-          assetEventsLoaded={this.state.assetEventsLoaded}
+          data={this.state.cleanData}
+          deviceConfig={deviceConfig}
+          history={this.props.history}
         />
       </div>
     )

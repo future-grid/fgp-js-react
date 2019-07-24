@@ -1,0 +1,48 @@
+{
+    "excludedColumns" : [
+        "lastLogon",
+        "type",
+        "daasCost",
+        "daasCostPrimitive"
+    ],
+    "mutatedColumns" : [
+        {
+            "key" : "legacyCost",
+            "style" : "currency"
+        },
+        {
+            "key" : "daasCostPrimitive",
+            "style" : "currency"
+        },
+        {
+            "key" : "lastLogon",
+            "style" : "datetime"
+        },
+        {
+            "key" : "lastLogonAsDate",
+            "style" : "datetime"
+        },
+        {
+            "key" : "lastChange",
+            "style" : "datetime"
+        },
+        {
+            "key" : "lastChangeAsDate",
+            "style" : "datetime"
+        },
+        {
+            "key" : "timestamp",
+            "style" : "datetime"
+        }
+    ],
+    "redirectColumns" : [
+        {
+            "key" : "name",
+            "redirectTo" : "/Asset/*"
+        },
+        {
+            "key" : "department",
+            "redirectTo" : "/super/*/test"
+        }
+    ]
+}

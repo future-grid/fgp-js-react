@@ -58,8 +58,20 @@ ul.info_r_list li{
 .fgReact_assetLabel{
   color: darkgray 
 }
-  
-  
+
+.fgReact_assetRedirect, .fgReact_assetRedirect hover {
+  color: inherit !important;
+  cursor: default;
+  text-decoration: none !important;
+}
+
+/* override for the  */
+.fgReact_assetRedirect label {
+  color: #0000EE;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
   /* Mobile */
   @media screen and (max-width: 768px) {
    
