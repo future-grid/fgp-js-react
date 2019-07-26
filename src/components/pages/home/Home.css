@@ -1,0 +1,19 @@
+.fgReact_home {
+    background: var(--fgReact_v0_dashboardGrey);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: calc(10px + 2vmin);
+    color: var(--fgReact_v0_boldBlack);
+    z-index: 1;
+    overflow-x: hidden;
+    padding: 70px 0 0 70px;
+  }
+  
+  
+  /* Mobile */
+  @media screen and (max-width: 768px) {
+   
+
+  }

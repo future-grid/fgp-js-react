@@ -1,0 +1,1659 @@
+= Future Grid - React Compass Frontend Guide
+Anthony Carnell <anthony@future-grid.com.au>
+0.01, Jun 27 2019
+
+
+== Revision History
+[options="header", cols="1,2,3,10"]
+|=====================
+| Version | Date| Name | Comments
+| 0.01    | 2019-27-06 | Anthony Carnell | First Draft
+|=====================
+
+== Overview
+
+This guide aims to document the different component, their functionality and their dependancies in the React implementation of the Compass app
+
+== Quick links
+
+  * <<Quick Start>>
+  * <<File Structure>>
+  * <<Search Component>>
+
+<<<
+
+== Before you begin
+NOTE: Before you begin it is recommended you read the getting started documents found on the React Website
+
+
+== Quick Start
+To start the compass app locally in a dev environment simply pull the latest version, and run the following in the root directory of the app
+
+ ----
+ $ npm install -i
+ ----
+
+  ----
+ $ npm run
+ ----
+
+The first command will install all dependancies, the second will the start the application at port 3000, opening your default web browser automatically,
+if you are planning on developing in React it is recommended to install the plugin for your respective browser
+
+
+== File Structure
+
+For this implementation of Compass we are using `React 16` , the file structure of the app is as follows,
+----
+
+  /thingsat
+        /node_modules
+              /...
+        /public
+        /src
+              /components
+                          /pages
+                               /...
+                          /search
+                               /searchrow
+                               /resulttable
+                               /configs
+                          /navigation
+                               /topnavigation
+                               /sidenavigation
+                          /floatingfooter
+              /configs
+              /docs
+----
+
+
+* `node_modules` - You should never have to modify the contents of this folder, it will be automatically handled by React.
+
+* `public` - Where you should put your favicon, manifest properties and logos used by the top level components
+
+* `src` - Inside here is where you will find all components/assets which are not required by the top level components
+
+* `src/pages` - Individual pages should be defined here for example, a home page, customer page, search page, for consistency, keep the pages here
+
+* `src/search` - Location of the *Search* component and its children which depend on it, more information on this later in the document (see quick links)
+
+* `src/navigation` - Location of the *Navigation* component and its children (top and side), this is the default navigation used, for more info see quick links
+
+* `src/floatingfooter` - Location of the *FloatingFooter* component, for more info see tge quick links
+
+
+
+== Search Component
+The *Search* component is integral to many use cases provided by Compass users, as such it has been built to be highly customisable to a configuration of your choosing. The component is driven by an external *JSON* file.
+
+The Search component also comes standard with 2 child components, these are the *Search Row* and *Result Table* components, before discussing them though let's discuss the invocation and use of the Search Component.
+
+Here is the implementation of the `Home` component, which hosts the `Search` component and another commonly used component in most pages of the app the `Navigation` component.
+
+----
+import React, { Component } from 'react';
+import './Home.css';
+import { Navigation } from '../../navigation/Navigation';
+import { Search } from '../../search/Search';
+import searchConfig from '../../search/searchconfigTA.json'
+
+export class Home extends Component {
+
+  render() {
+    return (
+      <div className="fgReact_home">
+        <Navigation
+          currentPage="/Home"
+        />
+        <Search
+          type="assetSearch"
+          baseApiUrl="http://thingsatapi.fgp.io/thingsat/"
+          title="Asset Search"
+          defaultSearchColumn="serialNumber"
+          defaultSearchType="==*?*"
+          searchConfig={searchConfig}
+        />
+
+
+      </div>
+    )
+  }
+}
+
+export default Home
+----
+
+=== Setting up the props
+
+* ``*title*`` Defines the green heading that floats above the first search row
+* ``*defaultSearchColumn*`` Defines the search column that will be initially selected in the default search row and subsequent search rows
+* ``*defaultSearchType*`` Defines the search type that will be initially selected in the default search row and subsequent search rows
+* ``*baseApiUrl*`` Defines the base URL that is used for searching, which later in the component will be used to build up the api url for searching
+* ``*searchConfig*`` This is the search config that will be passed through, it MUST have the following fields.
+
+=== Setting up the searchConfig JSON
+NOTE: You can hard code the search configuration into the prop, however for readability and consistency please use the template at the end of this section
+
+** `columns` This is an array of objects for use with populating the `ResultTable` with data, which needs to have the following, please note that these columns are defined to be compatible with https://github.com/tannerlinsley/react-table
+*** `accessor`: The column in the reference search you wish to get the data from, keep in mind that if the column is `sample_column`, that you should instead use camel case and drop
+the dash so that it becomes `sampleColumn`
+*** `Header` : What you would like the table header to read for this column
+*** `minWidth` : the minimum width of the column for presentation in the table
+*** `fgpRedirect`: specifies a *<Route>* that has been defined to navigate to, in the example *JSON * provided the `serialNumber` column will redirect to the
+asset page, and append the value of the `td` in the redirect, if a route is undefined and does not handle extensions of the route, it will not work.
+*** `fgpMutate` : Used to mutate the presentation of the cell, currently this is used to show a formatted date, using the `moment` library, passing `"date"` as the value
+will acheive this result.
+
+NOTE: `fgpRedirect` and `fgpMutate` cannot be used together at this current time
+
+** `searchingColumns` This is an array of objects used to populate the dropdown list for the searching fields, a searchingColumn object must have the following attributes
+*** `column` : the value of the accessor column in which you wish to search on
+*** `label` : what the user sees in the dropdown list as a selectable option.
+
+** `searchingTypes` these are the RSQL strings that will work with our back end to parse requests to the API, there should be no need to change these unless you are changing the labels
+*** `key`: the RSQL statement
+*** `label` what is shown to the user in the drop down list on the front end
+
+** `customer` This is the primary key of the reference model defined in the application xml
+** `reference` This is the name of the reference found in the application xml
+** `defaultQtyRecordsToRetrieve` For use when doing server side retrieval definition, defines how many records to get
+** `defaultStartFrom` For use when doing server side pagination, defines the page size
+
+Below is an example of the `searchConfig` *JSON* file
+
+----
+{
+    "columns": [
+        {"accessor":"serialNumber", "Header":"Serial Number", "minWidth" : 210, "fgpRedirect" : "/Asset/"},
+        {"accessor":"employeeId", "Header":"Employee ID", "minWidth" : 180, "fgpRedirect" : "/PersonPage/" },
+        {"accessor":"businessUnit", "Header":"Business Unit", "minWidth" : 120, "fgpRedirect" : "/BusinessUnitPage/"},
+        {"accessor":"orgUnit", "Header":"Organisation Unit", "minWidth" : 240},
+        {"accessor":"division", "Header":"Division", "minWidth" : 180}
+    ],
+    "searchingColumns": [{
+        "column": "serialNumber",
+        "label":"SERIAL NUMBER"
+    },{
+        "column": "employeeId",
+        "label":"EMPLOYEE ID"
+    },{
+        "column": "businessUnit",
+        "label":"BUSINESS UNIT"
+    },{
+        "column": "orgUnit",
+        "label":"ORGANISATION UNIT"
+    },{
+        "column": "division",
+        "label":"DIVISION"
+    }],
+    "searchingTypes": [
+        {
+            "key": "==*?*",
+            "label": "Include"
+        },{
+            "key": "==\"*?*\"",
+            "label": "Like"
+        },{
+            "key": "<?",
+            "label": "Less Than"
+        },{
+            "key": ">?",
+            "label": "Greater Than"
+        },{
+            "key": "<=?",
+            "label": "Less Than or Equal To"
+        },{
+            "key": ">=?",
+            "label": "Greater Than or Equal To"
+        },{
+            "key": "!=\"?\"",
+            "label": "Not Equal To"
+        },{
+            "key": "==\"?\"",
+            "label": "Equal To"
+        },{
+            "key": "=isnull=true",
+            "label": "Is Null"
+        },{
+            "key": "=isnull=false",
+            "label": "Not Null"
+        }
+    ],
+    "customer": "serial_number",
+    "reference":"asset_reference",
+    "defaultQtyRecordsToRetrieve" : 125,
+    "defaultStartFrom" : 0
+}
+----
+
+
+Provided you have passed the props correctly and you have the valid fields in your JSON the child
+components, *ResultTable* and *SearchingRows*, should render and function correctly.
+
+
+
+
+== SearchRow Component
+This component is the individual row(s) present in the UI and are generated from a `map` function in the search Component.
+The implementation of the `SearchRow` component should not need to be modified, however this will give you an overview to it's
+implementation. Here is the implementation of the component inside *Search*
+
+----
+<div>
+  {
+     this.state.searchRows.map((row, i) => {
+      return (
+        <SearchRow
+          key={row.indexKey}
+          indexKey={row.indexKey}
+          addSearchCriteria={this.addSearchCriteria}
+          removeSearchCriteria={this.removeSearchCriteria}
+          searchingKeyword = {row.searchingKeyword}
+          searchingType = {row.searchingType}
+          searchingColumn = {row.searchingColumn}
+          updateKeyword={this.updateKeyword.bind(this , 'searchingKeyword', row.indexKey )}
+          updateSearchingType={this.updateSearchingType.bind(this , 'searchingType', row.indexKey )}
+          updateSearchingColumn={this.updateSearchingColumn.bind(this , 'searchingColumn', row.indexKey )}
+          makeSearch={this.makeSearch}
+          searchingTypes={this.state.searchConfig.searchingTypes}
+          searchingColumns={this.state.searchConfig.searchingColumns}
+          isFirst={row.isFirst}
+        />)
+    })
+  }
+</div>
+----
+
+=== Setting up the props
+There is *no configuration expected* for this component, however this is what each prop is used for which is passed to the component
+
+* `*key*`: used as a requirement of mapping in ES6 JS
+* `*indexKey*`: used to hold a row's position in the queue, so that deleting deletes the correct row
+* `*addSearchCriteria*`: function passed to be able to add another search criteria component
+* `*removeSearchCriteria*`: function passed to be able remove and destroy `this` search row
+* `*searchingKeyword*`: the searching row keyword
+* `*searchingType*`: the searching row searching type
+* `*searchingColumn*`: the searching row searching column
+* `*updateKeyword*`: a functional binding to update the keyword
+* `*updateKeyword*`: a functional binding to update the searching type
+* `*updateSearchingColumn*`: a functional binding to update the searching column
+* `*makeSearch*`: function passed to be able to make a search from the search button in the first row
+* `*searchingTypes*`: searching types for the drop down menu for the individual searching row, taken from the search config
+* `*searchingColumns*`: searching columns for the drop down menu for the individual searching row, taken from the search config
+* `*isFirst*`: passed so the component knows if it is the first of it's kind in the indexing, useful for showing the search/minus buttons
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+== Navigation Component
+The *Navigation* component is the wrapper for the title bar located at the top of the page, as well as the side menu located at the left of the page. It is built such that all aesthetic options can be changed in an external *JSON* file.
+
+Navigation contains 2 children by default - *SideNavigation* and *TopNavigation*. As all branding options are available via `brandingconfig.json` the implementation of the Navigation component should not need to be changed.
+
+*No configuration is expected* for this component, however this will give you an overview of its implementation. Here is the implementation of the component inside *Home*.
+
+----
+<Navigation
+    history={this.props.history}
+    currentPage="/Home"
+    topNavTitle={this.props.topNavTitle}
+    sideNavLogoPath={this.props.sideNavLogoPath}
+/>
+----
+
+=== Setting up the props
+There is *no modification* to the props expected for the component
+
+* `*history*`: history throughout application, used in logout
+* `*currentPage*`: page currently displayed, used in sidebar
+* `*topNavTitle*`: the title for the top bar
+* `*sideNavLogoPath*`: the path for the image used for the logo, relative to the `public` folder
+
+=== Setting up the brandingConfig JSON
+** `sideNavLogoPath` : Defines the path to the image used for the logo
+
+NOTE: The path used is relative to the `public` folder. If no path is provided, it will default to `fgp-logo.png`.
+
+** `topNavTitle` : The title shown in the top bar present anywhere outside the Login page
+** `loginTitle` : The title of the login form
+
+Below is an example of the `brandingConfig` *JSON* file
+
+----
+{
+    "sideNavLogoPath" : "fgp-logo.png",
+    "topNavTitle" : "Compass",
+    "loginTitle" :  "Compass Login"
+}
+----
+
+== SideNavigation Component
+The *SideNavigation* component is the container for the sidebar navigation menu and logo. The SideNavigation component contains 4 children, the logo and 3 **SideNavigationItem**s.
+
+No implementation of the SideNavigation component should need to be changed, as all branding options are available via `brandingconfig.json` shown above. However, this will give you an overview of its implementation. Here is the implementation of the component inside *Navigation*.
+
+----
+<SideNavigation
+    history={this.props.history}
+    currentPage={this.props.currentPage}
+    isOpen={this.state.isOpen}
+    handler={this.toggleNav}
+    sideNavLogoPath={this.props.sideNavLogoPath}
+/>
+----
+
+NOTE: Opening and closing of the menu is handled by the *Navigation* component
+
+=== Setting up the props
+There is *no modification* to the props expected for the component
+
+* `*history*`: history throughout application, used in logout
+* `*currentPage*`: the page currently displayed, used to highlight menu options
+* `*isOpen*`: whether the menu is extended or not (displaying text as well as symbols)
+* `*handler*`: the function used to toggle isOpen
+* `*sideNavLogoPath*`: the path to the image used for the logo, relative to `public`
+
+
+=== SideNavigationItem
+The *SideNavigationItem* is a single button present in *SideNavigation*. Additional SideNavigationItems could be added to the sidebar, if extra features are desired. 
+
+The aesthetic of each SideNavigationItem (its *description* and *icon*) are hardcoded into their implementation. Below is an example implementation of the SideNavigationItem used for the Home button.
+
+----
+<SideNavigationItem
+    extensionShown={this.props.isOpen}
+    currentPage={this.props.currentPage}
+    linkTo="/Home"
+    FontAwesomeIcon="home"
+    fontAwesomeLib="fas"
+    description="Home"
+/>
+----
+
+==== SideNavigationItem Props
+These are expected to be modified for additional SideNavigationItems. Pre-existing SideNavigationItems are *not expected to be modified*.
+
+* `*extensionShown*`: whether the menu is extended or not
+
+NOTE: This is handled by the *Navigation* component
+
+* `*currentPage*`: the page currently displayed, the item will be highlighted if this value matches linkTo
+* `*linkTo*`: the page to redirect to upon clicking this item
+* `*FontAwesomeIcon*`: the icon for the button from the Font Awesome Library
+* `*fontAwesomeLib*`: the Font Awesome Library selected for the icon
+* `*description*`: page title, shown to the user while menu is extended
+
+== TopNavigation Component
+The *TopNavigation* component is the top bar featured on all pages outside the Login page. It features the title of the page.
+
+As the title can be edited via `brandingconfig.json` editing the implementation of the TopNavigation component should not be necessary. 
+
+NOTE: Aesthetic changes to TopNavigation can be made inside the `.closedheader` section of its individual CSS. Non-background edits are not recommended.
+
+However, for better understanding - below is the implementation inside *Navigation*
+
+----
+<TopNavigation
+    isOpen={this.state.isOpen}
+    isDashboard={this.props.isDashboard}
+    topNavAction={this.props.topNavAction}
+    topNavTitle={this.props.topNavTitle}
+/>
+----
+
+=== Setting up the props
+There is *no modification* to the props expected for this component
+
+* `*isOpen*`: whether the side menu is extended or not, handled by *Navigation*
+* `*isDashboard*`: no longer used
+* `*topNavAction*`: no longer used
+* `*topNavTitle*`: the title for the application, defined in `brandingconfig.json`
+
+== Network Configuration
+For the Scale Test environment at UE we will be using the following servers
+
+rtssbx010;; `10.153.154.40` Which will be host to Cassandra 201 and Cassandra 211
+
+AND
+
+rtssbx011;; `10.153.154.84` Which will be host to Cassandra 202 and Cassandra 212
+
+
+
+.Server One Technical Specification
+
+[options="header", cols="4,2,2,2"]
+|===============================================
+| Operating System| Cores | RAM(Gb)| Storage(Gb)
+|  Oracle Linux 7.3      | 64    | 504    | 465
+|===============================================
+
+
+.Server Two Technical Specification
+[options="header", cols="4,2,2,2"]
+|===============================================
+| Operating System| Cores | RAM(Gb)| Storage(Gb)
+|  Oracle Linux 7.3      | 64    | 504    | 465
+|===============================================
+
+Access to both of these servers can be had with the following user/password combination
+
+*username*  : `stanuser`
+
+*password* : `backlog123`
+
+
+== CPU Configuration
+On each server the 64 CPUs have been allocated as such
+
+.Server One CPU Configuration
+[options="header"]
+|=====================================================
+| CPU #          | Inhabitant                | Total
+| 0,1,2,3,4      | Cassandra Seeds Node 201  | 5
+| 5,6,7,8,9      | Cassandra Node 211        | 5
+| 10 (shared)    | Agent Node 101            | 1
+| 10 (shared)    | Agent Node 111            | 1
+| 11,12,13,14    | Application Node 10       | 4
+| 15,16,17,18    | Application Node 11       | 4
+| 19,20,21,22    | Application Node 12       | 4
+| 23,24,25,26    | Application Node 13       | 4
+| 27,28,29,30    | Application Node 14       | 4
+| 31,32,33,34    | Application Node 15       | 4
+| 35,36,37,38    | Application Node 16       | 4
+| 39,40,41,42    | Application Node 17       | 4
+| 43,44,45,46    | Application Node 18       | 4
+| 47,48,49,50    | Application Node 19       | 4
+| 51,52,53,54    | Ui                        | 4
+|=====================================================
+
+
+.Server Two CPU Configuration
+[options="header"]
+|=====================================================
+| CPU #             | Inhabitant                | Total
+| 0,1,2,3,4         | Cassandra Seeds Node 202  | 5
+| 5,6,7,8,9         | Cassandra Node 212        | 5
+| 10 (shared)       | Agent Node 102            | 1
+| 10 (shared)       | Agent Node 112            | 1
+| 11,12,13,14       | Application Node 30       | 4
+| 15,16,17,18       | Application Node 31       | 4
+| 19,20,21,22       | Application Node 32       | 4
+| 23,24,25,26       | Application Node 33       | 4
+| 27,28,29,30       | Application Node 34       | 4
+| 31,32,33,34       | Application Node 35       | 4
+| 35,36,37,38       | Application Node 36       | 4
+| 39,40,41,42       | Application Node 37       | 4
+| 43,44,45,46       | Application Node 38       | 4
+| 47,48,49,50       | Application Node 39       | 4
+| 59,60,61,62,63    | Pump                      | 5
+|=====================================================
+
+
+== Server Configuration
+The below table describes the architecture and resources of the servers at UE in the scale test environment
+[options="header", cols="2,2,2,5"]
+|=======================================================================================
+|             | Server 1       | Server 2       | Configuration (per server)
+| *Name*      | *rtssbx010*    | *rtssbx011*    | OS : Oracle Linux 7.3,
+
+                                                  CPU : 64,
+
+                                                  RAM : 504Gb,
+
+                                                  Storage : 465Gb(HDD)
+
+| *Address*     | 10.153.154.40  | 10.153.154.84  | Username : stanuser ,
+
+                                                  Password : backlog123
+
+| *Agent*       | 101, 111       | 102, 112       | CPUs : 1 shared = 1CPU,
+
+                                                  RAM  : 2Gb per node = 4Gb
+
+| *Cassandra*   | cassandra201, cassandra211       | cassandra202, cassandra212       | CPUs : 5 per node = 10CPUs,
+
+                                                  RAM  : 16Gb per node = 32Gb
+| *Neutral(app)*| 10, 11, 12, 13,
+                15, 16, 17, 18,
+                19             | 30, 31, 32, 33,
+                                 35, 36, 37, 38,
+                                 39               | CPUs : 4 per node = 40CPUs,
+
+                                                  RAM On-heap : 16Gb per node = 160Gb
+
+                                                  RAM off-heap : 24Gb per node = 240Gb
+
+| *Pump*        |       -        |     yes        | CPUs : 5,
+
+                                                  RAM : 16Gb
+
+| *Loaders*     |      yes       |     -          | CPUs : 2,
+
+                                                  RAM : 4Gb
+
+| *Ui*          |     yes        |       -        | CPUs : 4,
+
+                                                  RAM : 8Gb
+
+|=======================================================================================
+
+
+== File System Structure
+On each server, you will find a `/fgrid` directory near the root level, if this is not found at the root, it may be found in `/home/fgrid/`, at UE however
+you will find on both servers that the fgrid directory is at root, therefore you can use the following command to get to the appropriate directory
+----
+$ cd /fgrid
+----
+
+=== Overview of the File System
+The directory structure on each of the servers will share a very similar structure, *importantly*, the main difference to take note
+of is that one server should contain the `/fgrid/loader` and `/fgrid/ui` directories, where as the other server should
+contain the `/fgrid/pump` directory, neither server should contain all three.
+
+For example, ;; on the UE Scale Test environment *rtssbx010* contains `/fgrid/loader` and  `/fgrid/ui`, where as *rtssbx011* contains `/fgrid/pump`.
+
+Once set up the file system should resemble this structure
+
+.Server one layout : rtssbx010 - 10.153.154.40
+----
+
+  /fgrid
+        /database
+              /cassandra201
+              /cassandra211
+
+        /agent
+              /101
+                  /conf
+                  /logs
+              /111
+                  /conf
+                  /logs
+
+        /neutral
+                /conf
+                /10
+                   /logs
+                /11
+                   /logs
+                .
+                .
+                .
+                /19
+                   /logs
+        /loader
+               /conf
+               /<loader>
+                        /logs
+        /ui
+           /logs
+           /conf
+                /datasource
+                /libs
+                     /maps
+        /tool
+             /conf
+             /logs
+
+        /scripts
+
+----
+
+.Server two layout : rtssbx011 - 10.153.154.84
+----
+
+  /fgrid
+        /database
+              /cassandra202
+              /cassandra212
+
+        /agent
+              /102
+                  /conf
+                  /logs
+              /112
+                  /conf
+                  /logs
+
+        /neutral
+                /conf
+                /30
+                   /logs
+                /31
+                   /logs
+                .
+                .
+                .
+                /39
+                   /logs
+
+        /pump
+             /conf
+             /logs
+             /tarfiles
+                      /in-flight
+                      /load
+                      /processed
+
+        /scripts
+----
+
+
+=== Setting up the File System
+The following folders should be created inside `/fgrid` as per the diagram above
+
+use the `mkdir` command to make the directories, in conjunction you can use the `-p` flag to save time, for example if you
+wanted to create `/fgrid/agent/conf` you could simply type use this flag to propagate through and create the directories required
+to meet `conf`.
+
+----
+$ mkdir -p /fgrid/agent/conf
+----
+
+NOTE: You will also want to change the owner of these directories using `chown` , for example to change the owner of the `fgrid/agent` directory
+to the group `fgrid` you will need to use this command from the root, you will also want to do this for any folder your create and potentially
+any file
+
+----
+chown -R /fgrid/agent :fguser
+----
+
+
+
+* `/fgrid` - the root level folder from which everything can be found.
+
+* `/fgrid/database` - mount location for all *Docker database containers*
+** `/fgrid/database/<cassandracontainer>/logs` - logs related to the given cassandra container
+
+* `/fgrid/agent` - *fgp-node-agent container* related files, inside here you will find
+** `/fgrid/agent/conf` - configuration for agent
+** `/fgrid/agent/<agentname / ip>/logs` - logs related to the specific app running on that ip
+
+* `/fgrid/neutral` - location for application containers, inside here you will find
+  ** `/fgrid/neutral/conf`
+  ** `/fgrid/neutral/<nodename / ip>/logs` - logs related to the specific app running on that ip
+
+* `/fgrid/pump` - location for all data pump related files, inside here you will find
+  ** `/fgrid/pump/conf` - configuration for pump
+  ** `/fgrid/pump/logs` - logs related to the data pumps
+  ** `/fgrid/pump/tarfiles/in-flight` - tar files currently 'in-flight'
+  ** `/fgrid/pump/tarfiles/load` - tar files loading
+  ** `/fgrid/pump/tarfiles/processed` - tar files loaded and processed
+
+* `/fgrid/loader` - location for all loader related files, inside here you will find
+  ** `/fgrid/loader/conf` - configuration for loader
+  ** `/fgrid/loader/<loadername /ip>/logs` - logs related to the specific loader
+
+* `/fgrid/ui` - location for all ui related files, inside here you will find
+  ** `/fgrid/ui/logs` - logs related to the ui
+  ** `/fgrid/ui/conf/libs` - configuration for the libs being used by the ui
+  ** `/fgrid/ui/conf/libs/maps` - configuration for the maps being used by the ui
+  ** `/fgrid/ui/conf/datasource` - configuration for the libs being used by the ui
+
+
+
+== Setting up Cassandra
+NOTE: Before you begin, it is advised that you get a copy of the *application configuration xml file*
+      (in this example it is *ue-neutral-health*). you can find this by clicking the
+      circled icon in the screenshot provided, which was taken from the admin interface of the QA environment of UE.
+      You won't need this straight away but having it now will reduce headaches later. You will also need to have a copy
+      of the *node-agent configuration xml file* , this should be obtained from your local workspace, in my case this was found in
+      the path `workspace/futuregrid-platform/fgp-node-agent/src/main/resources/node-agent-datastore-config.xml`.
+
+image::./images/scaletest/applist.png[]
+
+
+make sure that both of these files are easily reachable as you will need to SCP them to the `/fgrid/tool` directory later
+
+After you have configured your directories, it is time to begin setting up your agent and databases, to begin start your
+docker containers, to check which containers are currently running use the command
+----
+[stanuser@rtssbx010 ~]$ docker ps
+----
+provided you have not started any containers this list should be rather small, as such you can use the following command to see
+all docker containers, including those which are not running.
+----
+docker ps -a
+----
+
+Lets create and start our first Cassandra DB container (cassandra201), to do this on the first server for the first time (`stanuser@rtssbx010` / `10.153.154.40` ), use the following command
+
+----
+docker run -d --ulimit memlock=17592186044416 --cpuset-cpus="0,1,2,3,4" --log-opt max-size=50m --log-opt max-file=20 --net=fgp -p 7198:7198 -e JMX_PORT=7198 -e LOCAL_JMX=false -e JMX_HOST=10.153.154.40 -v /fgrid/database/cassandra201/logs:/opt/cassandra/apache-cassandra/logs -v /fgrid/database/cassandra201:/opt/lib/cassandra -e CASSANDRA_DC=DC1 -e CASSANDRA_RACK=RAC1 -e CASSANDRA_CLUSTER_NAME=fgp -e CASSANDRA_VOLUME=/opt/lib -e INTERNODE_ENCRYPTION=none -e AUTHENTICATOR=PasswordAuthenticator -e CASSANDRA_USER_NAME=fguser -e CASSANDRA_USER_PASSWORD=fguser -e CASSANDRA_AUTH_REPLICATION_CLASS=NetworkTopologyStrategy -e CASSANDRA_AUTH_REPLICATION_FACTOR="'DC1':3" -e CASSANDRA_MAX_HEAP_SIZE=16G -e CASSANDRA_HEAP_NEWSIZE=4G -e CASSANDRA_SEEDS=cassandra201,cassandra202 -e CASSANDRA_LISTEN_ADDRESS=10.0.1.201 --ip=10.0.1.201 --name cassandra201 futuregrid/cassandra:3.9-jdk8u121
+----
+
+This command will do the following
+
+  * execute docker run with the following arguments
+  * -d (detach: runs container in the background and prints the container ID)
+  * --ulimit memlock=17592186044416
+  * --cpuset-cpus="0,1,2,3,4" Allocates CPUs 0-4 to this container
+  * --log-opt max-size=50m Sets the maximum log file size to 50 Megabytes
+  * --log-opt max-file=20 Sets the maximum amount of log files to 20
+  * --net=fgp Sets the network (this has been configured to be an overaly network, you can view networks with
+      `$ docker network ls`)
+  * -p 7198:7198
+  * -e (Set environment Variable) JMX_PORT=7198 Sets your JMX port
+  * -e LOCAL_JMX=false
+  * -e JMX_HOST=10.153.154.40 Sets your JMX Host
+  * -v/fgrid/database/cassandra201/logs:/opt/cassandra/apache-cassandra/logs
+
+
+any other time we can use
+
+----
+docker start cassandra201
+----
+
+it's recommended that you then follow the logs during the starting procedures, *less* is recommended, run the following
+command and the press `SHIFT F` to jump to the end of the logs to watch them in real time
+----
+[stanuser@rtssbx010 ~]$ less /fgrid/database/cassandra201/logs/system.log
+----
+you will be wanting to watch the logs for when you begin to see a log that includes `listening for thrift clients`,
+and also `startup default tasks complete`.
+
+Once you see these logs, you can then run the following command to start the
+first container on the second server, similar to the last command, you run this for the first time when configuring and starting Docker Cassandra
+
+----
+docker run -d --ulimit memlock=17592186044416 --cpuset-cpus="0,1,2,3,4" --log-opt max-size=50m --log-opt max-file=20 --net=fgp -p 7198:7198 -e JMX_PORT=7198 -e LOCAL_JMX=false -e JMX_HOST=10.153.154.84 -v /fgrid/database/cassandra202/logs:/opt/cassandra/apache-cassandra/logs -v /fgrid/database/cassandra202:/opt/lib/cassandra -e CASSANDRA_DC=DC1 -e CASSANDRA_RACK=RAC2 -e CASSANDRA_CLUSTER_NAME=fgp -e CASSANDRA_VOLUME=/opt/lib -e INTERNODE_ENCRYPTION=none -e AUTHENTICATOR=PasswordAuthenticator -e CASSANDRA_MAX_HEAP_SIZE=16G -e CASSANDRA_HEAP_NEWSIZE=4G -e CASSANDRA_SEEDS=cassandra201,cassandra202 -e CASSANDRA_LISTEN_ADDRESS=10.0.1.202 --ip=10.0.1.202 --name cassandra202 futuregrid/cassandra:3.9-jdk8u121
+----
+
+You may have noticed that the `-e CASSANDRA_USER_NAME` and `-e CASSANDRA_USER_PASSWORD` properties are absent from this command, that is because these settings remain persistent
+and will carry through the creation/running of the subsequent Docker Cassandra containers
+
+
+just like before if you do not need to configure Cassandra you can simply use
+----
+[stanuser@rtssbx011 ~]$ docker start cassandra202
+----
+
+Watch the logs again, again for the same messages described above in the logs before moving onto the next step.
+
+----
+[stanuser@rtssbx011 ~]$ less /fgrid/database/cassandra202/logs/system.log
+----
+
+
+The next step is exactly the same as the first ones, except you will be starting your other
+containers, in our case `cassandra211` on the first server and `cassandra212` on the second server,
+again only starting the other after you have confirmation from the logs as described above.
+
+*Cassandra 211*
+----
+docker run -d --ulimit memlock=17592186044416 --cpuset-cpus="5,6,7,8,9" --log-opt max-size=50m --log-opt max-file=20 --net=fgp -p 7199:7199 -e JMX_PORT=7199 -e LOCAL_JMX=false -e JMX_HOST=10.153.154.40 -v /fgrid/database/cassandra211/logs:/opt/cassandra/apache-cassandra/logs -v /fgrid/database/cassandra211:/opt/lib/cassandra -e CASSANDRA_DC=DC1 -e CASSANDRA_RACK=RAC1 -e CASSANDRA_CLUSTER_NAME=fgp -e CASSANDRA_VOLUME=/opt/lib -e INTERNODE_ENCRYPTION=none -e AUTHENTICATOR=PasswordAuthenticator -e CASSANDRA_MAX_HEAP_SIZE=16G -e CASSANDRA_HEAP_NEWSIZE=4G -e CASSANDRA_SEEDS=cassandra201,cassandra202 -e CASSANDRA_LISTEN_ADDRESS=10.0.1.211 --ip=10.0.1.211 --name cassandra211 futuregrid/cassandra:3.9-jdk8u121
+----
+----
+less /fgrid/database/cassandra211/logs/system.log
+----
+
+*Cassandra 212*
+----
+docker run -d --ulimit memlock=17592186044416 --cpuset-cpus="5,6,7,8,9" --log-opt max-size=50m --log-opt max-file=20 --net=fgp -p 7199:7199 -e JMX_PORT=7199 -e LOCAL_JMX=false -e JMX_HOST=10.153.154.84 -v /fgrid/database/cassandra212/logs:/opt/cassandra/apache-cassandra/logs -v /fgrid/database/cassandra212:/opt/lib/cassandra -e CASSANDRA_DC=DC1 -e CASSANDRA_RACK=RAC2 -e CASSANDRA_CLUSTER_NAME=fgp -e CASSANDRA_VOLUME=/opt/lib -e INTERNODE_ENCRYPTION=none -e AUTHENTICATOR=PasswordAuthenticator -e CASSANDRA_MAX_HEAP_SIZE=16G -e CASSANDRA_HEAP_NEWSIZE=4G -e CASSANDRA_SEEDS=cassandra201,cassandra202 -e CASSANDRA_LISTEN_ADDRESS=10.0.1.212 --ip=10.0.1.212 --name cassandra212 futuregrid/cassandra:3.9-jdk8u121
+----
+----
+less /fgrid/database/cassandra212/logs/system.log
+----
+
+
+These containers should now be running, running `docker ps` should now show that your containers are up
+under the *status* heading, showing more than before.
+
+feel free to now run the following commands
+----
+$ docker exec -it <cassandracontainer> bash
+----
+first and have a look around inside the docker/cassandra container, notice that at your command line you will now have a `#` instead of a `$`.
+
+you can then run the following to enter the interface to run cqlsh commands
+----
+# cqlsh -u fguser -p fguser --request-timeout=3600
+----
+the following command assumes you successfully got into the cqlsh interface and will simply display the keyspaces in this Cassandra DB
+----
+select * from system_schema.keyspaces ;
+----
+Exit out of the cqlsh interface by typing `exit` and hitting enter, the same goes for when you are in the bash environment in a Docker container
+
+
+== Setting up prerequisites for the agents, app and ui
+Before we can start configuring the agents in the next section, we need to ensure that these prerequisite commands are run,
+these commands will ultimately invoke NodeTool, a tool we use to help load and create schemas, setup nodes and configure settings
+that are required for the agents, nodes, applications and other nodes to be installed, run and configured correctly.
+
+Firstly, we need to edit the *ue-neutral-health configuration file* , I recommended you open this with a text editor like _atom_ or _brackets_ that allows you to
+"fold" XML, this will make it far less daunting to working with, complete the following steps, substituting your values where required.
+
+NOTE: For the following examples, the xml tags have been reformatted to be easier to read, however in your implementation
+      please keep the formatting of the XML so its closely resembles the original file.
+
+. *Step One* - Locate the `<environment>` tag and duplicate it by copy pasting it directly below.
+. *Step Two* - Modify the new `<environment>` tag's _name_ attribute to `name=TST`, unfold the environment element to reveal it's children.
+. *Step Three* - Locate the `<parameter`> tag where the _name_ attribute = `hazelcast.members`, populate the contents of this tag with
+                 each of the containers you made inside the '/fgrid/neutral/' directory for each server, in our case it looks like this (complete list without ...s and all on one line).
+----
+<parameter name="hazelcast.members">
+    neutral10,
+    neutral11,
+    neutral12,
+    neutral13,
+             .
+             .
+             .
+    neutral19,
+    neutral30,
+    neutral31,
+    neutral32,
+    neutral33,
+             .
+             .
+             .
+    neutral39
+</parameter>
+----
+
+* *Step Four* - Locate the `<parameter>` tag where the _name_ attribute = `agent.members` and modify  the contents to include
+                the agent names for both servers that you have defined inside the `/fgrid/agent` directory, our implementation
+                looks like this.
+----
+<parameter name="agent.members">
+    agent101,
+    agent102
+</parameter>
+----
+
+* *Step Five* - Locate the `<datasource>` tags where _type_ attribute = `cassandra`, within these tags
+                you will notice several children, we are interested in the `<parameter>` tags where
+                the _name_ attribute = `url` , `keyspace` , `username` and `password` , configure these
+                to fit your implementationm using the Cassandra seed nodes for the url, our implementation
+                looks like this.
+----
+<datasource name="core" type="cassandra">
+    <parameter name="url">
+        cassandra201,
+        cassandra202
+    </parameter>
+    <parameter name="keyspace">
+        fgp
+    </parameter>
+    <parameter name="username">
+        fguser
+    </parameter>
+    <parameter name="password">
+        fguser
+    </parameter>
+    <parameter name="port">
+        9042
+    </parameter>
+</datasource>
+
+<datasource name="ue" type="cassandra">
+    <parameter name="url">
+        cassandra201,
+        cassandra202
+    </parameter>
+    <parameter name="keyspace">
+        ue
+    </parameter>
+    <parameter name="username">
+        fguser
+    </parameter>
+    <parameter name="password">
+        fguser
+    </parameter>
+    <parameter name="port">
+        9042
+    </parameter>
+    <parameter name="request_timeout_millis">
+        60000
+    </parameter>
+    <parameter name="connect_timeout_millis">
+        60000
+    </parameter>
+</datasource>
+----
+
+* *Step Six* - Just below the tags in step 5 you will find similar `<datasource>` tags where the _type_ attribute
+               = `postgresql`, you will need to change the contents of the `<paramter>` child tag where the attribute is _url_
+                  to match your postgresql Database, similar to the last step, modify the username and passwords to match that
+                  for the Database, our implementation looks like this, this is just a snippet however as you will find there are
+                  several more datasource tags beneath it.
+----
+    <datasource name="ueprocess" type="postgresql">
+        <parameter name="connection_pool">
+            hikari
+        </parameter>
+        <parameter name="url">
+            jdbc:edb://10.153.154.192:5432/nap_monitoring?socketTimeout=90&amp;currentSchema=process
+        </parameter>
+        <parameter name="driver">
+            com.edb.ds.PGSimpleDataSource
+        </parameter>
+        <parameter name="username">
+            fgrid_process
+        </parameter>
+        <parameter name="password">
+            GW7)}P^6=9x6;Fsx
+        </parameter>
+        <parameter name="min_pool">1</parameter>
+        .
+        .
+        .
+    </datasource>
+
+    <datasource name="ueprocess_history" type="postgresql">
+        <parameter name="connection_pool">
+            hikari
+        </parameter>
+        <parameter name="url">
+            jdbc:edb://10.153.154.192:5432/nap_planning?socketTimeout=90&amp;currentSchema=process
+        </parameter>
+        <parameter name="driver">
+            com.edb.ds.PGSimpleDataSource
+        </parameter>
+        <parameter name="username">
+            fgrid_process
+        </parameter>
+        <parameter name="password">
+            GW7)}P^6=9x6;Fsx
+        </parameter>
+        .
+        .
+        .
+    </datasource>
+    .
+    .
+    .
+</environment>
+----
+
+*IMPORTANT!! DO NOT MODIFY THE _"node-agent-datastore-config.xml"_ FILE*
+
+Use the following command to copy the configuration files to the server from your local machine
+
+----
+  $ scp ue-neutral-health.0.02.20.xml stanuser@10.153.154.40:/fgrid/tool/conf
+
+  $ scp node-agent-datastore-config.xml stanuser@10.153.154.40:/fgrid/tool/conf
+----
+
+NOTE: The following commands should be run in the server where you have the `/fgrid/tool` directory, in our case that is server one, `rtssbx010` this is because, if you look at the
+script more carefully you will see that inside it, it is looking for the scripts directory.
+
+
+=== Command 1 - NodeTool Agent
+This command is required to setup and run the Agent Nodes, as with the other setup/configure/run commands, this is really only used for the first time setup.
+----
+docker run -d --net=fgp --log-opt max-size=1g --log-opt max-file=4 -v /fgrid/tool/conf:/fgp-node-tool/conf -v /fgrid/tool/logs:/logs -e database.stores=core -e database.core.type=cassandra -e database.core.url=cassandra201,cassandra202 -e database.core.keyspace=fgp -e database.core.port=9042 -e database.core.username=fguser -e database.core.password=fguser --name tool_fgp futuregrid/fgp-node-tool:18.2.5-e325004e5 --tool createSchema -f /fgp-node-tool/conf/node-agent-datastore-config.xml -e TST
+----
+
+=== Command 2 - NodeTool Application
+This command is required to setup and run the Application Nodes, as with the other setup/configure/run commands, this is really only used for the first time setup.
+----
+docker run -d --net=fgp --log-opt max-size=1g --log-opt max-file=4 -v /fgrid/tool/conf:/fgp-node-tool/conf -v /fgrid/tool/logs:/logs -e database.stores=ue -e database.core.type=cassandra -e database.core.url=cassandra201,cassandra202 -e database.core.keyspace=ue -e database.core.port=9042 -e database.core.username=fguser -e database.core.password=fguser --name tool_ue futuregrid/fgp-node-tool:18.2.5-e325004e5 --tool createSchema -f /fgp-node-tool/conf/ue-neutral-health.0.02.20.xml -e TST
+----
+
+For both of these processes it is recommended that you follow the logs like before, to ensure everything is going smoothly
+----
+less /fgrid/tool/logs/node-tool-current.log
+----
+
+At this stage you are also able to run `nodetool` on the Cassandra Nodes, to see a list of commands available enter into the
+`bash` interface for a given Cassandra Node and run `nodetool help`, to get you started however, you can check the status of your nodes, use the following
+
+----
+nodetool -ufguser status
+----
+
+depending on your configuration you may not need to run the command with the -u flag.
+
+=== Command 3 - Startup Admin UI
+This next command differs from the rest of the commands as it does not invoke NodeTool, instead, it will set up and run an instance of the FPG UI, this will simplify
+a step for us in the setup. Run the following
+----
+docker run -d --log-opt max-size=5m  --log-opt max-file=20 --net=fgp -p 80:8080 -p 7080:7080 -e JMX_PORT=7080 -e JMX_HOST=10.153.154.40 -v /fgrid/ui/conf:/conf -v /fgrid/ui/logs:/logs -e agent.port=5701 -e agent.members=agent101,agent102 -e JVM_GC=G1 -e JVM_MX=500M -e environment=TST --ip=10.0.1.88  --name=fgpui88  futuregrid/fgp-ui:18.2.5-e325004e5
+----
+Provided everything has worked as intended, your admin UI should now be available at the location specified in `-e JMX_HOST=10.153.154.40`, open up your web browser and go to this address.
+
+You should land on a login page, use the credentials `admin`/`password` to get into the UI, you should then be greeted with this page.
+
+Click the _Application Design_ option circled in red .
+
+image::./images/scaletest/landing.png[]
+
+
+On the following page, select the _Import_ option, and upload your *modified* version of the `ue-neutral-health` configuration XML file, for this example we used the modified `ue-neutral-health.0.02.20.xml`.
+
+image::./images/scaletest/appdesign.png[]
+
+
+Provided everything has worked smoothly you should now notice the ue-neutral-health application has been added to the application list
+
+image::./images/scaletest/neutral-health-success.png[]
+
+
+== Setting up the Agents
+Now it is time to set up your agents, to do this you will need a few scripts, these will be run on both servers, and have been written generically
+enough that you will only need to enter the given variables up the top.
+
+
+First, navigate to `/fgrid/scripts` directory on your first server, in our example it is `rtssbx010` and create the following file `run_docker_agent.sh` , to do this run the following command,
+----
+$ cd /fgrid/scripts
+$ vi run_docker_agent.sh
+----
+If you aren't comfortable with vi, that is okay, you won't need to be an expert to do this, just follow this part exactly.
+
+Once you are are in *vi*
+
+* Press `esc`
+* Press `i` to enter "INSERT" mode
+* Copy the script below and paste it in
+* Press `esc`
+* Press `SHIFT ;`  (`:`)
+* Type `wq` (w = write, q=quit)
+* Press enter
+* You are done, stop worrying, take a deep breath.
+* change the permissions of the script using the following
+----
+$ chmod +x run_docker_agent.sh
+----
+* execute the script, using the command
+----
+./run_docker_agent.sh
+----
+
+NOTE: If you *really* can't use vi and you *need* to edit the script, open your favourite text editor, edit the
+below script to your specification and then paste it into *vi*
+----
+AGENT_VERSION=18.2.5
+AGENT_TAG=18.2.5-e325004e5
+HOST_IP=10.153.154.40
+NODE1=101
+NODE2=111
+AGENT_SEEDS=agent101,agent102
+CASSANDRA_SEEDS=cassandra201,cassandra202
+FGRID_DIR=/fgrid
+
+#first check if agent is running
+echo "checking if container agent$NODE1 already exists..."
+appstatus="$(docker ps -a |  grep agent$NODE1| awk '{print $7}')"
+echo agent$NODE1 status: '*'$appstatus'*'
+case $appstatus in
+  Exited) echo "Attempting to start stopped container agent$NODE1"
+          docker start agent$NODE1
+  ;;
+  Up) echo "container agent$NODE1 already running"
+  ;;
+  *)
+  echo "agent$NODE1 not found"
+  echo "Attempting to start agent$NODE1"
+  cmd="docker run -d --cpuset-cpus=10 --log-opt max-size=50m --log-opt max-file=20 --net=fgp -v $FGRID_DIR/agent/conf:/fgp-node-agent/conf -v $FGRID_DIR/agent/$NODE1/logs:/logs -e JVM_GC=G1 -e JVM_MX=2G -e application.version=$AGENT_VERSION -e docker.host.uri=$HOST_IP -e docker.host.port=2376 -e hazelcast.members=$AGENT_SEEDS -e hazelcast.interface=10.0.1.$NODE1 -e hazelcast.port=5701 -e database.stores=core -e database.core.type=cassandra -e database.core.url=$CASSANDRA_SEEDS -e database.core.keyspace=fgp -e database.core.port=9042 -e database.core.username=fguser -e database.core.password=fguser --ip=10.0.1.$NODE1 --name=agent$NODE1 futuregrid/fgp-node-agent:$AGENT_TAG"
+  echo starting agent$NODE1
+  echo $cmd
+  eval "$cmd"
+ ;;
+esac
+#first check if agent is running
+echo "checking if container agent$NODE2 already exists..."
+appstatus="$(docker ps -a |  grep agent$NODE2| awk '{print $7}')"
+echo agent$NODE2 status: '*'$appstatus'*'
+case $appstatus in
+  Exited) echo "Attempting to start stopped container agent$NODE2"
+          docker start agent$NODE2
+  ;;
+  Up) echo "container agent$NODE2 already running"
+  ;;
+  *)
+  echo "agent$NODE2 not found"
+  echo "Attempting to start agent$NODE2"
+  cmd="docker run -d --cpuset-cpus=10 --log-opt max-size=50m --log-opt max-file=20 --net=fgp -v $FGRID_DIR/agent/conf:/fgp-node-agent/conf -v $FGRID_DIR/agent/$NODE2/logs:/logs -e JVM_GC=G1 -e JVM_MX=2G -e application.version=$AGENT_VERSION -e docker.host.uri=$HOST_IP -e docker.host.port=2376 -e hazelcast.members=$AGENT_SEEDS -e hazelcast.interface=10.0.1.$NODE2 -e hazelcast.port=5701 -e database.stores=core -e database.core.type=cassandra -e database.core.url=$CASSANDRA_SEEDS -e database.core.keyspace=fgp -e database.core.port=9042 -e database.core.username=fguser -e database.core.password=fguser --ip=10.0.1.$NODE2 --name=agent$NODE2 futuregrid/fgp-node-agent:$AGENT_TAG"
+  echo starting agent$NODE2
+  echo $cmd
+  eval "$cmd"
+  ;;
+esac
+----
+Please read the script carefully to gain an understanding as to what it is attempting
+to do, and ensure that if your environment does not have the resources specified in the script provided, that you change them, as the script will run regardless of
+the amount of CPU/RAM available, and you don't want that.
+
+*If in any case you make a mistake in the script, it is easiest remove the agent(s) (in this example agent101) and run the amended script again*
+----
+$ docker rm agent101
+----
+
+Now, we need to do the same thing but on the second servers, so
+
+
+First, navigate to `/fgrid/scripts` directory on your second server, in our example it is `rtssbx011` .
+
+Next, follow the above instructions to create the same file as above on the second server, using the same procedure as before, but instead,
+copy and paste this script
+----
+AGENT_VERSION=18.2.5
+AGENT_TAG=18.2.5-e325004e5
+HOST_IP=10.153.154.84
+NODE1=102
+NODE2=112
+AGENT_SEEDS=agent101,agent102
+CASSANDRA_SEEDS=cassandra201,cassandra202
+FGRID_DIR=/fgrid
+
+#first check if agent is running
+echo "checking if container agent$NODE1 already exists..."
+appstatus="$(docker ps -a |  grep agent$NODE1| awk '{print $7}')"
+echo agent$NODE1 status: '*'$appstatus'*'
+case $appstatus in
+  Exited) echo "Attempting to start stopped container agent$NODE1"
+          docker start agent$NODE1
+  ;;
+  Up) echo "container agent$NODE1 already running"
+  ;;
+  *)
+  echo "agent$NODE1 not found"
+  echo "Attempting to start agent$NODE1"
+  cmd="docker run -d --cpuset-cpus=10 --log-opt max-size=50m --log-opt max-file=20 --net=fgp -v $FGRID_DIR/agent/conf:/fgp-node-agent/conf -v $FGRID_DIR/agent/$NODE1/logs:/logs -e JVM_GC=G1 -e JVM_MX=2G -e application.version=$AGENT_VERSION -e docker.host.uri=$HOST_IP -e docker.host.port=2376 -e hazelcast.members=$AGENT_SEEDS -e hazelcast.interface=10.0.1.$NODE1 -e hazelcast.port=5701 -e database.stores=core -e database.core.type=cassandra -e database.core.url=$CASSANDRA_SEEDS -e database.core.keyspace=fgp -e database.core.port=9042 -e database.core.username=fguser -e database.core.password=fguser --ip=10.0.1.$NODE1 --name=agent$NODE1 futuregrid/fgp-node-agent:$AGENT_TAG"
+  echo starting agent$NODE1
+  echo $cmd
+  eval "$cmd"
+ ;;
+esac
+#first check if agent is running
+echo "checking if container agent$NODE2 already exists..."
+appstatus="$(docker ps -a |  grep agent$NODE2| awk '{print $7}')"
+echo agent$NODE2 status: '*'$appstatus'*'
+case $appstatus in
+  Exited) echo "Attempting to start stopped container agent$NODE2"
+          docker start agent$NODE2
+  ;;
+  Up) echo "container agent$NODE2 already running"
+  ;;
+  *)
+  echo "agent$NODE2 not found"
+  echo "Attempting to start agent$NODE2"
+  cmd="docker run -d --cpuset-cpus=10 --log-opt max-size=50m --log-opt max-file=20 --net=fgp -v $FGRID_DIR/agent/conf:/fgp-node-agent/conf -v $FGRID_DIR/agent/$NODE2/logs:/logs -e JVM_GC=G1 -e JVM_MX=2G -e application.version=$AGENT_VERSION -e docker.host.uri=$HOST_IP -e docker.host.port=2376 -e hazelcast.members=$AGENT_SEEDS -e hazelcast.interface=10.0.1.$NODE2 -e hazelcast.port=5701 -e database.stores=core -e database.core.type=cassandra -e database.core.url=$CASSANDRA_SEEDS -e database.core.keyspace=fgp -e database.core.port=9042 -e database.core.username=fguser -e database.core.password=fguser --ip=10.0.1.$NODE2 --name=agent$NODE2 futuregrid/fgp-node-agent:$AGENT_TAG"
+  echo starting agent$NODE2
+  echo $cmd
+  eval "$cmd"
+  ;;
+esac
+----
+
+NOTE: Again, please change the variables at the top, to meet your directory, ip, nodes, memory and CPU requirements
+
+
+The hard part is done for now, run the following on either server, any database in the `cqlsh` interface discussed before
+to create some additional required keyspaces, you only need to run these once and it will be duplicated across all databases on all servers.
+
+
+----
+CREATE KEYSPACE fgp WITH replication = {'class': 'NetworkTopologyStrategy', 'DC1': '1'}  AND durable_writes = true ;
+----
+----
+CREATE KEYSPACE ue WITH replication = {'class': 'NetworkTopologyStrategy', 'DC1': '1'}  AND durable_writes = true ;
+----
+Check that they were successfully created with the following command, you should see both `ue` and `fpg` listed now
+----
+select * from system_schema.keyspaces ;
+----
+
+and exit out if all looks good.
+
+
+== Setting up the Applications
+This process will be quite similar to setting up the agents, and luckily you won't need to configure 20 different applications manually,
+as the scripts have been built generically to make your life a bit easier, you will be running one script on each server.
+
+To begin, if you are not already in the `/fgrid/scripts`, navigate to it and run the following on the first server, just like before we will be using *vi*
+to create and edit the scripts.
+
+
+=== Creating the run_docker_app.sh script
+
+Create the run docker script and paste in the script below, substitute in your values where required, change the permissions
+of the script once saving, use the following commands.
+----
+$ vi run_docker_app.sh
+----
+copy in the following
+----
+./docker_start.sh 18.2.5-e325004e5 neutral 0.02.20 4 11 10 10
+----
+modify the permissions
+----
+$ chmod +x docker_start.sh
+----
+*Do not execute this script yet*
+
+looking at this code you will notice a series of numbers and a script we have not defined yet, this is because this docker_start script actually invokes another
+script called `run_docker_app.sh` (which will create in the next step) and runs it with the parameters specified, the breakdown of the parameters are
+as follows.
+
+`./docker_start.sh` = Calls execution of this script
+
+`18.2.5-e325004e5` = The docker tag
+
+`neutral` = The application name, to be passed into the script
+
+`0.02.20` = The application version (can be found in the application configuration xml file)
+
+`4` = The number of CPUs to allocate to the given containers, to be passed into the script
+
+`11` = The CPU number to begin from, to be passed into the script
+
+`10` = The amount of containers to make
+
+`10` = The container name suffix starting number, to be passed into the script
+
+
+
+
+Now, go and follow the same steps over on the second server, instead copying the following script.
+----
+./docker_start.sh 18.2.5-e325004e5 neutral 0.02.20 4 11 10 30
+----
+You may have noticed that in this script we are passing in 30 instead of 10, if you recall from setting up the filestructure our application
+containers on server 2 started at the number 30.
+
+Next we will move on create the `docker_start.sh` script
+
+
+
+=== Creating the docker_start.sh script
+
+
+Before we get started copying the script, it is important to take a second to understand what the variables
+declared at the top of the script are used for, so that you can change them to match your specifications
+
+`tag=$1` = The docker tag used in the implementation on the application (18.2.5-e325004e5)
+
+`name=$2` =  The application name (neutral)
+
+`version=$3` = The application version, defined at the top of the XML (0.02.20)
+
+`cores=$4` = How many cores each application container will be allocated (4)
+
+`firstcore=$5` = The core number which you will start at, as we have allocated the first 10 cores
+                 already, we will begin at core 11
+
+`nodes=$6` = The amount of nodes/containers you wish to create (10)
+
+`firstNode=$7` = The first node number/name , for our implementation on server one this begins at 10 and goes to 19
+                 and on server 2 it begins at 30, going up to 39.
+
+`confDir="fgp-node-application"`
+
+`application="fgp-app:$tag ue-neutral-health $version"`
+
+`ipaddress=`hostname -i`
+
+`FGRID_DIR=/fgrid` = The path to the `fgrid` directory, this should be a absolute path
+
+`FGRID_ENV=TST` = The environment in which you wish to build the applications for, this is specified in
+                  the properties of an <environment> tag.
+
+`AGENT_NODES=agent101,agent102,agent111,agent112` = The names of the agent nodes
+
+Create the application container config/run script and paste in the script below, substitute in your values where required, change the permissions
+of the script once saving, use the following commands.
+
+----
+$ vi docker_start.sh
+----
+copy in the following
+----
+tag=$1
+name=$2
+version=$3
+cores=$4
+firstcore=$5
+nodes=$6
+firstNode=$7
+confDir="fgp-node-application"
+application="fgp-app:$tag ue-neutral-health $version"
+ipaddress=`hostname -i`
+FGRID_DIR=/fgrid
+FGRID_ENV=TST
+AGENT_NODES=agent101,agent102,agent111,agent112
+
+if [ $# -lt 7 ]
+then
+        echo "USAGE: docker_start.sh <tag> <name> <version> <cores> <firstcore> <nodes> <firstnode>"
+        echo "  where <tag> is the tag of the futuregrid/fgp-app container you want to start"
+        echo "        <name> is the base name for all containers started with this command"
+        echo "        <version> is the version of the application config you want the application containers to use"
+        echo "        <cores> is the number of cores you want to allocate to each application container"
+        echo "        <firstcore> is the number of the first core you want to allocate"
+        echo "        <nodes> is the number of nodes you want to start"
+        echo "        <firstnode> is the first container name suffix that will be used"
+        echo "NOTES:"
+        echo "  the last digit of the jmx ports will start with <firstnode> and incrment by one for each container"
+        echo "  the cores assigned to each application container will be auto-incremented starting from"
+        echo "  the <firstcore> and ending at <firstcore> + (<cores> X (count of <number> in list))"
+        echo "  see example for more details"
+        echo "EXAMPLE:"
+        echo "  The following command will start 3 application containers named neutral11, neutral12, and neutral13."
+        echo "  Each application container will have 6 cores with the first container assigned cores 4-9 the"
+        echo "  second 10-15, and the third 16-21 the containers will have jmx ports 7091, 7092, and 7093 respectively"
+       echo "  docker_start.sh 0.09.22 neutral 0.01.17 6 4 3 11 "
+else
+        containers=1
+        nodeNum=$firstNode
+        while [ $containers -le $nodes ]
+        do
+                container=$name$nodeNum
+                echo $container
+                appstatus="$(docker ps -a |  grep $container | awk '{print $7}')"
+                echo $appstatus
+                if [ "$appstatus" == "Exited" ]; then
+                        appstatus="pending"
+                        echo "$(docker start $container)"
+                        echo starting container $container
+                else
+                        #agent="$(docker ps -f 'name=agent' --format '{{.Names}}')"
+                        agent="$AGENT_NODES"
+                        counter=1
+                        corelist=$firstcore
+                        while [ $counter -lt $cores ]; do
+                                nextcore=$((firstcore + counter))
+                                corelist="$corelist,$nextcore"
+                                let counter=counter+1
+                                #echo "firstcore: $firstcore, counter: $counter, nextcore: $nextcore, corelist: $corelist"
+                        done
+                        firstcore=$(($firstcore + $cores))
+            cmd="docker run -d --cpuset-cpus=\"$corelist\" --log-opt max-size=50m --log-opt max-file=20 --net=fgp -p 70$nodeNum:70$nodeNum -e JMX_PORT=70$nodeNum -e JMX_HOST=$ipaddress -v $FGRID_DIR/neutral/conf:/$confDir/conf -v $FGRID_DIR/neutral/$nodeNum/logs:/logs -e docker.host.uri=$ipaddress -e docker.host.port=2376 -e JVM_MX=16G -e JVM_GC=G1 -e JVM_MOH=24G -e object_pool.disable=true -e environment=$FGRID_ENV -e application.version=$version -e agent.members=$agent -e agent.port=5701 -e hazelcast.interface=10.0.1.$nodeNum --ip=10.0.1.$nodeNum --name=$container futuregrid/$application"
+                                echo "$cmd"
+                                eval "$cmd"
+                fi
+                appstatus="$(docker ps -a |  grep $container | awk '{print $7}')"
+                echo "started container $container status $appstatus"
+                appstatus=pending
+                nodeNum=$(($nodeNum + 1))
+                containers=$(($containers + 1))
+                sleep 5
+        done
+fi
+
+----
+modify the permissions
+----
+$ chmod +x docker_start.sh
+----
+*Do not execute this script*
+
+Now, go and follow the same steps over on the second server, the script should be the same, as we are going to be passing in the parameters
+such as `firstcore` , `cores` etc.
+
+=== Executing the Scripts
+
+Now that both of our scripts are set up we execute them, start on server one and simply run
+
+----
+$ ./run_docker_app.sh
+----
+
+Let the script run, do not interrupt it.
+
+You will then want to follow the logs through, similar to before, you should only really need to follow through
+the logs on one application container on each server to verify things are running smoothly the following on the first server
+----
+less /fgrid/neutral/10/logs/app-current.log
+----
+and this command on the second server
+----
+less /fgrid/neutral/30/logs/app-current.log
+----
+Once you get confirmation in the logs of `Startup Complete` for the application node run
+----
+$ docker ps
+----
+to see all of the application nodes running now, if it appears some are missing, run
+----
+$ docker ps -a
+----
+to confirm the missing containers and check their status
+
+=== Useful Commands To Manipulate Application Containers
+
+*Command to remove all future grid app containers*
+----
+ $ docker rm $(docker ps -a | grep app | awk '{print $1}')
+----
+
+*Command to stop all future grid app containers*
+----
+ $ docker stop $(docker ps -a | grep app | awk '{print $1}')
+----
+
+*Command to start all future grid app containers*
+----
+ $ docker start $(docker ps -a | grep app | awk '{print $1}')
+----
+
+== Populating Cassandra
+
+With the Cassandra nodes, application nodes and agent nodes running, we can load
+in the required data into the Cassandra DB, in out example, we are making a copy of the
+_production_ environment's data, so to begin we write an export script to be run on the
+prod database.
+
+=== Exporting from the Production Environment
+
+It is good practise to keep these exports in a dated folder so it is clear when these exports
+were made, and it keeps the filesystem more tidy. Navigate to `/fgrid/database/<databaseName>/logs/export`
+and make a directory for today's date, in our example this was done on the 30th of January, 2019 so the
+command is as follow
+
+`mkdir 20190130`
+
+Feel free to the navigate into this directory, then enter the `bash` interface for this Cassandra instance,
+and then the `cqlsh` interface like before.
+
+Now the directory is set up, using the following template, construct your export scripts
+----
+COPY {keyspace}.{tablename} ({column one}, {column two} ...) TO 'logs/export/{dateFolder}/{tablename}_{date yyyymmdd}.csv' WITH HEADER = TRUE;
+----
+
+Our export scripts look like this
+----
+COPY ue.busbar_to_voltage_channel (parent_key, child_key) TO 'logs/export/20190130/busbar_to_voltage_channel_20190130.csv' WITH HEADER = TRUE;
+COPY ue.channel (channel_uuid,effective_from_ts,channel_cd,has_current_yn,has_powerfactor_yn,has_voltage_yn,nic_channel_id,phase_cd) TO 'logs/export/20190130/channel_20190130.csv' WITH HEADER = TRUE;
+COPY ue.channel_index (parent_key,slice_key,count,left_key,right_key) TO 'logs/export/20190130/channel_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.channel_to_circuit (device_key,valid_from,parent_index,parent_key) TO 'logs/export/20190130/channel_to_circuit_20190130.csv' WITH HEADER = TRUE;
+COPY ue.channel_to_distribution_substation( device_key, valid_from, parent_index, parent_key) TO 'logs/export/20190130/channel_to_distribution_substation_20190130.csv' WITH HEADER = TRUE;
+COPY ue.channel_to_meter (device_key,valid_from,parent_index,parent_key) TO 'logs/export/20190130/channel_to_meter_20190130.csv' WITH HEADER = TRUE;
+COPY ue.circuit_to_channel (parent_key,child_key) TO 'logs/export/20190130/circuit_to_channel_20190130.csv' WITH HEADER = TRUE;
+COPY ue.circuit_to_distribution_substation (device_key,valid_from,parent_index,parent_key) TO 'logs/export/20190130/circuit_to_distribution_substation_20190130.csv' WITH HEADER = TRUE;
+COPY ue.device (device_key,description,name,type) TO 'logs/export/20190130/device_20190130.csv' WITH HEADER = TRUE;
+COPY ue.device_audit (device_key,thread_of_time,description,name,type) TO 'logs/export/20190130/device_audit_20190130.csv' WITH HEADER = TRUE;
+COPY ue.device_lookup (lookup_key,device_key) TO 'logs/export/20190130/device_lookup_20190130.csv' WITH HEADER = TRUE;
+COPY ue.distribution_substation (distribution_substation_key,effective_from_ts,cmen_area_yn,construction_date_dt,csc_code_z,distribution_substation_id,earth_type_cd,engineering_analysis_load_kw,fgp_distribution_substation_id,gis_id,install_date_dt,maximum_demand_amps_lct,maximum_demand_install_capacity_kva,maximum_demand_kw,maximum_demand_thermal_rating_kva,name_sd,operating_level_cd,other_db_supply_yn,phase_colour_cd,pole_id,power_factor_pf,sap_id,status_cd,swer_num_z,type_cd,ue_owned_yn) TO 'logs/export/20190130/distribution_substation_20190130.csv' WITH HEADER = TRUE;
+COPY ue.distribution_substation_index (parent_key,slice_key,count,left_key,right_key) TO 'logs/export/20190130/distribution_substation_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.distribution_substation_to_channel(parent_key, child_key) TO 'logs/export/20190130/distribution_substation_to_channel_20190130.csv' WITH HEADER = TRUE;
+COPY ue.distribution_substation_to_circuit (parent_key,child_key) TO 'logs/export/20190130/distribution_substation_to_circuit_20190130.csv' WITH HEADER = TRUE;
+COPY ue.distribution_substation_to_switch_zone (device_key,valid_from,parent_index,parent_key) TO 'logs/export/20190130/distribution_substation_to_switch_zone_20190130.csv' WITH HEADER = TRUE;
+COPY ue.high_voltage_feeder (high_voltage_feeder_key,effective_from_ts,feeder_num,fgp_high_voltage_feeder_id,gis_id,high_voltage_feeder_id,install_date_dt,label_sd,operating_level_cd,rural_feeder_yn,sap_floc_id,scada_id) TO 'logs/export/20190130/high_voltage_feeder_20190130.csv' WITH HEADER = TRUE;
+COPY ue.high_voltage_feeder_index (parent_key,slice_key,count,left_key,right_key) TO 'logs/export/20190130/high_voltage_feeder_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.high_voltage_feeder_to_station_busbar (device_key,valid_from,parent_index,parent_key) TO 'logs/export/20190130/high_voltage_feeder_to_station_busbar_20190130.csv' WITH HEADER = TRUE;
+COPY ue.high_voltage_feeder_to_switch_zone (parent_key,child_key) TO 'logs/export/20190130/high_voltage_feeder_to_switch_zone_20190130.csv' WITH HEADER = TRUE;
+COPY ue.location (device_key,effective_from_ts,device_name,latitude,longitude) TO 'logs/export/20190130/location_20190130.csv' WITH HEADER = TRUE;
+COPY ue.location_index (parent_key,slice_key,count,left_key,right_key) TO 'logs/export/20190130/location_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.low_voltage_circuit (low_voltage_circuit_key,effective_from_ts,changed_on_ts,circuit_num_z,fgp_low_voltage_circuit_id,gis_id,low_voltage_circuit_id,operating_level_cd) TO 'logs/export/20190130/low_voltage_circuit_20190130.csv' WITH HEADER = TRUE;
+COPY ue.low_voltage_circuit_index (parent_key,slice_key,count,left_key,right_key) TO 'logs/export/20190130/low_voltage_circuit_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.meter (meter_key,effective_from_ts,ct_ratio,national_metering_identifier_id,network_interface_mac,serial_num,siq_polling_period) TO 'logs/export/20190130/meter_20190130.csv' WITH HEADER = TRUE;
+COPY ue.meter_channels (meter_key,channel_uuid_a,channel_uuid_b,channel_uuid_c,nic_channel_id_a,nic_channel_id_b,nic_channel_id_c) TO 'logs/export/20190130/meter_channels_20190130.csv' WITH HEADER = TRUE;
+COPY ue.meter_hierarchy( meter_uuid, address, asset_type, circuit_num, cust_class, customer_class, customer_start_date, equipment_number, external_ant, frmp, gis_status, hv_feeder_id, hv_feeder_name, lat, life_support, lng, lv_circuit_id, lv_circuit_name, lv_fuse, material_description, meter_class, meter_id, meter_phase_type, meter_program, meter_status, meter_type, meter_user_status, nation_metering_identifier_id, nic_mac_id, nmi, nmi_start_date, nmi_status, point_of_delivery, remote_lockout, rolr, sap_serial_number, sap_status, sensitive_load, serial_number, service_id, st_feeder, substation_dsc, substation_gis_id, substation_id, substation_name, supply_point_gis_id, supply_point_id, supply_point_status, switch_zone_id, switch_zone_name, tariff_id, terminal_station, uiq_device_state, user_status, utl_device_state, zone_substation_id, zone_substation_name) TO 'logs/export/20190130/meter_hierarchy_20190130.csv' WITH HEADER = TRUE;
+COPY ue.meter_index (parent_key,slice_key,count,left_key,right_key) TO 'logs/export/20190130/meter_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.meter_info(meter_key, address, distance_to_low_voltage_circuit_mt, impedance_offset_r, serial_num, supply_point) TO 'logs/export/20190130/meter_info_20190130.csv' WITH HEADER = TRUE;
+COPY ue.meter_location(meter_uuid, latitude, longitude) TO 'logs/export/20190130/meter_location_20190130.csv' WITH HEADER = TRUE;
+COPY ue.meter_to_channel (parent_key,child_key) TO 'logs/export/20190130/meter_to_channel_20190130.csv' WITH HEADER = TRUE;
+COPY ue.meter_to_nmi(device_key, valid_from, parent_index, parent_key) TO 'logs/export/20190130/meter_to_nmi_20190130.csv' WITH HEADER = TRUE;
+COPY ue.nic_channel_id (lookup_key,time_key,device_key) TO 'logs/export/20190130/nic_channel_id_20190130.csv' WITH HEADER = TRUE;
+COPY ue.nmi(nmi_key, effective_from_ts, nmi_id) TO 'logs/export/20190130/nmi_20190130.csv' WITH HEADER = TRUE;
+COPY ue.nmi_index(parent_key, slice_key, count, left_key, right_key) TO 'logs/export/20190130/nmi_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.nmi_to_meter(parent_key, child_key) TO 'logs/export/20190130/nmi_to_meter_20190130.csv' WITH HEADER = TRUE;
+COPY ue.profile(profile_uuid, effective_from_ts, fgp_siq_profile_id, meter_profile_id, num_channels, polling_period, siq_profile_id) TO 'logs/export/20190130/profile_20190130.csv' WITH HEADER = TRUE;
+COPY ue.profile_index(parent_key, slice_key, count, left_key, right_key) TO 'logs/export/20190130/profile_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.profile_lookup(lookup_key, time_key, device_key) TO 'logs/export/20190130/profile_lookup_20190130.csv' WITH HEADER = TRUE;
+COPY ue.setpoint_lookup(lookup_key, time_key, device_key) TO 'logs/export/20190130/setpoint_lookup_20190130.csv' WITH HEADER = TRUE;
+COPY ue.station_busbar (station_busbar_key,effective_from_ts,bus_number_cd,conductor_location_cd,conductor_material_type_cd,construction_date_dt,construction_type_cd,fgp_station_busbar_id,gis_id,install_date_dt,insulation_type_cd,operating_voltage_cd,phase_cross_sectional_area_cd,rating_sd,rating_summer_hct,rating_winter_hct,sap_id,scada_id,station_busbar_id,status_cd,type_cd,ue_asset_yn) TO 'logs/export/20190130/station_busbar_20190130.csv' WITH HEADER = TRUE;
+COPY ue.station_busbar_index (parent_key,slice_key,count,left_key,right_key) TO 'logs/export/20190130/station_busbar_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.station_busbar_to_high_voltage_feeder (parent_key,child_key) TO 'logs/export/20190130/station_busbar_to_high_voltage_feeder_20190130.csv' WITH HEADER = TRUE;
+COPY ue.station_busbar_to_virtual_zone_substation(device_key, valid_from, parent_index, parent_key) TO 'logs/export/20190130/station_busbar_to_virtual_zone_substation_20190130.csv' WITH HEADER = TRUE;
+COPY ue.station_busbar_to_zone_substation(device_key, valid_from, parent_index, parent_key) TO 'logs/export/20190130/station_busbar_to_zone_substation_20190130.csv' WITH HEADER = TRUE;
+COPY ue.station_busbar_voltage_channel(station_busbar_key, effective_from_ts, channel_count_z, fgp_station_busbar_id, station_busbar_id) TO 'logs/export/20190130/station_busbar_voltage_channel_20190130.csv' WITH HEADER = TRUE;
+COPY ue.station_busbar_voltage_channel_index(parent_key, slice_key, count, left_key, right_key) TO 'logs/export/20190130/station_busbar_voltage_channel_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.switch_zone (switch_zone_key,effective_from_ts,fgp_high_voltage_feeder_id,fgp_switch_zone_id,gis_id,high_voltage_feeder_id,name_sd,operating_voltage_cd,sap_floc_id,status_cd,switch_zone_id) TO 'logs/export/20190130/switch_zone_20190130.csv' WITH HEADER = TRUE;
+COPY ue.switch_zone_index (parent_key,slice_key,count,left_key,right_key) TO 'logs/export/20190130/switch_zone_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.switch_zone_to_distribution_substation (parent_key,child_key) TO 'logs/export/20190130/switch_zone_to_distribution_substation_20190130.csv' WITH HEADER = TRUE;
+COPY ue.switch_zone_to_high_voltage_feeder (device_key,valid_from,parent_index,parent_key) TO 'logs/export/20190130/switch_zone_to_high_voltage_feeder_20190130.csv' WITH HEADER = TRUE;
+COPY ue.virtual_zone_substation_to_station_busbar(parent_key, child_key) TO 'logs/export/20190130/virtual_zone_substation_to_station_busbar_20190130.csv' WITH HEADER = TRUE;
+COPY ue.voltage_channel_to_busbar(device_key, valid_from, parent_index, parent_key) TO 'logs/export/20190130/voltage_channel_to_busbar_20190130.csv' WITH HEADER = TRUE;
+COPY ue.voltage_channel_to_zonesub (device_key,valid_from,parent_index,parent_key) TO 'logs/export/20190130/voltage_channel_to_zonesub_20190130.csv' WITH HEADER = TRUE;
+COPY ue.zone_substation (zone_sub_key,effective_from_ts,fgp_zone_substation_id,sap_floc_id,zone_substation_id) TO 'logs/export/20190130/zone_substation_20190130.csv' WITH HEADER = TRUE;
+COPY ue.zone_substation_index (parent_key,slice_key,count,left_key,right_key) TO 'logs/export/20190130/zone_substation_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.zone_substation_setpoint (zone_sub_key,effective_timestamp,change_10_to_9,change_11_to_10,change_12_to_11,change_13_to_12,change_14_to_13,change_15_to_14,change_2_to_1,change_3_to_2,change_4_to_3,change_5_to_4,change_6_to_5,change_7_to_6,change_8_to_7,change_9_to_8,current_step,fgp_zone_sub_id,sap_floc_id,zone_sub_id) TO 'logs/export/20190130/zone_substation_setpoint_20190130.csv' WITH HEADER = TRUE;
+COPY ue.zone_substation_setpoint_index (parent_key,slice_key,count,left_key,right_key) TO 'logs/export/20190130/zone_substation_setpoint_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.zone_substation_to_station_busbar(parent_key, child_key) TO 'logs/export/20190130/zone_substation_to_station_busbar_20190130.csv' WITH HEADER = TRUE;
+COPY ue.zone_substation_voltage_channel (zone_sub_key,effective_from_ts,channel_count_z,fgp_zone_substation_id,zone_substation_id) TO 'logs/export/20190130/zone_substation_voltage_channel_20190130.csv' WITH HEADER = TRUE;
+COPY ue.zone_substation_voltage_channel_index (parent_key,slice_key,count,left_key,right_key) TO 'logs/export/20190130/zone_substation_voltage_channel_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.zonesub_to_voltage_channel (parent_key,child_key) TO 'logs/export/20190130/zonesub_to_voltage_channel_20190130.csv' WITH HEADER = TRUE;
+----
+
+NOTE: To ensure that you have developed the export script correctly, run *only one command* first, to test if it has copied correctly do the following
+
+* in the `cqlsh` interface run your first command, in our example it is `COPY ue.busbar_to_voltage_channel (parent_key, child_key) TO 'logs/export/20190130/busbar_to_voltage_channel_20190130.csv' WITH HEADER = TRUE;`
+* wait for it to complete, and then run `select count(1) from ue.busbar_to_voltage_channel;`, this returned in *894281 rows* for us
+* exit the `cqlsh` interface, and navigate to your date folder and run the following `wc -l busbar_to_voltage_channel_20190130.csv`, this should returned *894282 rows*, one more than in the
+  `cqlsh` command because the header is treated as a row when running, this is expected
+* provided this has worked correctly, and the results expected are achieved, it is safe to then run the remainder of the commands by entering the `cqlsh`
+  interface again, and copying *ALL* of your remaining commands at the same time, and pasting them, they will then run one after the other
+
+NOTE: Make sure to watch this process, occasionally there will be a timeout, incorrect command, or other error in the copy process, it is
+      important to note these, amend them, and re-execute these commands on completion of the remaining scripts, they will simply
+      overwrite the bad files.
+
+After all exports are completed, you can verify that all files are there by checking the date directory you have created, and verify the amount of files
+aligns with the amount of scripts you have created.
+
+We then exit out of the prod server and ssh back into the ScaleTest Server One, navigate to `/fgrid/database/cassandra201/logs/import/`, subbing in
+you CassandraDB where applicable.
+
+=== Importing into the ScaleTest Environment
+
+You will now need to get the files from the prod server, and put them into this folder, using `scp` this becomes simple, do the following,
+substituting in your date file, login information, path and server address
+
+* Navigate into the `/fgrid/database/cassandra201/logs/import/` directory if you have not already
+* run `scp -r quenton@10.152.7.55:/fgrid/database/cassandra201/logs/export/20190130 .` this will copy the folder after you enter your password
+* wait for the copy to complete
+* navigate into the `20190130` directory which should have been created and verify all files were created
+
+Now the directory is set up, and your files are loaded, enter the cqlsh interface, and construct your import scripts using the following template.
+----
+COPY {keyspace}.{tablename} ({column one}, {column two} ...) FROM 'logs/import/{dateFolder}/{tablename}_{date yyyymmdd}.csv' WITH HEADER = TRUE;
+----
+
+Our import scripts look like this
+
+----
+COPY ue.busbar_to_voltage_channel (parent_key, child_key) FROM 'logs/import/20190130/busbar_to_voltage_channel_20190130.csv' WITH HEADER = TRUE;
+COPY ue.channel (channel_uuid,effective_from_ts,channel_cd,has_current_yn,has_powerfactor_yn,has_voltage_yn,nic_channel_id,phase_cd) FROM 'logs/import/20190130/channel_20190130.csv' WITH HEADER = TRUE;
+COPY ue.channel_index (parent_key,slice_key,count,left_key,right_key) FROM 'logs/import/20190130/channel_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.channel_to_circuit (device_key,valid_from,parent_index,parent_key) FROM 'logs/import/20190130/channel_to_circuit_20190130.csv' WITH HEADER = TRUE;
+COPY ue.channel_to_distribution_substation( device_key, valid_from, parent_index, parent_key) FROM 'logs/import/20190130/channel_to_distribution_substation_20190130.csv' WITH HEADER = TRUE;
+COPY ue.channel_to_meter (device_key,valid_from,parent_index,parent_key) FROM 'logs/import/20190130/channel_to_meter_20190130.csv' WITH HEADER = TRUE;
+COPY ue.circuit_to_channel (parent_key,child_key) FROM 'logs/import/20190130/circuit_to_channel_20190130.csv' WITH HEADER = TRUE;
+COPY ue.circuit_to_distribution_substation (device_key,valid_from,parent_index,parent_key) FROM 'logs/import/20190130/circuit_to_distribution_substation_20190130.csv' WITH HEADER = TRUE;
+COPY ue.device (device_key,description,name,type) FROM 'logs/import/20190130/device_20190130.csv' WITH HEADER = TRUE;
+COPY ue.device_audit (device_key,thread_of_time,description,name,type) FROM 'logs/import/20190130/device_audit_20190130.csv' WITH HEADER = TRUE;
+COPY ue.device_lookup (lookup_key,device_key) FROM 'logs/import/20190130/device_lookup_20190130.csv' WITH HEADER = TRUE;
+COPY ue.distribution_substation (distribution_substation_key,effective_from_ts,cmen_area_yn,construction_date_dt,csc_code_z,distribution_substation_id,earth_type_cd,engineering_analysis_load_kw,fgp_distribution_substation_id,gis_id,install_date_dt,maximum_demand_amps_lct,maximum_demand_install_capacity_kva,maximum_demand_kw,maximum_demand_thermal_rating_kva,name_sd,operating_level_cd,other_db_supply_yn,phase_colour_cd,pole_id,power_factor_pf,sap_id,status_cd,swer_num_z,type_cd,ue_owned_yn) FROM 'logs/import/20190130/distribution_substation_20190130.csv' WITH HEADER = TRUE;
+COPY ue.distribution_substation_index (parent_key,slice_key,count,left_key,right_key) FROM 'logs/import/20190130/distribution_substation_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.distribution_substation_to_channel(parent_key, child_key) FROM 'logs/import/20190130/distribution_substation_to_channel_20190130.csv' WITH HEADER = TRUE;
+COPY ue.distribution_substation_to_circuit (parent_key,child_key) FROM 'logs/import/20190130/distribution_substation_to_circuit_20190130.csv' WITH HEADER = TRUE;
+COPY ue.distribution_substation_to_switch_zone (device_key,valid_from,parent_index,parent_key) FROM 'logs/import/20190130/distribution_substation_to_switch_zone_20190130.csv' WITH HEADER = TRUE;
+COPY ue.high_voltage_feeder (high_voltage_feeder_key,effective_from_ts,feeder_num,fgp_high_voltage_feeder_id,gis_id,high_voltage_feeder_id,install_date_dt,label_sd,operating_level_cd,rural_feeder_yn,sap_floc_id,scada_id) FROM 'logs/import/20190130/high_voltage_feeder_20190130.csv' WITH HEADER = TRUE;
+COPY ue.high_voltage_feeder_index (parent_key,slice_key,count,left_key,right_key) FROM 'logs/import/20190130/high_voltage_feeder_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.high_voltage_feeder_to_station_busbar (device_key,valid_from,parent_index,parent_key) FROM 'logs/import/20190130/high_voltage_feeder_to_station_busbar_20190130.csv' WITH HEADER = TRUE;
+COPY ue.high_voltage_feeder_to_switch_zone (parent_key,child_key) FROM 'logs/import/20190130/high_voltage_feeder_to_switch_zone_20190130.csv' WITH HEADER = TRUE;
+COPY ue.location (device_key,effective_from_ts,device_name,latitude,longitude) FROM 'logs/import/20190130/location_20190130.csv' WITH HEADER = TRUE;
+COPY ue.location_index (parent_key,slice_key,count,left_key,right_key) FROM 'logs/import/20190130/location_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.low_voltage_circuit (low_voltage_circuit_key,effective_from_ts,changed_on_ts,circuit_num_z,fgp_low_voltage_circuit_id,gis_id,low_voltage_circuit_id,operating_level_cd) FROM 'logs/import/20190130/low_voltage_circuit_20190130.csv' WITH HEADER = TRUE;
+COPY ue.low_voltage_circuit_index (parent_key,slice_key,count,left_key,right_key) FROM 'logs/import/20190130/low_voltage_circuit_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.meter (meter_key,effective_from_ts,ct_ratio,national_metering_identifier_id,network_interface_mac,serial_num,siq_polling_period) FROM 'logs/import/20190130/meter_20190130.csv' WITH HEADER = TRUE;
+COPY ue.meter_channels (meter_key,channel_uuid_a,channel_uuid_b,channel_uuid_c,nic_channel_id_a,nic_channel_id_b,nic_channel_id_c) FROM 'logs/import/20190130/meter_channels_20190130.csv' WITH HEADER = TRUE;
+COPY ue.meter_hierarchy( meter_uuid, address, asset_type, circuit_num, cust_class, customer_class, customer_start_date, equipment_number, external_ant, frmp, gis_status, hv_feeder_id, hv_feeder_name, lat, life_support, lng, lv_circuit_id, lv_circuit_name, lv_fuse, material_description, meter_class, meter_id, meter_phase_type, meter_program, meter_status, meter_type, meter_user_status, nation_metering_identifier_id, nic_mac_id, nmi, nmi_start_date, nmi_status, point_of_delivery, remote_lockout, rolr, sap_serial_number, sap_status, sensitive_load, serial_number, service_id, st_feeder, substation_dsc, substation_gis_id, substation_id, substation_name, supply_point_gis_id, supply_point_id, supply_point_status, switch_zone_id, switch_zone_name, tariff_id, terminal_station, uiq_device_state, user_status, utl_device_state, zone_substation_id, zone_substation_name) FROM 'logs/import/20190130/meter_hierarchy_20190130.csv' WITH HEADER = TRUE;
+COPY ue.meter_index (parent_key,slice_key,count,left_key,right_key) FROM 'logs/import/20190130/meter_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.meter_info(meter_key, address, distance_to_low_voltage_circuit_mt, impedance_offset_r, serial_num, supply_point) FROM 'logs/import/20190130/meter_info_20190130.csv' WITH HEADER = TRUE;
+COPY ue.meter_location(meter_uuid, latitude, longitude) FROM 'logs/import/20190130/meter_location_20190130.csv' WITH HEADER = TRUE;
+COPY ue.meter_to_channel (parent_key,child_key) FROM 'logs/import/20190130/meter_to_channel_20190130.csv' WITH HEADER = TRUE;
+COPY ue.meter_to_nmi(device_key, valid_from, parent_index, parent_key) FROM 'logs/import/20190130/meter_to_nmi_20190130.csv' WITH HEADER = TRUE;
+COPY ue.nic_channel_id (lookup_key,time_key,device_key) FROM 'logs/import/20190130/nic_channel_id_20190130.csv' WITH HEADER = TRUE;
+COPY ue.nmi(nmi_key, effective_from_ts, nmi_id) FROM 'logs/import/20190130/nmi_20190130.csv' WITH HEADER = TRUE;
+COPY ue.nmi_index(parent_key, slice_key, count, left_key, right_key) FROM 'logs/import/20190130/nmi_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.nmi_to_meter(parent_key, child_key) FROM 'logs/import/20190130/nmi_to_meter_20190130.csv' WITH HEADER = TRUE;
+COPY ue.profile(profile_uuid, effective_from_ts, fgp_siq_profile_id, meter_profile_id, num_channels, polling_period, siq_profile_id) FROM 'logs/import/20190130/profile_20190130.csv' WITH HEADER = TRUE;
+COPY ue.profile_index(parent_key, slice_key, count, left_key, right_key) FROM 'logs/import/20190130/profile_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.profile_lookup(lookup_key, time_key, device_key) FROM 'logs/import/20190130/profile_lookup_20190130.csv' WITH HEADER = TRUE;
+COPY ue.setpoint_lookup(lookup_key, time_key, device_key) FROM 'logs/import/20190130/setpoint_lookup_20190130.csv' WITH HEADER = TRUE;
+COPY ue.station_busbar (station_busbar_key,effective_from_ts,bus_number_cd,conductor_location_cd,conductor_material_type_cd,construction_date_dt,construction_type_cd,fgp_station_busbar_id,gis_id,install_date_dt,insulation_type_cd,operating_voltage_cd,phase_cross_sectional_area_cd,rating_sd,rating_summer_hct,rating_winter_hct,sap_id,scada_id,station_busbar_id,status_cd,type_cd,ue_asset_yn) FROM 'logs/import/20190130/station_busbar_20190130.csv' WITH HEADER = TRUE;
+COPY ue.station_busbar_index (parent_key,slice_key,count,left_key,right_key) FROM 'logs/import/20190130/station_busbar_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.station_busbar_to_high_voltage_feeder (parent_key,child_key) FROM 'logs/import/20190130/station_busbar_to_high_voltage_feeder_20190130.csv' WITH HEADER = TRUE;
+COPY ue.station_busbar_to_virtual_zone_substation(device_key, valid_from, parent_index, parent_key) FROM 'logs/import/20190130/station_busbar_to_virtual_zone_substation_20190130.csv' WITH HEADER = TRUE;
+COPY ue.station_busbar_to_zone_substation(device_key, valid_from, parent_index, parent_key) FROM 'logs/import/20190130/station_busbar_to_zone_substation_20190130.csv' WITH HEADER = TRUE;
+COPY ue.station_busbar_voltage_channel(station_busbar_key, effective_from_ts, channel_count_z, fgp_station_busbar_id, station_busbar_id) FROM 'logs/import/20190130/station_busbar_voltage_channel_20190130.csv' WITH HEADER = TRUE;
+COPY ue.station_busbar_voltage_channel_index(parent_key, slice_key, count, left_key, right_key) FROM 'logs/import/20190130/station_busbar_voltage_channel_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.switch_zone (switch_zone_key,effective_from_ts,fgp_high_voltage_feeder_id,fgp_switch_zone_id,gis_id,high_voltage_feeder_id,name_sd,operating_voltage_cd,sap_floc_id,status_cd,switch_zone_id) FROM 'logs/import/20190130/switch_zone_20190130.csv' WITH HEADER = TRUE;
+COPY ue.switch_zone_index (parent_key,slice_key,count,left_key,right_key) FROM 'logs/import/20190130/switch_zone_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.switch_zone_to_distribution_substation (parent_key,child_key) FROM 'logs/import/20190130/switch_zone_to_distribution_substation_20190130.csv' WITH HEADER = TRUE;
+COPY ue.switch_zone_to_high_voltage_feeder (device_key,valid_from,parent_index,parent_key) FROM 'logs/import/20190130/switch_zone_to_high_voltage_feeder_20190130.csv' WITH HEADER = TRUE;
+COPY ue.virtual_zone_substation_to_station_busbar(parent_key, child_key) FROM 'logs/import/20190130/virtual_zone_substation_to_station_busbar_20190130.csv' WITH HEADER = TRUE;
+COPY ue.voltage_channel_to_busbar(device_key, valid_from, parent_index, parent_key) FROM 'logs/import/20190130/voltage_channel_to_busbar_20190130.csv' WITH HEADER = TRUE;
+COPY ue.voltage_channel_to_zonesub (device_key,valid_from,parent_index,parent_key) FROM 'logs/import/20190130/voltage_channel_to_zonesub_20190130.csv' WITH HEADER = TRUE;
+COPY ue.zone_substation (zone_sub_key,effective_from_ts,fgp_zone_substation_id,sap_floc_id,zone_substation_id) FROM 'logs/import/20190130/zone_substation_20190130.csv' WITH HEADER = TRUE;
+COPY ue.zone_substation_index (parent_key,slice_key,count,left_key,right_key) FROM 'logs/import/20190130/zone_substation_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.zone_substation_setpoint (zone_sub_key,effective_timestamp,change_10_to_9,change_11_to_10,change_12_to_11,change_13_to_12,change_14_to_13,change_15_to_14,change_2_to_1,change_3_to_2,change_4_to_3,change_5_to_4,change_6_to_5,change_7_to_6,change_8_to_7,change_9_to_8,current_step,fgp_zone_sub_id,sap_floc_id,zone_sub_id) FROM 'logs/import/20190130/zone_substation_setpoint_20190130.csv' WITH HEADER = TRUE;
+COPY ue.zone_substation_setpoint_index (parent_key,slice_key,count,left_key,right_key) FROM 'logs/import/20190130/zone_substation_setpoint_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.zone_substation_to_station_busbar(parent_key, child_key) FROM 'logs/import/20190130/zone_substation_to_station_busbar_20190130.csv' WITH HEADER = TRUE;
+COPY ue.zone_substation_voltage_channel (zone_sub_key,effective_from_ts,channel_count_z,fgp_zone_substation_id,zone_substation_id) FROM 'logs/import/20190130/zone_substation_voltage_channel_20190130.csv' WITH HEADER = TRUE;
+COPY ue.zone_substation_voltage_channel_index (parent_key,slice_key,count,left_key,right_key) FROM 'logs/import/20190130/zone_substation_voltage_channel_index_20190130.csv' WITH HEADER = TRUE;
+COPY ue.zonesub_to_voltage_channel (parent_key,child_key) FROM 'logs/import/20190130/zonesub_to_voltage_channel_20190130.csv' WITH HEADER = TRUE;
+----
+
+NOTE: To ensure that you have developed the import script correctly, run *only one command* first, to test if it has imported into the database correctly,
+      in the `cqlsh` interface, do the `select count(1)` command again to verify the rows, if everything seems fine, it is safe do as we did before and
+      run all of the commands in a large copy paste chunk. *Watch the process* as this importing process generally has more issues than the copy process.
+
+You should now have all of the data in your CassandraDB, verify this using the skills discussed in the export section
+
+
+=== Fixing problems with import
+Occasionally whilst running the import script you will encounter errors, timeouts and other problems, when this occurs you
+must take note of which ones fail. After you compile a list of the failed imports, do the following
+
+In our example `ue.virtual_zone_substation_to_station_busbar` failed with a _timeout error_ .
+
+* First, get into the `cqlsh` and truncate the table
+
+  TRUNCATE ue.virtual_zone_substation_to_station_busbar ;
+
+* Second, re run the import script
+
+  COPY ue.virtual_zone_substation_to_station_busbar(parent_key, child_key) FROM 'logs/import/20190130/virtual_zone_substation_to_station_busbar_20190130.csv' WITH HEADER = TRUE;
+
+* Lastly, let the process run, if you encounter an error, follow these steps again and revise the script if necessary

@@ -1,0 +1,82 @@
+{
+    "excludedColumns" : [
+        "lastLogon",
+        "type"
+    ],
+    "mutatedColumns" : [
+        {
+            "key" : "legacyCost",
+            "style" : "currency"
+        },
+        {
+            "key" : "lastLogon",
+            "style" : "datetime"
+        },
+        {
+            "key" : "lastLogonAsDate",
+            "style" : "datetime"
+        },
+        {
+            "key" : "lastChange",
+            "style" : "datetime"
+        },
+        {
+            "key" : "lastChangeAsDate",
+            "style" : "datetime"
+        },
+        {
+            "key" : "timestamp",
+            "style" : "datetime"
+        }
+    ],
+    "redirectColumns" : [
+        {
+            "key" : "name",
+            "redirectTo" : "/Asset/*"
+        },
+        {
+            "key" : "department",
+            "redirectTo" : "/super/*/test"
+        }
+    ],
+    "relation_excludedColumns" : [
+        {
+            "extension" : "assetInfo",
+            "key" : "name"
+        },
+        {
+            "extension" : "assetInfo",
+            "key" : "timestamp"
+        },
+        {
+            "extension" : "assetExtension",
+            "key" : "name"
+        }
+    ],
+    "relation_mutatedColumns" : [
+        {
+            "extension" : "assetExtension",
+            "key" : "daasCostPrimitive",
+            "style" : "currency"
+        },
+        {
+            "extension" : "assetExtension",
+            "key" : "daasCost",
+            "style" : "currency"
+        }
+    ],
+    "relation_redirectColumns" : [
+        {
+            "extension" : "employeeAssigned",
+            "key" : "name",
+            "redirect" : "/Employee/*"
+        }
+    ],
+    "relation_renameColumns" : [
+        {
+            "extension" : "employeeAssigned",
+            "key" : "name",
+            "desiredKey" : "Employee ID"
+        }
+    ]
+}
