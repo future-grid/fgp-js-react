@@ -10,7 +10,6 @@ import './App.css';
 import BrandingConfig from './configs/brandingconfig.json'
 // Pages
 import { Home } from './components/pages/home/Home';
-import { WelnetExamplePage } from './components/pages/welnetexamplepage/WelnetExamplePage';
 import { Login } from './components/login/Login';
 // import { Users } from './components/pages/users/Users';
 import { AssetPage } from './components/pages/assetpage/AssetPage';
@@ -56,16 +55,6 @@ function App() {
           <ProtectedRoute path="/Asset/:handle"
             component={props => 
               <AssetPage                 
-                topNavTitle={BrandingConfig.topNavTitle}
-                sideNavLogoPath={BrandingConfig.sideNavLogoPath}
-                {...props}
-              />
-            }
-          />  
-          
-          <ProtectedRoute path="/WelnetExample/:handle"
-            component={props => 
-              <WelnetExamplePage                 
                 topNavTitle={BrandingConfig.topNavTitle}
                 sideNavLogoPath={BrandingConfig.sideNavLogoPath}
                 {...props}

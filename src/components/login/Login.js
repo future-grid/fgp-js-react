@@ -12,7 +12,7 @@ export class Login extends Component {
   }
 
   componentDidMount(){
-    auth.isAuthenticated() === "true" ?  this.props.history.push("/Dashboard") : this.props.history.push("/")
+    auth.isAuthenticated() === "true" ?  this.props.history.push("/Home") : this.props.history.push("/")
   }
 
   render() {

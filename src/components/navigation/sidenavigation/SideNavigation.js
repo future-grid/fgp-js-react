@@ -27,15 +27,6 @@ export class SideNavigation extends Component {
           fontAwesomeLib="fas"
           description="Home"
         />
-
-        <SideNavigationItem
-          extensionShown={this.props.isOpen}
-          currentPage={this.props.currentPage}
-          linkTo="/WelnetExample/E00025675COMP"
-          FontAwesomeIcon="map"
-          fontAwesomeLib="fas"
-          description="WEL Map Example"
-        />
         
         {/* the signout button always needs history as a prop to properly sign out */}
         <SideNavigationItem
