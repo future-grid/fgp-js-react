@@ -1,0 +1,102 @@
+.fgReact-SideNavigation{
+    width: 70px;
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    user-select: none;
+    height: 100%;
+    transition: 0.2s ease;
+    z-index: 100;
+    background-color: var(--fgReact_v0_pureWhite) !important;
+    border-right : 1px solid var(--fgReact_v0_borderGrey);
+}
+
+.fgReact-SideNavigation-open{
+    width: 180px;
+    background: red;
+}
+
+.fgReact_compass{
+    text-align: left;
+    padding-left: 18px;
+    user-select: none;
+    width: 70px;
+    height: 70px;
+    line-height: 68px;
+    color: rgb(51, 51, 51);
+    font-size: 32px;
+    cursor: pointer;
+    transition: all 0.2s ease 0s;
+    margin-bottom: 70px;
+}
+
+.fgReact_compass2{
+    text-align: left;
+    padding-left: 10px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    width: 70px;
+    height: 70px;
+    line-height: 68px;
+    color: rgb(51, 51, 51);
+    font-size: 32px;
+    cursor: pointer;
+    transition: all 0.2s ease 0s;
+    margin-bottom: 70px;
+}
+
+.fgReact_compass svg{
+    height: 70px;
+    user-select: none;
+}
+
+.fgReact_compass:hover{
+    /* transform: rotate(360deg) scale(1.1);  */
+    color: var(--fgReact_V0_boldGreen);
+}
+
+.fgReact_compass-active{
+    /* transform: rotate(360deg) scale(1.1);  */
+    color: var(--fgReact_V0_boldGreen);
+    padding-left: 23px;
+    width: 180px;
+}
+
+.fgReact_compass-active2{
+    /* transform: rotate(360deg) scale(1.1);  */
+    color: var(--fgReact_V0_boldGreen);
+    padding-left: 10px;
+    width: 180px;
+}
+.fgReact_logo{
+    /* background-image: url('./fgp-logo.png'); */
+    background-size: contain;
+    background-position: center;
+    position: relative;
+    background-repeat: no-repeat;
+    display: inline-block;
+    user-select: none;
+    width: 57px;
+    top: 2px;
+    margin-left: 12px;
+    height: 66px;
+    -webkit-animation: App-links-fade-in 1s none; /* Safari 4.0 - 8.0 */
+    animation: App-links-fade-in 1s none;
+}
+.fgReact_logo-thingsat{
+    /* background-image: url('./thingsAtlogo.png'); */
+    background-size: contain;
+    background-position: center;
+    position: relative;
+    background-repeat: no-repeat;
+    display: inline-block;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    width: 48px;
+    top: 4px;
+    /* margin-left: 28px; */
+    height: 66px;
+    /* animation: App-links-fade-in 1s none; */
+}
