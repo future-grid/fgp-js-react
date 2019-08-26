@@ -53,7 +53,8 @@ export class BasicMapFGP extends Component {
         this.state = {
             popupVisible:false,
             focusedFeature: null,
-            focusedGroup: null
+            focusedGroup: null,
+            id: Math.random().toString(36).substr(2, 11)
         };
     }
     
@@ -212,7 +213,7 @@ export class BasicMapFGP extends Component {
           vectorLayerChildren,
           vectorLayerParent
         ],
-        target: 'map',
+        target: this.state.id,
         view: new View({
           center: layerCenter,
           zoom: 16,
@@ -325,7 +326,7 @@ export class BasicMapFGP extends Component {
         
 
         return (
-          <div className={"w-100 map fgpReactMap"} id="map">
+          <div className={"w-100 map fgpReactMap"} id={this.state.id}>
             <MapPopup
               visibility={this.state.popupVisible}
               focusedFeature={this.state.focusedFeature}
