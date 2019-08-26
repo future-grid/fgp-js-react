@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
-import { MapPopup } from './mapPopup/MapPopup'
-import './MapFGP2.css';
+import { MapPopup } from '../mapPopup/MapPopup'
+import './BasicMapFGP.css';
 import Map from 'ol/Map.js';
 import View from 'ol/View.js';
 import 'ol/ol.css';
@@ -11,49 +11,64 @@ import {OSM, Vector as VectorSource} from 'ol/source.js';
 import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style.js';
 
 
-//  Sample Feature object
-// {
-//   'type' : "Feature",
-//   'id': '_' + Math.random().toString(36).substr(2, 11),
-//   'geometry': {
-//     'type': "Point",
-//     'coordinates': [
-//       19514291.235482115,
-//       -4549771.9135484705
-//     ]
-//   },
-//   "geometry_name": "geom",
-//   "properties": {
-//     "lat":  -4549771.9135484705,
-//     "lng": 19514291.235482115,
-//     "id": "F384jfE",
-//     "type": "Feeder",
-//     "name": "John Cena",
-//   }
-// }
+/* 
+Basic Map - The basic map functionality is present here, that includes a popover on hover and support for 
+            a children device set and a single parent device
 
+Properties to pass through to this Component (it will handle everything else)
+- featuresChildrenStyles =  an object specifies the styling of the children dots, an example of this is ...
+  featuresChildrenStyles : {
+                            label : "ICP",
+                            borderColor : "red",
+                            borderWidth: "1",
+                            fillColor : "pink"
+                          }
 
+- featuresChildren: should be an array of objects of the child devices, an example of this is ...
+  featuresChildren[0]:  {
+                          deviceName: "0012650932WE139",
+                          lat: -37.801555,
+                          lng: 174.883438,
+                        }
 
-export class MapFGP2 extends Component {
+- featuresParentStyles: an object specifies the styling of the parent dot, an example of this is ...
+  featuresParentStyles :  {
+                            label : "Transformer",
+                            borderColor : "blue",
+                            borderWidth : "1",
+                            fillColor : "lightblue"
+                          }
+
+ - featuresParent: this is an object, singular, an example of this object is the following
+   -featuresParent: {
+                      deviceName: "E00025675COMP",
+                      lat: -37.8028377815772,
+                      lng: 174.880836345938,
+                    }
+*/
+
+export class BasicMapFGP extends Component {
     constructor(props){
         super(props);
         this.state = {
             popupVisible:false,
             focusedFeature: null,
-            focusedGroup: null,
-            zoomLevel: 16,
-            dotRadius: 4
+            focusedGroup: null
         };
     }
     
     buildmap(){
-      // child style
+
+      // child style - pink inner, red outer
       var image = new CircleStyle({
-        radius: this.state.dotRadius,
+        radius: 4,
         fill: new Fill({
-          color: 'pink'
+          color: this.props.featuresChildrenStyles.fillColor
         }),
-        stroke: new Stroke({color: 'red', width: 1})
+        stroke: new Stroke({
+          color: this.props.featuresChildrenStyles.borderColor, 
+          width: this.props.featuresChildrenStyles.borderWidth
+        })
       });
       var styles = {
         'Point': new Style({
@@ -61,17 +76,20 @@ export class MapFGP2 extends Component {
         })
       };
       var styleFunctionChildren = function(feature) {
+        
         return styles[feature.getGeometry().getType()];
       };
       
-      
-      // parent style
+      // parent style - blue inner, dark blue outer
       var imageParent = new CircleStyle({
-        radius: this.state.dotRadius,
+        radius: 4,
         fill: new Fill({
-          color: 'lightblue'
+          color: this.props.featuresParentStyles.fillColor
         }),
-        stroke: new Stroke({color: 'blue', width: 1})
+        stroke: new Stroke({
+          color: this.props.featuresParentStyles.borderColor, 
+          width: this.props.featuresParentStyles.borderWidth
+        })
       });
       var stylesParent = {
         'Point': new Style({
@@ -90,8 +108,7 @@ export class MapFGP2 extends Component {
         'features': [ ]
       };
 
-      // this will need to be tweaked from project to project depending on data structure
-      // in this example I am using a list of ICP extensions/locations from a tx relation
+      // setting the style, labels and location for the children which are passe through props
       this.props.featuresChildren.forEach( feature => {
         let featureObj = {
           'type' : "Feature",
@@ -113,7 +130,7 @@ export class MapFGP2 extends Component {
           "properties": {
             "lat":  feature.lat,
             "lng": feature.lng,
-            "type": "ICP",
+            "type": this.props.featuresChildrenStyles.label,
             "id": '_' + Math.random().toString(36).substr(2, 11),
             "name": feature.deviceName,
           }
@@ -122,43 +139,39 @@ export class MapFGP2 extends Component {
         geojsonObjectChildren.features.push(featureObj)
       })
       
-      // let pointsP = [];
       var geojsonObjectParent = {
         'type': 'FeatureCollection',
         'features': [ ]
       };
 
-      // this will need to be tweaked from project to project depending on data structure
-      // in this example I am using a list of ICP extensions/locations from a tx relation
-      // this.props.featuresParent.forEach( feature => {
-        let featureObjParent = {
-          'type' : "Feature",
-          'id': '_' + Math.random().toString(36).substr(2, 11),
-          'geometry': {
-            'type': "Point",
-            'crs': {
-              'type': 'name',
-              'properties': {
-                'name': 'EPSG:4326'
-              }
-            },
-            'coordinates': [
-              this.props.featuresParent.lng,
-              this.props.featuresParent.lat
-            ]
+      // setting the style, labels and location for the parent
+      let featureObjParent = {
+        'type' : "Feature",
+        'id': '_' + Math.random().toString(36).substr(2, 11),
+        'geometry': {
+          'type': "Point",
+          'crs': {
+            'type': 'name',
+            'properties': {
+              'name': 'EPSG:4326'
+            }
           },
-          "geometry_name": "geom",
-          "properties": {
-            "lat":  this.props.featuresParent.lat,
-            "lng": this.props.featuresParent.lng,
-            "type": "Transformer",
-            "id": '_' + Math.random().toString(36).substr(2, 11),
-            "name": this.props.featuresParent.deviceName,
-          }
+          'coordinates': [
+            this.props.featuresParent.lng,
+            this.props.featuresParent.lat
+          ]
+        },
+        "geometry_name": "geom",
+        "properties": {
+          "lat":  this.props.featuresParent.lat,
+          "lng": this.props.featuresParent.lng,
+          "type": this.props.featuresParentStyles.label,
+          "id": '_' + Math.random().toString(36).substr(2, 11),
+          "name": this.props.featuresParent.deviceName,
         }
-        points.push([this.props.featuresParent.lng, this.props.featuresParent.lat])
-        geojsonObjectParent.features.push(featureObjParent)
-      // })
+      }
+      points.push([this.props.featuresParent.lng, this.props.featuresParent.lat])
+      geojsonObjectParent.features.push(featureObjParent)
       
       // creates a vector source
       var vectorSourceChildren = new VectorSource({
@@ -202,7 +215,7 @@ export class MapFGP2 extends Component {
         target: 'map',
         view: new View({
           center: layerCenter,
-          zoom: this.state.zoomLevel,
+          zoom: 16,
           projection: 'EPSG:4326'
         })
       });
@@ -308,11 +321,6 @@ export class MapFGP2 extends Component {
       }
     }
 
-    componentDidUpdate(){
-
-    }
-
-
     render() {
         
 
@@ -327,5 +335,5 @@ export class MapFGP2 extends Component {
     }
 }
 
-export default MapFGP2
+export default BasicMapFGP
 

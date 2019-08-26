@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './WelnetExamplePage.css';
 import { Navigation } from '../../navigation/Navigation';
 import { DeviceData } from './devicedata/DeviceData'
-import { MapFGP2 } from '../../map/MapFGP2'
+import { BasicMapFGP } from '../../map/basicMap/BasicMapFGP'
 import axios from "axios";
 import welApiConfig  from '../../../configs/welApiConfig.json'
 
@@ -79,10 +79,27 @@ export class WelnetExamplePage extends Component {
         { 
           this.state.icpLocations && this.state.txLocations !== false ?
           <div className="col-7">
-            <MapFGP2 
+          
+            <BasicMapFGP 
               featuresChildren={this.state.icpLocations}
+              featuresChildrenStyles={
+                {
+                  label : "ICP",
+                  borderColor : "red",
+                  borderWidth: "1",
+                  fillColor : "pink"
+                }
+              }
               featuresParent={this.state.txLocations}
-          />
+              featuresParentStyles={
+                {
+                  label : "Transformer",
+                  borderColor : "blue",
+                  borderWidth : "1",
+                  fillColor : "lightblue",
+                }
+              }
+            />
           </div>
           
          : "Map loading..."
