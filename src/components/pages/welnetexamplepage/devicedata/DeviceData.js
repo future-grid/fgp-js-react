@@ -53,11 +53,11 @@ export class DeviceData extends Component {
 
 
        
-        <Tabs defaultActiveKey="timeseries" className="fgReact_tabs" id="uncontrolled-tab-example">
+        {/* <Tabs defaultActiveKey="timeseries" className="fgReact_tabs" id="uncontrolled-tab-example">
           <Tab eventKey="timeseries" title="Time Series">
             
           </Tab>
-        </Tabs>
+        </Tabs> */}
       </div>
     )
   }
