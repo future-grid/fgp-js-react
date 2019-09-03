@@ -14,7 +14,6 @@ export class DeviceData extends Component {
 
   }
   componentDidUpdate(){
-    console.log(this.props)
   }
   render() {
     return (

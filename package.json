@@ -1,8 +1,8 @@
 {
-  "name": "chizzele",
+  "name": "Compass-React",
   "version": "0.1.0",
   "private": true,
-  "description": "This is the Font-End of ThingsAt",
+  "description": "This is the Font-End of Compass built in React",
   "main": "./src/index.js",
   "config": {
     "version": "0.1.0-RC1"

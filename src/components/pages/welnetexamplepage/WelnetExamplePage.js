@@ -101,6 +101,42 @@ export class WelnetExamplePage extends Component {
           })
         })
       }),
+      sampleDestinationTx2 : "E00024817COMP",
+      destinationTxLocations2:false,
+      destinationIcpLocations2: false,
+      destinationTxExtensions2: axios.post(
+        welApiConfig.baseUrl + "transformer/name/" + "E00024817COMP",
+        {"extensions":["transformer_ext","transformer_anzsic","transformer_event_stats_ext", "location"]}
+      ).then(resp => {
+        this.setState({
+          destinationTxExtension2:resp.data,
+          destinationTxLocations2:resp.data.location
+        })
+      }),
+      sampleDestinationTxIcpExtLocList2: axios.get( 
+        welApiConfig.baseUrl + "transformer/" + "E00024817COMP" + welApiConfig.relation_icp_tx
+      ).then(resp => {
+        let icpNames = [];
+        resp.data.forEach(icp => {
+          icpNames.push(icp.name);
+        });
+        axios.post( 
+          welApiConfig.baseUrl + "icp/location",
+          { 
+            timestamp: new Date().getTime(),
+            devices:icpNames
+          }
+        ).then(resp => {
+          this.setState({
+            destinationIcpLocations2: resp.data
+          })
+        }).catch(resp=>{
+          console.log("error:", resp)
+          this.setState({
+            destinationIcpLocations2: []
+          })
+        })
+      }),
     };  
     
   } 
@@ -118,7 +154,8 @@ export class WelnetExamplePage extends Component {
           <div className={"col-12"}>
           { 
           this.state.icpLocations !== false && this.state.txLocations !== false && 
-          this.state.destinationIcpLocations && this.state.destinationTxLocations !== false 
+          this.state.destinationIcpLocations && this.state.destinationTxLocations !== false &&
+          this.state.destinationIcpLocations2 && this.state.destinationTxLocations2 !== false 
            ?
           <div className="col-12">
           
@@ -163,6 +200,26 @@ export class WelnetExamplePage extends Component {
                         borderColor : "black",
                         borderWidth: "1",
                         fillColor : "pink"
+                      }
+                    }
+                  },
+                  {
+                    parent : {
+                      device : this.state.destinationTxLocations2,
+                      style : {
+                        label : "Transformer",
+                        borderColor : "yellow",
+                        borderWidth : "1",
+                        fillColor : "yellow",
+                      }
+                    },
+                    children : {
+                      devices: this.state.destinationIcpLocations2,
+                      style: {
+                        label : "ICP",
+                        borderColor : "black",
+                        borderWidth: "1",
+                        fillColor : "lightyellow"
                       }
                     }
                   }

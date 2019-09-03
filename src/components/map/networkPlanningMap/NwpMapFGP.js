@@ -9,7 +9,6 @@ import {defaults as defaultControls, OverviewMap} from 'ol/control.js';
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
 import {OSM, Vector as VectorSource} from 'ol/source.js';
 import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style.js';
-import { timeout } from 'q';
 
 
 /* 
@@ -29,37 +28,6 @@ communicate the source child device has been swapped to the target parents relat
 I recommend for clarity setting the parent device to a solid, dark color, then the children for that parent to a lighter shade of that color
 eg Parent: blue... Child: lightblue
 You may use defined html accepted named colors, or hex colors
-
-Properties to pass through to this Component (it will handle everything else)
-- featuresChildrenStyles =  an object specifies the styling of the children dots, an example of this is ...
-  featuresChildrenStyles : {
-                            label : "ICP",
-                            borderColor : "red",
-                            borderWidth: "1",
-                            fillColor : "pink"
-                          }
-
-- featuresChildren: should be an array of objects of the child devices, an example of this is ...
-  featuresChildren[0]:  {
-                          deviceName: "0012650932WE139",
-                          lat: -37.801555,
-                          lng: 174.883438,
-                        }
-
-- featuresParentStyles: an object specifies the styling of the parent dot, an example of this is ...
-  featuresParentStyles :  {
-                            label : "Transformer",
-                            borderColor : "blue",
-                            borderWidth : "1",
-                            fillColor : "lightblue"
-                          }
-
- - featuresParent: this is an object, singular, an example of this object is the following
-   -featuresParent: {
-                      deviceName: "E00025675COMP",
-                      lat: -37.8028377815772,
-                      lng: 174.880836345938,
-                    }
 */
 
 export class NwpMapFGP extends Component {
@@ -71,18 +39,17 @@ export class NwpMapFGP extends Component {
             focusedGroup: null,
             id: Math.random().toString(36).substr(2, 11),
             points: [],
-            sourceParentVectorLayer: undefined,
-            sourceChildVectorLayer: undefined,
-            targetParentVectorLayers: [],
-            targetChildVectorLayers: [],
+            swappedDevices: [],
+            parentDevices: [],
         };
     }
-    
-    // toggles the swap of a child device to/from the source to target parents, this is invoked generally with a click callback on the map
-    swapChild(){
 
+    // once the component is ready, build the map
+    componentDidMount(){
+      this.buildMap() 
     }
 
+    // Creates Feature, Style, GeoJSON, Vector Source and Vector Layer for the Source Device
     buildSourceFeatures(){
       let points = [...this.state.points]
       // BEGIN SOURCE PARENT CODE
@@ -91,52 +58,22 @@ export class NwpMapFGP extends Component {
         'type': 'FeatureCollection',
         'features': [ ]
       };
-      var imageParentSource = new CircleStyle({
-        radius: 4,
-        fill: new Fill({
-          color: this.props.sourceFeaturesParentStyles.fillColor
-        }),
-        stroke: new Stroke({
-          color: this.props.sourceFeaturesParentStyles.borderColor, 
-          width: this.props.sourceFeaturesParentStyles.borderWidth
-        })
-      });
-      var stylesParentSource = {
-        'Point': new Style({
-          image: imageParentSource
-        })
-      };
-      // creating the style function
-      var styleFunctionParentSource = function(feature) {
-        return stylesParentSource[feature.getGeometry().getType()];
-      };      
+      var styleFunctionParentSource = this.buildStyle(
+        this.props.sourceFeaturesParentStyles.fillColor, 
+        this.props.sourceFeaturesParentStyles.borderColor, 
+        this.props.sourceFeaturesParentStyles.borderWidth,
+        4,
+        true
+      );
 
       // creating the parent feature
-      let featureObjParentSource = {
-        'type' : "Feature",
-        'id': '_' + Math.random().toString(36).substr(2, 11),
-        'geometry': {
-          'type': "Point",
-          'crs': {
-            'type': 'name',
-            'properties': {
-              'name': 'EPSG:4326'
-            }
-          },
-          'coordinates': [
-            this.props.sourceFeaturesParent.lng,
-            this.props.sourceFeaturesParent.lat
-          ]
-        },
-        "geometry_name": "geom",
-        "properties": {
-          "lat":  this.props.sourceFeaturesParent.lat,
-          "lng": this.props.sourceFeaturesParent.lng,
-          "type": this.props.sourceFeaturesParentStyles.label,
-          "id": '_' + Math.random().toString(36).substr(2, 11),
-          "name": this.props.sourceFeaturesParent.deviceName,
-        }
-      }
+      let featureObjParentSource = this.buildFeature(
+        this.props.sourceFeaturesParent.lat, 
+        this.props.sourceFeaturesParent.lng,
+        this.props.sourceFeaturesParentStyles.label,
+        this.props.sourceFeaturesParent.deviceName,
+        false
+      )
       points.push([this.props.sourceFeaturesParent.lng, this.props.sourceFeaturesParent.lat])
       geojsonObjectParentSource.features.push(featureObjParentSource)
 
@@ -150,60 +87,31 @@ export class NwpMapFGP extends Component {
         style: styleFunctionParentSource,
         key: "parentSource"
       });
-      // vector layer for the parent source device is now complete
 
       // BEGIN SOURCE CHILD CODE
       var geojsonObjectChildrenSource = {
         'type': 'FeatureCollection',
         'features': [ ]
       };
-      var imageChildSource = new CircleStyle({
-        radius: 4,
-        fill: new Fill({
-          color: this.props.sourceFeaturesChildrenStyles.fillColor
-        }),
-        stroke: new Stroke({
-          color: this.props.sourceFeaturesChildrenStyles.borderColor, 
-          width: this.props.sourceFeaturesChildrenStyles.borderWidth
-        })
-      });
-      var stylesChildSource = {
-        'Point': new Style({
-          image: imageChildSource
-        })
-      };
-      // creating the styleHandler for the features
-      var styleFunctionChildrenSource = function(feature) {
-        return stylesChildSource[feature.getGeometry().getType()];
-      };
+      
+      var styleFunctionChildrenSource = this.buildStyle(
+        this.props.sourceFeaturesChildrenStyles.fillColor, 
+        this.props.sourceFeaturesChildrenStyles.borderColor, 
+        this.props.sourceFeaturesChildrenStyles.borderWidth,
+        4,
+        true
+      );
+      
       // creating features for the geojson
       this.props.sourceFeaturesChildren.forEach( feature => {
-        let featureObj = {
-          'type' : "Feature",
-          'id': '_' + Math.random().toString(36).substr(2, 11),
-          'geometry': {
-            'type': "Point",
-            'crs': {
-              'type': 'name',
-              'properties': {
-                'name': 'EPSG:4326'
-              }
-            },
-            'coordinates': [
-              feature.lng,
-              feature.lat
-            ]
-          },
-          "geometry_name": "geom",
-          "properties": {
-            "lat":  feature.lat,
-            "lng": feature.lng,
-            "type": this.props.sourceFeaturesChildrenStyles.label,
-            "id": '_' + Math.random().toString(36).substr(2, 11),
-            "name": feature.deviceName,
-          }
-        }
-        points.push([feature.lng, feature.lat])
+        let featureObj = this.buildFeature(
+          feature.lat, 
+          feature.lng, 
+          this.props.sourceFeaturesChildrenStyles.label,
+          feature.deviceName,
+          true,
+          this.props.sourceFeaturesParent.deviceName
+        );
         geojsonObjectChildrenSource.features.push(featureObj)
       })
       // creating the source with the features and geojson
@@ -216,37 +124,119 @@ export class NwpMapFGP extends Component {
         style: styleFunctionChildrenSource,
         key: "childSource"
       });
-      // vector layer for the child source devices is now complete
-      // updating state var
-      // this.setState({
-      //   points:points
-      // })
       // returning an object for both child and parent layers to be accessed via
-      // this.buildSourceFeatures().parent/this.buildSourceFeatures().child
-      return {parent: vectorLayerParentSource, child:vectorLayerChildrenSource, points:points}
+      let tmpParentStyle = {
+        deviceName : this.props.sourceFeaturesParent.deviceName,
+        borderColor : this.props.sourceFeaturesChildrenStyles.borderColor
+      }
+      return {parent: vectorLayerParentSource, child:vectorLayerChildrenSource, points:points, parentForSwap: tmpParentStyle}
     }
 
-    buildTargetFeatures(){
-      
+    // pass through the fill, border, width, radius and a return function flag
+    buildStyle(fillColor, borderColor, borderWidth, radius, returnFunc){
+      var image = new CircleStyle({
+        radius: radius,
+        fill: new Fill({
+          color: fillColor
+        }),
+        stroke: new Stroke({
+          color: borderColor, 
+          width: borderWidth
+        })
+      });
+      var styles = {
+        'Point': new Style({
+          image: image
+        })
+      };
+      // Returning the actual style function, needed for first time creation, not modifying functions
+      if(returnFunc === true){
+        var style = function(feature) {
+          return styles[feature.getGeometry().getType()];
+        };  
+      }else{
+        // returning just updated styles and not the function
+        var style = styles.Point;
+      }
+      return style;
+    }
+
+    // creates the feature (marker), if is a source child device pass through flag isSourceChild
+    buildFeature(lat, lng, label, deviceName, isSourceChild, parentName){
+      let feature;
+      if(isSourceChild === true){
+        feature = {
+          'type' : "Feature",
+          'id': '_' + Math.random().toString(36).substr(2, 11),
+          'geometry': {
+            'type': "Point",
+            'crs': {
+              'type': 'name',
+              'properties': {
+                'name': 'EPSG:4326'
+              }
+            },
+            'coordinates': [
+              lng,
+              lat
+            ]
+          },
+          "geometry_name": "geom",
+          "properties": {
+            lat : lat,
+            lng : lng,
+            type : label,
+            id : '_' + Math.random().toString(36).substr(2, 11),
+            name : deviceName,
+            isSwapped : false,
+            // firstTimeSwapped: true,
+            originParent : parentName,
+            currentParent : parentName
+          }
+        }
+      }else{
+        feature = {
+          'type' : "Feature",
+          'id': '_' + Math.random().toString(36).substr(2, 11),
+          'geometry': {
+            'type': "Point",
+            'crs': {
+              'type': 'name',
+              'properties': {
+                'name': 'EPSG:4326'
+              }
+            },
+            'coordinates': [
+              lng,
+              lat
+            ]
+          },
+          "geometry_name": "geom",
+          "properties": {
+            "lat":  lat,
+            "lng": lng,
+            "type": label,
+            "id": '_' + Math.random().toString(36).substr(2, 11),
+            "name": deviceName,
+          }
+        }
+      }
+      return feature;
     }
 
 
-    buildmap(){
-
-      
-
+    buildMap(){
       let vectorLayerParentSource = this.buildSourceFeatures().parent;
       let vectorLayerChildrenSource = this.buildSourceFeatures().child
+      let specialParentSwapStyle = this.buildSourceFeatures().parentForSwap;
       let points = [...this.state.points] 
       points.push(this.buildSourceFeatures().points)
-      console.log(points)
       
-
-      
-
       /* //// //// //// //// //// //// //// //// //// //// //// */
       // BEGIN TARGET CODE (goes through parents, then children)
       let targetDestinationLayers = [];
+      let tmpParents = [...this.state.parentDevices];
+      tmpParents.push(specialParentSwapStyle);
       this.props.destinationFeatures.forEach(destinationFeature => {
         // creating a geoJSON each time for the parent
         var geojsonObjectParentTarget = {
@@ -259,110 +249,46 @@ export class NwpMapFGP extends Component {
           'features': []
         };
 
-        // target child style 
-        var imageChildTarget = new CircleStyle({
-          radius: 4,
-          fill: new Fill({
-            color: destinationFeature.children.style.fillColor
-          }),
-          stroke: new Stroke({
-            color: destinationFeature.children.style.borderColor, 
-            width: destinationFeature.children.style.borderWidth
-          })
-        });
-        var stylesChildTarget = {
-          'Point': new Style({
-            image: imageChildTarget
-          })
-        };
-        var styleFunctionChildrenTarget = function(feature) {
-          return stylesChildTarget[feature.getGeometry().getType()];
-        };
+        var styleFunctionChildrenTarget = this.buildStyle(
+          destinationFeature.children.style.fillColor,
+          destinationFeature.children.style.borderColor, 
+          destinationFeature.children.style.borderWidth, 
+          4,
+          true
+        );
           
         // Setting up the target children features
-        if(destinationFeature.children.devices){
-          destinationFeature.children.devices.forEach( feature => {
-            let featureObj = {
-              'type' : "Feature",
-              'id': '_' + Math.random().toString(36).substr(2, 11),
-              'geometry': {
-                'type': "Point",
-                'crs': {
-                  'type': 'name',
-                  'properties': {
-                    'name': 'EPSG:4326'
-                  }
-                },
-                'coordinates': [
-                  feature.lng,
-                  feature.lat
-                ]
-              },
-              "geometry_name": "geom",
-              "properties": {
-                "lat":  feature.lat,
-                "lng": feature.lng,
-                "type": destinationFeature.children.style.label,
-                "id": '_' + Math.random().toString(36).substr(2, 11),
-                "name": feature.deviceName,
-              }
-            }
-            points[0].push([feature.lng, feature.lat])
-            geojsonObjectChildrenTarget.features.push(featureObj)
-          })
-        }else{
-          // have to figure out what to do here
-          
-        }
-
+        destinationFeature.children.devices.forEach( feature => {
+          let featureObj = this.buildFeature(
+            feature.lat,
+            feature.lng,
+            destinationFeature.children.style.label,
+            feature.deviceName,
+            false
+          );
+          // Removing the push of children so that you get the center between two parents
+          // points[0].push([feature.lng, feature.lat])
+          geojsonObjectChildrenTarget.features.push(featureObj)
+        })
 
         // creating the parent target feature
         // parent target  style 
-        var imageParentTarget = new CircleStyle({
-          radius: 4,
-          fill: new Fill({
-            color: destinationFeature.parent.style.fillColor
-          }),
-          stroke: new Stroke({
-            color: destinationFeature.parent.style.borderColor, 
-            width: destinationFeature.parent.style.borderWidth
-          })
-        });
-        var stylesParentTarget = {
-          'Point': new Style({
-            image: imageParentTarget
-          })
-        };
-        var styleFunctionParentTarget = function(feature) {
-          return stylesParentTarget[feature.getGeometry().getType()];
-        };
+        var styleFunctionParentTarget = this.buildStyle(
+          destinationFeature.parent.style.fillColor,
+          destinationFeature.parent.style.borderColor, 
+          destinationFeature.parent.style.borderWidth,
+          4,
+          true
+        );
 
-        let featureObjParentTarget = {
-          'type' : "Feature",
-          'id': '_' + Math.random().toString(36).substr(2, 11),
-          'geometry': {
-            'type': "Point",
-            'crs': {
-              'type': 'name',
-              'properties': {
-                'name': 'EPSG:4326'
-              }
-            },
-            'coordinates': [
-              destinationFeature.parent.device.lng,
-              destinationFeature.parent.device.lat
-            ]
-          },
-          "geometry_name": "geom",
-          "properties": {
-            "lat":  destinationFeature.parent.device.lat,
-            "lng": destinationFeature.parent.device.lng,
-            "type": destinationFeature.parent.style.label,
-            "id": '_' + Math.random().toString(36).substr(2, 11),
-            "name": destinationFeature.parent.device.deviceName,
-          }
-        }
-        points[0].push([destinationFeature.parent.device.lng, destinationFeature.parent.device.lat])
+        let featureObjParentTarget =  this.buildFeature(
+          destinationFeature.parent.device.lat,
+          destinationFeature.parent.device.lng,
+          destinationFeature.parent.style.label,
+          destinationFeature.parent.device.deviceName,
+          false
+        );
+        // points[0].push([destinationFeature.parent.device.lng, destinationFeature.parent.device.lat])
         geojsonObjectParentTarget.features.push(featureObjParentTarget) 
 
         // creating the layer for this target device(parent)
@@ -387,78 +313,24 @@ export class NwpMapFGP extends Component {
           key: destinationFeature.parent.device.deviceName + "_c"
         });
 
+        tmpParents.push({
+          deviceName : destinationFeature.parent.device.deviceName,
+          borderColor : destinationFeature.parent.style.borderColor
+        });
+
+        this.setState({
+          parentDevices : tmpParents
+        })
+        
         targetDestinationLayers.push(vectorLayerChildrenTarget)
         targetDestinationLayers.push(vectorLayerParentTarget)
 
-      });
-
-
-      
+      });      
       // vector layer for the child source devices is now complete
       // END TARGET CODE  =  targetDestinationLayers
       /* //// //// //// //// //// //// //// //// //// //// //// */
 
-      this.setState({
-        points:points
-      })
-
-
-      //building the "swapped" styles, which are the the solid fill color of the sourceChild, with the thicker halo of the color of the destinationChild
-      // let availableSwappableStyles = [];
-      // this.props.destinationFeaturesChildren.forEach(childrenDeviceSetObject => {
-      //   // first, creating the swapped styles
-      //   var tmpImg = new CircleStyle({
-      //     radius: 4,
-      //     fill: new Fill({
-      //       color: this.props.sourceFeaturesParentStyles.fillColor
-      //     }),
-      //     stroke: new Stroke({
-      //       color: childrenDeviceSetObject.style.borderColor, 
-      //       width: (childrenDeviceSetObject.style.borderWidth + 1)
-      //     })
-      //   });
-      //   var tmpStyles = {
-      //     'Point': new Style({
-      //       image: tmpImg
-      //     })
-      //   };
-      //   var toggleableChildStyle = function(feature) {
-      //     return tmpStyles[feature.getGeometry().getType()];
-      //   };
-
-      //   // whilst we are in the foreach, we may as well make use of the loop and define the target child styles 
-      //   // and also create the vector source, layer and features for good measure
-      //   var tmpChildImg = new CircleStyle({
-      //     radius: 4,
-      //     fill: new Fill({
-      //       color: this.props.sourceFeaturesParentStyles.fillColor
-      //     }),
-      //     stroke: new Stroke({
-      //       color: childrenDeviceSetObject.style.borderColor, 
-      //       width: childrenDeviceSetObject.style.borderWidth
-      //     })
-      //   });
-      //   var tmpChildStyles = {
-      //     'Point': new Style({
-      //       image: tmpChildImg
-      //     })
-      //   };
-      //   var toggleableChildStyle = function(feature) {
-      //     return tmpChildStyles[feature.getGeometry().getType()];
-      //   };
-
-
-      //   // pushing into the relevant arrays
-      //   availableSwappableStyles.push(toggleableChildStyle)
-      // })
-      // // setting this as a state variable so we can access it anywhere, this should also stay relatively static after first creation
-      // this.setState({
-      //   availableSwappableStyles : availableSwappableStyles
-      // });
-
-
-
-      
+      // getting there center of the points
       var getCentroid = function (coord) {
         var totalLen = 0;
         coord.forEach(arr => {
@@ -511,14 +383,16 @@ export class NwpMapFGP extends Component {
       // binding the hover event (popup dialogue)
       map.on('pointermove', this.handleMapHover.bind(this));     
       // binding the zoom event (resize dots)
-      map.getView().on('change:resolution', this.handleMapMove.bind(this, map));     
+      map.getView().on('change:resolution', this.handleMapZoom.bind(this, map));     
+      // binding the on click handler
+      map.on('click', this.handleMapClick.bind(this, map))
       // making sure its the right dimension
       map.updateSize() 
     }
 
-    componentDidMount(){
-      this.buildmap()
-      
+    // toggles the swap of a child device to/from the source to target parents, this is invoked generally with a click callback on the map
+    swapChild(){
+
     }
 
     // different on click handlers
@@ -538,21 +412,82 @@ export class NwpMapFGP extends Component {
 
     
 
-    handleMapClick(event){
-      this.state.map.updateSize()
+    handleMapClick(map, event){
       let feature = this.state.map.forEachFeatureAtPixel(event.pixel, feature => {    
         return feature
       });     
+      let newStyleFunction;
       if(feature){
-        this.setState({
-          focusedFeature: feature.values_,
-          popupVisible: true
-        })
-      }else{
-        this.setState({
-          focusedFeature: null,
-          popupVisible: false
-        })
+        let featureProperties = feature.getProperties();
+        console.log(featureProperties)
+        if(featureProperties.hasOwnProperty('isSwapped')){
+          // getting the current position in the parent device array to find which 
+          let currentParentDeviceIndex = this.state.parentDevices.map(parentDevice =>{
+            return parentDevice.deviceName
+          }).indexOf(featureProperties.currentParent)
+          let newStyleIndex;
+          // if at the end of the array, reset back to 0, else increment by one, set the feature's currentParent
+          if(this.state.parentDevices[currentParentDeviceIndex + 1]){
+            newStyleIndex = currentParentDeviceIndex + 1;
+            console.log(this.state.parentDevices[newStyleIndex], currentParentDeviceIndex, newStyleIndex)
+            feature.setProperties({currentParent: this.state.parentDevices[newStyleIndex].deviceName }) 
+          }else{
+            newStyleIndex = 0
+            console.log(this.state.parentDevices[newStyleIndex])
+            feature.setProperties({currentParent: this.state.parentDevices[newStyleIndex].deviceName}) ;
+          }
+          // getting a temp copy of the state of the swapped devices and getting the index of the current feature in the array
+          let tmpStateSwappedDevices = [...this.state.swappedDevices];
+          let indexOfThisDevice = tmpStateSwappedDevices.map(swappedDevice => {
+            return swappedDevice.deviceName
+          }).indexOf(featureProperties.name);
+          // if this has not been swapped (on origin parent), set styles accordingly
+          if(featureProperties.isSwapped === false || newStyleIndex !== 0 ){
+            feature.setProperties({isSwapped : true, currentParentStyles : {borderColor:this.state.parentDevices[newStyleIndex].borderColor} });
+            // not in the state array of swapped devices, so push it in 
+            if(indexOfThisDevice === -1){
+              tmpStateSwappedDevices.push({
+                deviceName: featureProperties.name,
+                originParent: featureProperties.originParent,
+                currentParent: featureProperties.currentParent
+              });
+            // is there, so we update the device properties
+            }else{
+              tmpStateSwappedDevices[indexOfThisDevice].deviceName = featureProperties.name;
+              tmpStateSwappedDevices[indexOfThisDevice].originParent = featureProperties.originParent;
+              tmpStateSwappedDevices[indexOfThisDevice].currentParent = featureProperties.currentParent;
+            }
+            // create style function dependant on zoom level
+            var currZoomLevel = map.getView().getZoom();
+            var radius;
+            if(currZoomLevel>18){
+              radius = 7;
+            }else if(currZoomLevel>15){
+              radius = 5;
+            }else if(currZoomLevel>13){
+              radius = 3;
+            }else if(currZoomLevel>10){
+              radius = 2;
+            }else{
+              radius = 1;
+            }
+            newStyleFunction = this.buildStyle(
+              this.props.sourceFeaturesChildrenStyles.fillColor,
+              this.state.parentDevices[newStyleIndex].borderColor,
+              this.props.sourceFeaturesChildrenStyles.borderWidth,
+              radius,
+              true
+            );
+          }else{
+            // go back to old styles and reset the swapped flag, remove from state swappedDevices
+            feature.setProperties({isSwapped : false, currentParentStyles : {borderColor:this.props.sourceFeaturesChildrenStyles.borderColor}});
+            tmpStateSwappedDevices.splice(indexOfThisDevice,1)
+          }
+          this.setState({
+            swappedDevices : tmpStateSwappedDevices
+          });
+          feature.setStyle(newStyleFunction);
+        }
       }
     }
 
@@ -573,7 +508,8 @@ export class NwpMapFGP extends Component {
       }
     }
 
-    handleMapMove(map, event){
+    // on move / zoom of the map we remake styles to change the size of the markers 
+    handleMapZoom(map, event){
         var currZoomLevel = map.getView().getZoom();
         var radius;
         var compiledStyle;
@@ -589,10 +525,6 @@ export class NwpMapFGP extends Component {
           radius = 1;
         }
         
-        // let tvlps = this.state.vectorLayerParentSource
-        // let tvlcs = this.state.vectorLayerChildrenSource
-        // tvlps.setStyle(newStyleSourceParent);
-        // tvlcs.setStyle(newStyleSourceChild);
         let finalLayers = map.getLayers();
         finalLayers.forEach(layer => {
           // we don't want to edit the tile layer, leave this
@@ -600,82 +532,77 @@ export class NwpMapFGP extends Component {
           // find the sources first and set them first as they are easily modified by their key
           }else {  
             let layerKey = layer.getProperties().key;
-            if(layerKey== "parentSource"){
-              // creating a style based on the source style in props
-              compiledStyle = new Style({
-                image: new CircleStyle({
-                  radius: radius,
-                  fill: new Fill({
-                    color: this.props.sourceFeaturesParentStyles.fillColor
-                  }),
-                  stroke: new Stroke({
-                    color: this.props.sourceFeaturesParentStyles.borderColor, 
-                    width: this.props.sourceFeaturesParentStyles.borderWidth
-                  })
-                })
-              })
-              
+            if(layerKey == "parentSource"){
+              compiledStyle = this.buildStyle(
+                this.props.sourceFeaturesParentStyles.fillColor,
+                this.props.sourceFeaturesParentStyles.borderColor,
+                this.props.sourceFeaturesParentStyles.borderWidth,
+                radius,
+                false
+              ); 
+            // special case in the childsource, as we will need it render modified styles when selected 
             }else if(layerKey == "childSource"){
-              compiledStyle = new Style({
-                image: new CircleStyle({
-                  radius: radius,
-                  fill: new Fill({
-                    color: this.props.sourceFeaturesChildrenStyles.fillColor
-                  }),
-                  stroke: new Stroke({
-                    color: this.props.sourceFeaturesChildrenStyles.borderColor,
-                    width: this.props.sourceFeaturesChildrenStyles.borderWidth
-                  })
-                })
-              })
+              let source = layer.getSource();
+              let features = source.getFeatures();
+              features.forEach(feature =>  {
+                // if the feature has a modified style use this modified style
+                if(feature.getStyle() !== null){
+                  let borderColor = feature.getProperties().currentParentStyles.borderColor
+                  let featureSpecificCompiledStyle = this.buildStyle(
+                    this.props.sourceFeaturesChildrenStyles.fillColor,
+                    borderColor,
+                    this.props.sourceFeaturesChildrenStyles.borderWidth,
+                    radius,
+                    true
+                  );
+                  feature.setStyle(featureSpecificCompiledStyle)
+                }
+              });
+              compiledStyle = this.buildStyle(
+                this.props.sourceFeaturesChildrenStyles.fillColor,
+                this.props.sourceFeaturesChildrenStyles.borderColor,
+                this.props.sourceFeaturesChildrenStyles.borderWidth,
+                radius,
+                false
+              );  
+            // if the layer is a child target
             }else if(layerKey.split("_")[1] == "c"){
-              var originalStyle = this.props.destinationFeatures.map( feature => {
+              var originalStyle = this.props.destinationFeatures.filter( feature => {
                 if(feature.parent.device.deviceName == layerKey.split("_")[0]){
                   return feature.children.style
                 }
               })
-              originalStyle = originalStyle[0];
-              compiledStyle = new Style({
-                image: new CircleStyle({
-                  radius: radius,
-                  fill: new Fill({
-                    color: originalStyle.fillColor
-                  }),
-                  stroke: new Stroke({
-                    color: originalStyle.borderColor, 
-                    width: originalStyle.borderWidth
-                  })
-                })
-              })
+              // debugger
+              originalStyle = originalStyle[0].children.style;
+              compiledStyle = this.buildStyle(
+                originalStyle.fillColor,
+                originalStyle.borderColor,
+                originalStyle.borderWidth,
+                radius,
+                false
+              );  
+            // if the layer is a parent target
             }else if(layerKey.split("_")[1] == "p"){
-              var originalStyle = this.props.destinationFeatures.map( feature => {
+              var originalStyle = this.props.destinationFeatures.filter( feature => {
                 if(feature.parent.device.deviceName == layerKey.split("_")[0]){
                   return feature.parent.style
                 }
               })
-              originalStyle = originalStyle[0];
-              compiledStyle = new Style({
-                image: new CircleStyle({
-                  radius: radius,
-                  fill: new Fill({
-                    color: originalStyle.fillColor
-                  }),
-                  stroke: new Stroke({
-                    color: originalStyle.borderColor, 
-                    width: originalStyle.borderWidth
-                  })
-                })
-              })
+              originalStyle = originalStyle[0].parent.style
+              compiledStyle = this.buildStyle(
+                originalStyle.fillColor,
+                originalStyle.borderColor,
+                originalStyle.borderWidth,
+                radius,
+                false
+              );  
             }
             layer.setStyle(compiledStyle)
           }
-          
-        })    
+        });    
     }
 
     render() {
-        
-
         return (
           <div className={"w-100 map fgpReactMap"} id={this.state.id}>
             <MapPopup
