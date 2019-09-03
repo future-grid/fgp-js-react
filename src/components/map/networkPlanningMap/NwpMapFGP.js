@@ -13,11 +13,115 @@ import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style.js';
 
 /* 
 Network Planning Map - The basic map functionality is present here, that includes a popover on hover and support the 
-additional features, this map supports 2 types of parent devices and 2 types of children device arrays
-The first type is a source Parent/Child device set, these devices will be used to transfer from, to other other set.
-The source Parent will be a singular device where as the children will be an array of objects
-The second type is a destination Parent/Child device set, these devices will be transferred to.
-The destination array will be host to an array of an arrays of objects for an example see the below samples
+additional features, this map differs as it supports transferring children from a sources parent to the relation of 
+the specified target parent children set. When defining styles you may use HTML keywords eg. "red", "blue" 
+or color hex values eg. "#ffffff".
+
+Properties to pass into this tool include the following, please note you must provide at MINIMUM one destinationFeatures array entry
+  sourceFeaturesParent - This is the source's (where you want to transfer from) Parent device for example a Transformer
+                         in a Transformer - ICP relation. an example of the bare minimum for this prop is below.
+    sourceFeaturesParent = {
+      deviceName : "E00025675COMP",
+      lat : -37.8028377815772,
+      lng : 174.880836345938
+    }
+
+  sourceFeaturesParentStyles - This is the source Parent device's accompanying style, or how it will appear on the map,
+                               fillColor is the center of the dot, label is what will appear as the device type in the popup
+                               on hover, borderColor is the external stroke of the dot, borderWidth is the width of this stroke
+                               an example of the bare minimum for this prop is below.
+    sourceFeaturesParentStyles = {
+      label : "Transformer",
+      borderColor : "blue",
+      borderWidth : "1",
+      fillColor : "blue",
+    }
+
+  sourceFeaturesChildren - This is the source's (where you want to transfer from) Child device array for example a ICP
+                         in a Transformer - ICP relation. an example of the bare minimum for this prop is below.
+    sourceFeaturesChildren = [
+      {
+        deviceName : "0012650932WE139",
+        lat : -37.801555,
+        lng : 174.883438
+      },
+      {
+        deviceName : "0000037032WE096",
+        lat : -37.802375,
+        lng : 174.878309
+      },
+      etc.....
+    ]
+
+  sourceFeaturesChildrenStyles - This is the source Child device's accompanying style, or how it will appear on the map,
+                               fillColor is the center of the dot, label is what will appear as the device type in the popup
+                               on hover, borderColor is the external stroke of the dot, borderWidth is the width of this stroke
+                               an example of the bare minimum for this prop is below.
+    sourceFeaturesChildrenStyles = {
+        label : "ICP",
+        borderColor : "black",
+        borderWidth: "1",
+        fillColor : "lightblue"
+      }
+
+  destinationFeatures - This is the array of Destination objects, these destination objects will contain both the parent and children
+                        objects, this is a more complex structure than the last 2 props, however is quite similar, just more compact. 
+                        an example of this destinationFeatures array is below, take time to ensure your data matches this, at minimum
+                        for both parent.device object and children.devices array objects must have deviceName, lat and lng properties.
+                        you must include all style properties defined as well. In this example I have provided only one destination 
+                        feature for space constraints, but you may add as many as you wish, I advise different styles so it is clear
+                        which child belongs to which parent, I am using the following convention 
+                        BOLD COLOR (red) = PARENT fill and stroke
+                        SOFT COLOR, shade of BOLD COLOR (pink) = Child fill, stroke BLACK
+
+    destinationFeatures = [
+      {
+        parent : {
+          device : {
+            deviceName : "E000300e9COMP",
+            lat : -37.8914305756977,
+            lng : 175.120603129093
+          },
+          style : {
+            label : "Transformer",
+            borderColor : "red",
+            borderWidth : "1",
+            fillColor : "red",
+          }
+        },
+        children : {
+          devices: [
+            {
+              deviceName : "0000016378WEBCC",
+              lat : -37.892923,
+              lng : 175.120257,
+            },
+            {
+              deviceName : "0000001139WE3AA",
+              lat : -37.892923,
+              lng : 175.120257,
+            },
+            {
+              deviceName : "0000011687WE560",
+              lat : -37.890748,
+              lng : 175.120469,
+            },
+            {
+              deviceName : "0000011172WE73A",
+              lat : -37.891584,
+              lng : 175.121162,
+            }
+          ],
+          style: {
+            label : "ICP",
+            borderColor : "black",
+            borderWidth: "1",
+            fillColor : "pink"
+          }
+        }
+      }
+    ]
+
 
 Like the other map you can pass through parameters to style the given dots and this is encouraged or the default styles
 will be applied, notably.
@@ -413,80 +517,82 @@ export class NwpMapFGP extends Component {
     
 
     handleMapClick(map, event){
-      let feature = this.state.map.forEachFeatureAtPixel(event.pixel, feature => {    
-        return feature
-      });     
-      let newStyleFunction;
-      if(feature){
-        let featureProperties = feature.getProperties();
-        console.log(featureProperties)
-        if(featureProperties.hasOwnProperty('isSwapped')){
-          // getting the current position in the parent device array to find which 
-          let currentParentDeviceIndex = this.state.parentDevices.map(parentDevice =>{
-            return parentDevice.deviceName
-          }).indexOf(featureProperties.currentParent)
-          let newStyleIndex;
-          // if at the end of the array, reset back to 0, else increment by one, set the feature's currentParent
-          if(this.state.parentDevices[currentParentDeviceIndex + 1]){
-            newStyleIndex = currentParentDeviceIndex + 1;
-            console.log(this.state.parentDevices[newStyleIndex], currentParentDeviceIndex, newStyleIndex)
-            feature.setProperties({currentParent: this.state.parentDevices[newStyleIndex].deviceName }) 
-          }else{
-            newStyleIndex = 0
-            console.log(this.state.parentDevices[newStyleIndex])
-            feature.setProperties({currentParent: this.state.parentDevices[newStyleIndex].deviceName}) ;
-          }
-          // getting a temp copy of the state of the swapped devices and getting the index of the current feature in the array
-          let tmpStateSwappedDevices = [...this.state.swappedDevices];
-          let indexOfThisDevice = tmpStateSwappedDevices.map(swappedDevice => {
-            return swappedDevice.deviceName
-          }).indexOf(featureProperties.name);
-          // if this has not been swapped (on origin parent), set styles accordingly
-          if(featureProperties.isSwapped === false || newStyleIndex !== 0 ){
-            feature.setProperties({isSwapped : true, currentParentStyles : {borderColor:this.state.parentDevices[newStyleIndex].borderColor} });
-            // not in the state array of swapped devices, so push it in 
-            if(indexOfThisDevice === -1){
-              tmpStateSwappedDevices.push({
-                deviceName: featureProperties.name,
-                originParent: featureProperties.originParent,
-                currentParent: featureProperties.currentParent
-              });
-            // is there, so we update the device properties
+      if(this.state.parentDevices.length > 0){
+        let feature = this.state.map.forEachFeatureAtPixel(event.pixel, feature => {    
+          return feature
+        });     
+        let newStyleFunction;
+        if(feature){
+          let featureProperties = feature.getProperties();
+          console.log(featureProperties)
+          if(featureProperties.hasOwnProperty('isSwapped')){
+            // getting the current position in the parent device array to find which 
+            let currentParentDeviceIndex = this.state.parentDevices.map(parentDevice =>{
+              return parentDevice.deviceName
+            }).indexOf(featureProperties.currentParent)
+            let newStyleIndex;
+            // if at the end of the array, reset back to 0, else increment by one, set the feature's currentParent
+            if(this.state.parentDevices[currentParentDeviceIndex + 1]){
+              newStyleIndex = currentParentDeviceIndex + 1;
+              console.log(this.state.parentDevices[newStyleIndex], currentParentDeviceIndex, newStyleIndex)
+              feature.setProperties({currentParent: this.state.parentDevices[newStyleIndex].deviceName }) 
             }else{
-              tmpStateSwappedDevices[indexOfThisDevice].deviceName = featureProperties.name;
-              tmpStateSwappedDevices[indexOfThisDevice].originParent = featureProperties.originParent;
-              tmpStateSwappedDevices[indexOfThisDevice].currentParent = featureProperties.currentParent;
+              newStyleIndex = 0
+              console.log(this.state.parentDevices[newStyleIndex])
+              feature.setProperties({currentParent: this.state.parentDevices[newStyleIndex].deviceName}) ;
             }
-            // create style function dependant on zoom level
-            var currZoomLevel = map.getView().getZoom();
-            var radius;
-            if(currZoomLevel>18){
-              radius = 7;
-            }else if(currZoomLevel>15){
-              radius = 5;
-            }else if(currZoomLevel>13){
-              radius = 3;
-            }else if(currZoomLevel>10){
-              radius = 2;
+            // getting a temp copy of the state of the swapped devices and getting the index of the current feature in the array
+            let tmpStateSwappedDevices = [...this.state.swappedDevices];
+            let indexOfThisDevice = tmpStateSwappedDevices.map(swappedDevice => {
+              return swappedDevice.deviceName
+            }).indexOf(featureProperties.name);
+            // if this has not been swapped (on origin parent), set styles accordingly
+            if(featureProperties.isSwapped === false || newStyleIndex !== 0 ){
+              feature.setProperties({isSwapped : true, currentParentStyles : {borderColor:this.state.parentDevices[newStyleIndex].borderColor} });
+              // not in the state array of swapped devices, so push it in 
+              if(indexOfThisDevice === -1){
+                tmpStateSwappedDevices.push({
+                  deviceName: featureProperties.name,
+                  originParent: featureProperties.originParent,
+                  currentParent: featureProperties.currentParent
+                });
+              // is there, so we update the device properties
+              }else{
+                tmpStateSwappedDevices[indexOfThisDevice].deviceName = featureProperties.name;
+                tmpStateSwappedDevices[indexOfThisDevice].originParent = featureProperties.originParent;
+                tmpStateSwappedDevices[indexOfThisDevice].currentParent = featureProperties.currentParent;
+              }
+              // create style function dependant on zoom level
+              var currZoomLevel = map.getView().getZoom();
+              var radius;
+              if(currZoomLevel>18){
+                radius = 7;
+              }else if(currZoomLevel>15){
+                radius = 5;
+              }else if(currZoomLevel>13){
+                radius = 3;
+              }else if(currZoomLevel>10){
+                radius = 2;
+              }else{
+                radius = 1;
+              }
+              newStyleFunction = this.buildStyle(
+                this.props.sourceFeaturesChildrenStyles.fillColor,
+                this.state.parentDevices[newStyleIndex].borderColor,
+                this.props.sourceFeaturesChildrenStyles.borderWidth,
+                radius,
+                true
+              );
             }else{
-              radius = 1;
+              // go back to old styles and reset the swapped flag, remove from state swappedDevices
+              feature.setProperties({isSwapped : false, currentParentStyles : {borderColor:this.props.sourceFeaturesChildrenStyles.borderColor}});
+              tmpStateSwappedDevices.splice(indexOfThisDevice,1)
             }
-            newStyleFunction = this.buildStyle(
-              this.props.sourceFeaturesChildrenStyles.fillColor,
-              this.state.parentDevices[newStyleIndex].borderColor,
-              this.props.sourceFeaturesChildrenStyles.borderWidth,
-              radius,
-              true
-            );
-          }else{
-            // go back to old styles and reset the swapped flag, remove from state swappedDevices
-            feature.setProperties({isSwapped : false, currentParentStyles : {borderColor:this.props.sourceFeaturesChildrenStyles.borderColor}});
-            tmpStateSwappedDevices.splice(indexOfThisDevice,1)
+            this.setState({
+              swappedDevices : tmpStateSwappedDevices
+            });
+            feature.setStyle(newStyleFunction);
           }
-          this.setState({
-            swappedDevices : tmpStateSwappedDevices
-          });
-          feature.setStyle(newStyleFunction);
         }
       }
     }
