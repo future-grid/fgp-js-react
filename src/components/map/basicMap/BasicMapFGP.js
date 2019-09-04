@@ -306,12 +306,13 @@ export class BasicMapFGP extends Component {
     }
 
     handleMapHover(event){
-      let feature = this.state.map.forEachFeatureAtPixel(event.pixel, feature => {    
-        return feature
+      let featureArr = [];
+      this.state.map.forEachFeatureAtPixel(event.pixel, feature => {    
+        featureArr.push(feature.values_);
       });     
-      if(feature){
+      if(featureArr.length > 0){
         this.setState({
-          focusedFeature: feature.values_,
+          focusedFeatures: featureArr,
           popupVisible: true
         })
       }else{
@@ -329,7 +330,7 @@ export class BasicMapFGP extends Component {
           <div className={"w-100 map fgpReactMap"} id={this.state.id}>
             <MapPopup
               visibility={this.state.popupVisible}
-              focusedFeature={this.state.focusedFeature}
+              focusedFeatures={this.state.focusedFeatures}
             />
           </div>
         )

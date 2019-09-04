@@ -139,12 +139,13 @@ export class NwpMapFGP extends Component {
         super(props);
         this.state = {
             popupVisible:false,
-            focusedFeature: null,
+            focusedFeatures: null,
             focusedGroup: null,
             id: Math.random().toString(36).substr(2, 11),
             points: [],
             swappedDevices: [],
             parentDevices: [],
+            thoroughTest: false
         };
     }
 
@@ -216,6 +217,17 @@ export class NwpMapFGP extends Component {
           true,
           this.props.sourceFeaturesParent.deviceName
         );
+        if(this.state.thoroughTest === true){
+          let featureObjDupe = this.buildFeature(
+            feature.lat +0.00007, 
+            feature.lng, 
+            this.props.sourceFeaturesChildrenStyles.label+"_d",
+            feature.deviceName+"_d",
+            true,
+            this.props.sourceFeaturesParent.deviceName
+          );
+          geojsonObjectChildrenSource.features.push(featureObjDupe)
+        }
         geojsonObjectChildrenSource.features.push(featureObj)
       })
       // creating the source with the features and geojson
@@ -330,285 +342,285 @@ export class NwpMapFGP extends Component {
 
 
     buildMap(){
-      let vectorLayerParentSource = this.buildSourceFeatures().parent;
-      let vectorLayerChildrenSource = this.buildSourceFeatures().child
-      let specialParentSwapStyle = this.buildSourceFeatures().parentForSwap;
-      let points = [...this.state.points] 
-      points.push(this.buildSourceFeatures().points)
-      
-      /* //// //// //// //// //// //// //// //// //// //// //// */
-      // BEGIN TARGET CODE (goes through parents, then children)
-      let targetDestinationLayers = [];
-      let tmpParents = [...this.state.parentDevices];
-      tmpParents.push(specialParentSwapStyle);
-      this.props.destinationFeatures.forEach(destinationFeature => {
-        // creating a geoJSON each time for the parent
-        var geojsonObjectParentTarget = {
-          'type': 'FeatureCollection',
-          'features': []
-        };
-        // creating a geoJSON each time for the child
-        var geojsonObjectChildrenTarget = {
-          'type': 'FeatureCollection',
-          'features': []
-        };
-
-        var styleFunctionChildrenTarget = this.buildStyle(
-          destinationFeature.children.style.fillColor,
-          destinationFeature.children.style.borderColor, 
-          destinationFeature.children.style.borderWidth, 
-          4,
-          true
-        );
-          
-        // Setting up the target children features
-        destinationFeature.children.devices.forEach( feature => {
-          let featureObj = this.buildFeature(
-            feature.lat,
-            feature.lng,
-            destinationFeature.children.style.label,
-            feature.deviceName,
+      if(this.props.sourceFeaturesChildren){
+        let vectorLayerParentSource = this.buildSourceFeatures().parent;
+        let vectorLayerChildrenSource = this.buildSourceFeatures().child
+        let specialParentSwapStyle = this.buildSourceFeatures().parentForSwap;
+        let points = [...this.state.points] 
+        points.push(this.buildSourceFeatures().points)
+        
+        /* //// //// //// //// //// //// //// //// //// //// //// */
+        // BEGIN TARGET CODE (goes through parents, then children)
+        let targetDestinationLayers = [];
+        let tmpParents = [...this.state.parentDevices];
+        tmpParents.push(specialParentSwapStyle);
+        this.props.destinationFeatures.forEach(destinationFeature => {
+          // creating a geoJSON each time for the parent
+          var geojsonObjectParentTarget = {
+            'type': 'FeatureCollection',
+            'features': []
+          };
+          // creating a geoJSON each time for the child
+          var geojsonObjectChildrenTarget = {
+            'type': 'FeatureCollection',
+            'features': []
+          };
+  
+          var styleFunctionChildrenTarget = this.buildStyle(
+            destinationFeature.children.style.fillColor,
+            destinationFeature.children.style.borderColor, 
+            destinationFeature.children.style.borderWidth, 
+            4,
+            true
+          );
+            
+          // Setting up the target children features
+          destinationFeature.children.devices.forEach( feature => {
+            let featureObj = this.buildFeature(
+              feature.lat,
+              feature.lng,
+              destinationFeature.children.style.label,
+              feature.deviceName,
+              false
+            );
+            // Removing the push of children so that you get the center between two parents
+            // points[0].push([feature.lng, feature.lat])
+            geojsonObjectChildrenTarget.features.push(featureObj)
+          })
+  
+          // creating the parent target feature
+          // parent target  style 
+          var styleFunctionParentTarget = this.buildStyle(
+            destinationFeature.parent.style.fillColor,
+            destinationFeature.parent.style.borderColor, 
+            destinationFeature.parent.style.borderWidth,
+            4,
+            true
+          );
+  
+          let featureObjParentTarget =  this.buildFeature(
+            destinationFeature.parent.device.lat,
+            destinationFeature.parent.device.lng,
+            destinationFeature.parent.style.label,
+            destinationFeature.parent.device.deviceName,
             false
           );
-          // Removing the push of children so that you get the center between two parents
-          // points[0].push([feature.lng, feature.lat])
-          geojsonObjectChildrenTarget.features.push(featureObj)
-        })
-
-        // creating the parent target feature
-        // parent target  style 
-        var styleFunctionParentTarget = this.buildStyle(
-          destinationFeature.parent.style.fillColor,
-          destinationFeature.parent.style.borderColor, 
-          destinationFeature.parent.style.borderWidth,
-          4,
-          true
-        );
-
-        let featureObjParentTarget =  this.buildFeature(
-          destinationFeature.parent.device.lat,
-          destinationFeature.parent.device.lng,
-          destinationFeature.parent.style.label,
-          destinationFeature.parent.device.deviceName,
-          false
-        );
-        // points[0].push([destinationFeature.parent.device.lng, destinationFeature.parent.device.lat])
-        geojsonObjectParentTarget.features.push(featureObjParentTarget) 
-
-        // creating the layer for this target device(parent)
-        var vectorSourceParentTarget = new VectorSource({
-          features: (new GeoJSON()).readFeatures(geojsonObjectParentTarget)
-        });
-        // creating the layer for this target device(child)
-        var vectorSourceChildrenTarget = new VectorSource({
-          features: (new GeoJSON()).readFeatures(geojsonObjectChildrenTarget)
-        });
+          // points[0].push([destinationFeature.parent.device.lng, destinationFeature.parent.device.lat])
+          geojsonObjectParentTarget.features.push(featureObjParentTarget) 
   
-  
-        var vectorLayerParentTarget = new VectorLayer({
-          source: vectorSourceParentTarget,
-          style: styleFunctionParentTarget,
-          key: destinationFeature.parent.device.deviceName + "_p"
-        });
-
-        var vectorLayerChildrenTarget = new VectorLayer({
-          source: vectorSourceChildrenTarget,
-          style: styleFunctionChildrenTarget,
-          key: destinationFeature.parent.device.deviceName + "_c"
-        });
-
-        tmpParents.push({
-          deviceName : destinationFeature.parent.device.deviceName,
-          borderColor : destinationFeature.parent.style.borderColor
-        });
-
-        this.setState({
-          parentDevices : tmpParents
-        })
-        
-        targetDestinationLayers.push(vectorLayerChildrenTarget)
-        targetDestinationLayers.push(vectorLayerParentTarget)
-
-      });      
-      // vector layer for the child source devices is now complete
-      // END TARGET CODE  =  targetDestinationLayers
-      /* //// //// //// //// //// //// //// //// //// //// //// */
-
-      // getting there center of the points
-      var getCentroid = function (coord) {
-        var totalLen = 0;
-        coord.forEach(arr => {
-          totalLen += arr.length
-        })
-        let totalX = 0;
-        let totalY = 0;
-        coord.flat().forEach(location => {
-          totalX += location[0];
-          totalY += location[1];
-        })
-        let center = [totalX/totalLen, totalY/totalLen];;
-        return center;
-       }
-
-      // get center
-      var layerCenter = getCentroid(points);
-
-      // adding the layers
-      var finalLayers = []
-      finalLayers.push(new TileLayer({source: new OSM()}))
-      finalLayers.push(vectorLayerChildrenSource)
-      finalLayers.push(vectorLayerParentSource)
-      targetDestinationLayers.forEach(layer =>{
-        finalLayers.push(layer)
-      })
-
-      //initializing the map with its layers etc
-      var map = new Map({
-        controls: defaultControls().extend([
-          new OverviewMap()
-        ]),
-        layers: finalLayers,
-        target: this.state.id,
-        view: new View({
-          center: layerCenter,
-          zoom: 16,
-          projection: 'EPSG:4326'
-        })
-      });
-      
-      // setting the state
-      this.setState({
-        map:map,
-        featuresLayerChildren:vectorLayerChildrenSource,
-        featuresLayerParent:vectorLayerParentSource,
-        targetDestinationLayers:targetDestinationLayers
-      })
-
-      // binding the hover event (popup dialogue)
-      map.on('pointermove', this.handleMapHover.bind(this));     
-      // binding the zoom event (resize dots)
-      map.getView().on('change:resolution', this.handleMapZoom.bind(this, map));     
-      // binding the on click handler
-      map.on('click', this.handleMapClick.bind(this, map))
-      // making sure its the right dimension
-      map.updateSize() 
-    }
-
-    // toggles the swap of a child device to/from the source to target parents, this is invoked generally with a click callback on the map
-    swapChild(){
-
-    }
-
-    // different on click handlers
-    showDeviceExtensionPopUp(deviceId, type){
-      // gets an extension for the device and creates an overlay
-    }
-
-    goto(deviceId, type){
-      // redirects to the asset page of device type
-    }
-
-    createGroup(){
-      // creates a group of assets with a drawing shape
-      
-    }
-
-
+          // creating the layer for this target device(parent)
+          var vectorSourceParentTarget = new VectorSource({
+            features: (new GeoJSON()).readFeatures(geojsonObjectParentTarget)
+          });
+          // creating the layer for this target device(child)
+          var vectorSourceChildrenTarget = new VectorSource({
+            features: (new GeoJSON()).readFeatures(geojsonObjectChildrenTarget)
+          });
     
+    
+          var vectorLayerParentTarget = new VectorLayer({
+            source: vectorSourceParentTarget,
+            style: styleFunctionParentTarget,
+            key: destinationFeature.parent.device.deviceName + "_p"
+          });
+  
+          var vectorLayerChildrenTarget = new VectorLayer({
+            source: vectorSourceChildrenTarget,
+            style: styleFunctionChildrenTarget,
+            key: destinationFeature.parent.device.deviceName + "_c"
+          });
+  
+          tmpParents.push({
+            deviceName : destinationFeature.parent.device.deviceName,
+            borderColor : destinationFeature.parent.style.borderColor
+          });
+  
+          this.setState({
+            parentDevices : tmpParents
+          })
+          
+          targetDestinationLayers.push(vectorLayerChildrenTarget)
+          targetDestinationLayers.push(vectorLayerParentTarget)
+  
+        });      
+        // vector layer for the child source devices is now complete
+        // END TARGET CODE  =  targetDestinationLayers
+        /* //// //// //// //// //// //// //// //// //// //// //// */
+  
+        // getting there center of the points
+        var getCentroid = function (coord) {
+          var totalLen = 0;
+          coord.forEach(arr => {
+            totalLen += arr.length
+          })
+          let totalX = 0;
+          let totalY = 0;
+          coord.flat().forEach(location => {
+            totalX += location[0];
+            totalY += location[1];
+          })
+          let center = [totalX/totalLen, totalY/totalLen];;
+          return center;
+         }
+  
+        // get center
+        var layerCenter = getCentroid(points);
+  
+        // adding the layers
+        var finalLayers = []
+        finalLayers.push(new TileLayer({source: new OSM()}))
+        finalLayers.push(vectorLayerChildrenSource)
+        finalLayers.push(vectorLayerParentSource)
+        targetDestinationLayers.forEach(layer =>{
+          finalLayers.push(layer)
+        })
+  
+        //initializing the map with its layers etc
+        var map = new Map({
+          controls: defaultControls().extend([
+            new OverviewMap()
+          ]),
+          layers: finalLayers,
+          target: this.state.id,
+          view: new View({
+            center: layerCenter,
+            zoom: 16,
+            projection: 'EPSG:4326'
+          })
+        });
+        
+        // setting the state
+        this.setState({
+          map:map,
+          featuresLayerChildren:vectorLayerChildrenSource,
+          featuresLayerParent:vectorLayerParentSource,
+          targetDestinationLayers:targetDestinationLayers
+        })
+  
+        // binding the hover event (popup dialogue)
+        map.on('pointermove', this.handleMapHover.bind(this));     
+        // binding the zoom event (resize dots)
+        map.getView().on('change:resolution', this.handleMapZoom.bind(this, map));     
+        // binding the on click handler
+        map.on('click', this.handleMapClick.bind(this, map))
+        // making sure its the right dimension
+        map.updateSize() 
+      }else{
+        var map = new Map({
+          controls: defaultControls().extend([
+            new OverviewMap()
+          ]),
+          layers: [new TileLayer({source: new OSM()})],
+          target: this.state.id,
+          view: new View({
+            zoom: 3,
+            center : [140, -25],
+            projection: 'EPSG:4326'
+          })
+        });
+        map.updateSize() 
+      }
+    }
 
     handleMapClick(map, event){
       if(this.state.parentDevices.length > 0){
-        let feature = this.state.map.forEachFeatureAtPixel(event.pixel, feature => {    
+        let feature = this.state.map.forEachFeatureAtPixel(event.pixel, feature => { 
           return feature
         });     
+        let featureArr = []
+
+        this.state.map.forEachFeatureAtPixel(event.pixel, feature => { 
+          featureArr.push(feature)
+        });    
         let newStyleFunction;
-        if(feature){
-          let featureProperties = feature.getProperties();
-          console.log(featureProperties)
-          if(featureProperties.hasOwnProperty('isSwapped')){
-            // getting the current position in the parent device array to find which 
-            let currentParentDeviceIndex = this.state.parentDevices.map(parentDevice =>{
-              return parentDevice.deviceName
-            }).indexOf(featureProperties.currentParent)
-            let newStyleIndex;
-            // if at the end of the array, reset back to 0, else increment by one, set the feature's currentParent
-            if(this.state.parentDevices[currentParentDeviceIndex + 1]){
-              newStyleIndex = currentParentDeviceIndex + 1;
-              console.log(this.state.parentDevices[newStyleIndex], currentParentDeviceIndex, newStyleIndex)
-              feature.setProperties({currentParent: this.state.parentDevices[newStyleIndex].deviceName }) 
-            }else{
-              newStyleIndex = 0
-              console.log(this.state.parentDevices[newStyleIndex])
-              feature.setProperties({currentParent: this.state.parentDevices[newStyleIndex].deviceName}) ;
-            }
-            // getting a temp copy of the state of the swapped devices and getting the index of the current feature in the array
-            let tmpStateSwappedDevices = [...this.state.swappedDevices];
-            let indexOfThisDevice = tmpStateSwappedDevices.map(swappedDevice => {
-              return swappedDevice.deviceName
-            }).indexOf(featureProperties.name);
-            // if this has not been swapped (on origin parent), set styles accordingly
-            if(featureProperties.isSwapped === false || newStyleIndex !== 0 ){
-              feature.setProperties({isSwapped : true, currentParentStyles : {borderColor:this.state.parentDevices[newStyleIndex].borderColor} });
-              // not in the state array of swapped devices, so push it in 
-              if(indexOfThisDevice === -1){
-                tmpStateSwappedDevices.push({
-                  deviceName: featureProperties.name,
-                  originParent: featureProperties.originParent,
-                  currentParent: featureProperties.currentParent
-                });
-              // is there, so we update the device properties
+        // has clicked on a feature
+        if(featureArr.length > 0){
+          featureArr.forEach(feature => {
+            let featureProperties = feature.getProperties();
+            if(featureProperties.hasOwnProperty('isSwapped')){
+              // getting the current position in the parent device array to find which 
+              let currentParentDeviceIndex = this.state.parentDevices.map(parentDevice =>{
+                return parentDevice.deviceName
+              }).indexOf(featureProperties.currentParent)
+              let newStyleIndex;
+              // if at the end of the array, reset back to 0, else increment by one, set the feature's currentParent
+              if(this.state.parentDevices[currentParentDeviceIndex + 1]){
+                newStyleIndex = currentParentDeviceIndex + 1;
+                feature.setProperties({currentParent: this.state.parentDevices[newStyleIndex].deviceName }) 
               }else{
-                tmpStateSwappedDevices[indexOfThisDevice].deviceName = featureProperties.name;
-                tmpStateSwappedDevices[indexOfThisDevice].originParent = featureProperties.originParent;
-                tmpStateSwappedDevices[indexOfThisDevice].currentParent = featureProperties.currentParent;
+                newStyleIndex = 0
+                feature.setProperties({currentParent: this.state.parentDevices[newStyleIndex].deviceName}) ;
               }
-              // create style function dependant on zoom level
-              var currZoomLevel = map.getView().getZoom();
-              var radius;
-              if(currZoomLevel>18){
-                radius = 7;
-              }else if(currZoomLevel>15){
-                radius = 5;
-              }else if(currZoomLevel>13){
-                radius = 3;
-              }else if(currZoomLevel>10){
-                radius = 2;
+              // getting a temp copy of the state of the swapped devices and getting the index of the current feature in the array
+              let tmpStateSwappedDevices = [...this.state.swappedDevices];
+              let indexOfThisDevice = tmpStateSwappedDevices.map(swappedDevice => {
+                return swappedDevice.deviceName
+              }).indexOf(featureProperties.name);
+              // if this has not been swapped (on origin parent), set styles accordingly
+              if(featureProperties.isSwapped === false || newStyleIndex !== 0 ){
+                feature.setProperties({isSwapped : true, currentParentStyles : {borderColor:this.state.parentDevices[newStyleIndex].borderColor} });
+                // not in the state array of swapped devices, so push it in 
+                if(indexOfThisDevice === -1){
+                  tmpStateSwappedDevices.push({
+                    deviceName: featureProperties.name,
+                    originParent: featureProperties.originParent,
+                    currentParent: featureProperties.currentParent
+                  });
+                // is there, so we update the device properties
+                }else{
+                  tmpStateSwappedDevices[indexOfThisDevice].deviceName = featureProperties.name;
+                  tmpStateSwappedDevices[indexOfThisDevice].originParent = featureProperties.originParent;
+                  tmpStateSwappedDevices[indexOfThisDevice].currentParent = featureProperties.currentParent;
+                }
+                // create style function dependant on zoom level
+                var currZoomLevel = map.getView().getZoom();
+                var radius;
+                if(currZoomLevel>18){
+                  radius = 7;
+                }else if(currZoomLevel>15){
+                  radius = 5;
+                }else if(currZoomLevel>13){
+                  radius = 3;
+                }else if(currZoomLevel>10){
+                  radius = 2;
+                }else{
+                  radius = 1;
+                }
+                newStyleFunction = this.buildStyle(
+                  this.props.sourceFeaturesChildrenStyles.fillColor,
+                  this.state.parentDevices[newStyleIndex].borderColor,
+                  this.props.sourceFeaturesChildrenStyles.borderWidth,
+                  radius,
+                  true
+                );
               }else{
-                radius = 1;
+                // go back to old styles and reset the swapped flag, remove from state swappedDevices
+                feature.setProperties({isSwapped : false, currentParentStyles : {borderColor:this.props.sourceFeaturesChildrenStyles.borderColor}});
+                tmpStateSwappedDevices.splice(indexOfThisDevice,1)
               }
-              newStyleFunction = this.buildStyle(
-                this.props.sourceFeaturesChildrenStyles.fillColor,
-                this.state.parentDevices[newStyleIndex].borderColor,
-                this.props.sourceFeaturesChildrenStyles.borderWidth,
-                radius,
-                true
-              );
-            }else{
-              // go back to old styles and reset the swapped flag, remove from state swappedDevices
-              feature.setProperties({isSwapped : false, currentParentStyles : {borderColor:this.props.sourceFeaturesChildrenStyles.borderColor}});
-              tmpStateSwappedDevices.splice(indexOfThisDevice,1)
+              this.setState({
+                swappedDevices : tmpStateSwappedDevices
+              });
+              feature.setStyle(newStyleFunction);
             }
-            this.setState({
-              swappedDevices : tmpStateSwappedDevices
-            });
-            feature.setStyle(newStyleFunction);
-          }
+          });
         }
       }
     }
 
     handleMapHover(event){
-      let feature = this.state.map.forEachFeatureAtPixel(event.pixel, feature => {    
-        return feature
+      let featureArray = [];
+      this.state.map.forEachFeatureAtPixel(event.pixel, feature => {    
+        featureArray.push(feature.values_)
       });     
-      if(feature){
+      if(featureArray.length > 0){
         this.setState({
-          focusedFeature: feature.values_,
+          focusedFeatures: featureArray,
           popupVisible: true
         })
       }else{
         this.setState({
-          focusedFeature: null,
+          focusedFeatures: null,
           popupVisible: false
         })
       }
@@ -713,7 +725,8 @@ export class NwpMapFGP extends Component {
           <div className={"w-100 map fgpReactMap"} id={this.state.id}>
             <MapPopup
               visibility={this.state.popupVisible}
-              focusedFeature={this.state.focusedFeature}
+              focusedFeatures={this.state.focusedFeatures}
+              propertiesToDisplay={this.props.propertiesToDisplay}
             />
           </div>
         )

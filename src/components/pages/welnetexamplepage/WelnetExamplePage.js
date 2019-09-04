@@ -152,6 +152,7 @@ export class WelnetExamplePage extends Component {
         />
         <div className=" fgReact_componentContainer container fgReact_startTop ">
           <div className={"col-12"}>
+          {/* ensure all data is there before you attempt to render the map */}
           { 
           this.state.icpLocations !== false && this.state.txLocations !== false && 
           this.state.destinationIcpLocations && this.state.destinationTxLocations !== false &&
@@ -160,6 +161,21 @@ export class WelnetExamplePage extends Component {
           <div className="col-12">
           
             <NwpMapFGP 
+              // On hover properties to display
+              propertiesToDisplay={[
+                {
+                  label: "Lat",
+                  data: "lat"
+                }, 
+                {
+                  label: "Lng",
+                  data: "lng"
+                }, 
+                {
+                  label: "Original Parent",
+                  data: "originParent"
+                }
+              ]}
               // Source Devices
               sourceFeaturesChildren={this.state.icpLocations}
               sourceFeaturesChildrenStyles={
