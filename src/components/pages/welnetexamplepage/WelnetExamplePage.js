@@ -162,18 +162,24 @@ export class WelnetExamplePage extends Component {
           
             <NwpMapFGP 
               // On hover properties to display
+              // propertiesToDisplay={[
+              //   {
+              //     label: "Lat",
+              //     data: "lat"
+              //   }, 
+              //   {
+              //     label: "Lng",
+              //     data: "lng"
+              //   }
+              // ]}
               propertiesToDisplay={[
-                {
-                  label: "Lat",
-                  data: "lat"
-                }, 
-                {
-                  label: "Lng",
-                  data: "lng"
-                }, 
                 {
                   label: "Original Parent",
                   data: "originParent"
+                },
+                {
+                  label: "Current Parent",
+                  data: "currentParent"
                 }
               ]}
               // Source Devices
