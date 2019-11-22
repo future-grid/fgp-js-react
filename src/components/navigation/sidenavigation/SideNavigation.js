@@ -23,7 +23,7 @@ export class SideNavigation extends Component {
           extensionShown={this.props.isOpen}
           currentPage={this.props.currentPage}
           linkTo="/Home"
-          FontAwesomeIcon="home"
+          fontAwesomeIcon="home"
           fontAwesomeLib="fas"
           description="Home"
         />
@@ -32,7 +32,7 @@ export class SideNavigation extends Component {
           extensionShown={this.props.isOpen}
           currentPage={this.props.currentPage}
           linkTo="/WelnetExample/E00025675COMP"
-          FontAwesomeIcon="map"
+          fontAwesomeIcon="map"
           fontAwesomeLib="fas"
           description="WEL Map Example"
         />
@@ -44,7 +44,7 @@ export class SideNavigation extends Component {
           currentPage={this.props.currentPage}
           isSignOut={true}
           linkTo="/Signout"
-          FontAwesomeIcon="sign-out-alt"
+          fontAwesomeIcon="sign-out-alt"
           fontAwesomeLib="fa"
           description="Sign Out"
         />

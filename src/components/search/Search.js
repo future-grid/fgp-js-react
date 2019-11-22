@@ -4,6 +4,7 @@ import { SearchRow } from './searchrow/SearchRow';
 import axios from "axios";
 import ResultTable from './resulttable/ResultTable';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { debug } from 'util';
 
 
 export class Search extends Component {
@@ -32,7 +33,35 @@ export class Search extends Component {
           indexKey : Math.random()
         }],
       hasLoaded : false,
-      data : axios.get(this.props.baseApiUrl + this.props.searchConfig.reference + '/data/' +
+      data : []
+    };
+    // console.log(this.props)
+    this.addSearchCriteria = this.addSearchCriteria.bind(this);
+    this.removeSearchCriteria = this.removeSearchCriteria.bind(this);
+    this.makeSearch = this.makeSearch.bind(this);
+    // this.handlePagination = this.handlePagination.bind(this);
+  }
+
+  componentDidMount(){
+    this.makeSearch(true)
+  }
+
+  addSearchCriteria() {
+    let defaultSearchRow = {
+      searchingType : this.props.defaultSearchType,
+      searchingColumn : this.props.defaultSearchColumn,
+      searchingKeyword : "",
+      isFirst : false,
+      indexKey : Math.random()
+    };
+    this.setState(state => ({
+      searchRows: state.searchRows.concat([defaultSearchRow])
+    }));
+  }
+
+  makeSearch(isFirstTime) {
+    if(isFirstTime === true){
+      axios.get(this.props.baseApiUrl + this.props.searchConfig.reference + '/data/' +
       this.props.searchConfig.defaultQtyRecordsToRetrieve + "/" + 
       this.props.searchConfig.defaultStartFrom + "/" +
       this.props.searchConfig.customer +
@@ -49,57 +78,77 @@ export class Search extends Component {
                         }).catch(function (error) {
                           console.log(error);
                         })
-    };
-    // console.log(this.props)
-    this.addSearchCriteria = this.addSearchCriteria.bind(this);
-    this.removeSearchCriteria = this.removeSearchCriteria.bind(this);
-    this.makeSearch = this.makeSearch.bind(this);
-  }
-
-  addSearchCriteria() {
-    let defaultSearchRow = {
-      searchingType : this.props.defaultSearchType,
-      searchingColumn : this.props.defaultSearchColumn,
-      searchingKeyword : "",
-      isFirst : false,
-      indexKey : Math.random()
-    };
-    this.setState(state => ({
-      searchRows: state.searchRows.concat([defaultSearchRow])
-    }));
-  }
-
-  makeSearch() {
-    this.setState({
-      hasLoaded: false
-    })
-    let query_rsql = [];
-
-    this.state.searchRows.forEach(_c => {
-      if(_c.searchingType === "==*?*" || _c.searchingType === "==\"*?*\""){
-        // var _tempSearch = _c.searchingKeyword.replace("\"", "\\\"");
-        
-        var items = [];
-        var newSearch = null;
-
-        if(_c.searchingType === "==\"*?*\""){
-            // single like address with comma
-          newSearch = _c.searchingKeyword;
-        }else if(_c.searchingType === "==*?*"){
-             // multi split by comma                     
-          for(var i = 0; i < _c.searchingKeyword.split(',').length; i++){
-            items.push(_c.searchingKeyword.split(',')[i].trim());
-          }
-        }
-        
-        if (_c.searchingColumn !== "all") {           
-          if(_c.searchingType === "==\"*?*\""){ 
-            // check
-            query_rsql.push(_c.searchingColumn + _c.searchingType.replace("?", newSearch) + "");
+    }else{
+      this.setState({
+        hasLoaded: false
+      })
+      let query_rsql = [];
+  
+      this.state.searchRows.forEach(_c => {
+        if(_c.searchingType === "==*?*" || _c.searchingType === "==\"*?*\""){
+          // var _tempSearch = _c.searchingKeyword.replace("\"", "\\\"");
+          
+          var items = [];
+          var newSearch = null;
+  
+          if(_c.searchingType === "==\"*?*\""){
+              // single like address with comma
+            newSearch = _c.searchingKeyword;
           }else if(_c.searchingType === "==*?*"){
-            var final = "";
+               // multi split by comma                     
+            for(var i = 0; i < _c.searchingKeyword.split(',').length; i++){
+              items.push(_c.searchingKeyword.split(',')[i].trim());
+            }
+          }
+          
+          if (_c.searchingColumn !== "all") {           
+            if(_c.searchingType === "==\"*?*\""){ 
+              // check
+              query_rsql.push(_c.searchingColumn + _c.searchingType.replace("?", newSearch) + "");
+            }else if(_c.searchingType === "==*?*"){
+              var final = "";
+              items.forEach(function(_item, _in){
+                var _tempRSQL = _c.searchingColumn + "" + "==\"*?*\"".replace("?", _item);
+                if(_in < items.length - 1){
+                  final += _tempRSQL + ",";
+                }else{
+                  final += _tempRSQL;
+                }
+              });
+              query_rsql.push(final);
+            }
+              
+        } else if(_c.searchingColumn === "all" && _c.searchingKeyword !== null && 
+                  _c.searchingKeyword.trim() !== ""){
+          if(_c.searchingType === "==\"*?*\""){
+            // put all column names here
+            var _tempRSQL = "(";
+            this.props.SearchConfig.searchingColumns.forEach(function(_column, _index){
+              if(_column.column !== "all"){
+                if(_index <  this.props.SearchConfig.searchingColumns.length -1){
+                  _tempRSQL += _column.column + "" + _c.searchingType.replace("?", newSearch) + ",";
+                }else{
+                  _tempRSQL += _column.column + "" + _c.searchingType.replace("?", newSearch);
+                }
+              }
+            });
+            _tempRSQL += ")";
+                  query_rsql.push(_tempRSQL);
+          }else if(_c.searchingType === "==*?*"){
+                  //
+            final = "";
             items.forEach(function(_item, _in){
-              var _tempRSQL = _c.searchingColumn + "" + "==\"*?*\"".replace("?", _item);
+              var _tempRSQL = "(";
+              this.props.SearchConfig.searchingColumns.forEach(function(_column, _index){
+                if(_column.column !== "all"){
+                  if(_index <  this.props.SearchConfig.searchingColumns.length -1){
+                    _tempRSQL += _column.column + "" + "==\"*?*\"".replace("?", _item) + ",";
+                  }else{
+                    _tempRSQL += _column.column + "" + "==\"*?*\"".replace("?", _item);
+                  }
+                }
+              });
+              _tempRSQL += ")";
               if(_in < items.length - 1){
                 final += _tempRSQL + ",";
               }else{
@@ -108,98 +157,59 @@ export class Search extends Component {
             });
             query_rsql.push(final);
           }
-            
-      } else if(_c.searchingColumn === "all" && _c.searchingKeyword !== null && 
-                _c.searchingKeyword.trim() !== ""){
-        if(_c.searchingType === "==\"*?*\""){
-          // put all column names here
-          var _tempRSQL = "(";
-          this.props.SearchConfig.searchingColumns.forEach(function(_column, _index){
-            if(_column.column !== "all"){
-              if(_index <  this.props.SearchConfig.searchingColumns.length -1){
-                _tempRSQL += _column.column + "" + _c.searchingType.replace("?", newSearch) + ",";
-              }else{
-                _tempRSQL += _column.column + "" + _c.searchingType.replace("?", newSearch);
-              }
+              
+        }
+        }else{
+          if (_c.searchingColumn !== "all") {                
+            // check
+            if (_c.searchingKeyword.indexOf("'") !== -1 || _c.searchingKeyword.indexOf("\"") !== -1) {
+              //escape single and double quotes
+              var _tempSearch = _c.searchingKeyword.replace("\"", "\\\"");
+              _tempSearch = "\"" + _tempSearch + "\"";
+              query_rsql.push(_c.searchingColumn + _c.searchingType.replace("?", _tempSearch) + "");
+            }else{
+              query_rsql.push(_c.searchingColumn + _c.searchingType.replace("?", _c.searchingKeyword) + "");
             }
-          });
-          _tempRSQL += ")";
-                query_rsql.push(_tempRSQL);
-        }else if(_c.searchingType === "==*?*"){
-                //
-          final = "";
-          items.forEach(function(_item, _in){
-            var _tempRSQL = "(";
+          } else if(_c.searchingColumn === "all"){
+            // put all column names here
+            _tempRSQL = "(";
             this.props.SearchConfig.searchingColumns.forEach(function(_column, _index){
               if(_column.column !== "all"){
-                if(_index <  this.props.SearchConfig.searchingColumns.length -1){
-                  _tempRSQL += _column.column + "" + "==\"*?*\"".replace("?", _item) + ",";
+                if(_index <  this.props.SearchConfig.searchingColumns.length - 1){
+                  _tempRSQL += _column.column + "" + _c.searchingType.replace("?", newSearch) + ",";
                 }else{
-                  _tempRSQL += _column.column + "" + "==\"*?*\"".replace("?", _item);
+                  _tempRSQL += _column.column + "" + _c.searchingType.replace("?", newSearch);
                 }
               }
             });
             _tempRSQL += ")";
-            if(_in < items.length - 1){
-              final += _tempRSQL + ",";
-            }else{
-              final += _tempRSQL;
-            }
-          });
-          query_rsql.push(final);
+            query_rsql.push(_tempRSQL);   
+          }    
         }
-            
+      });
+     
+      let url =  this.props.baseApiUrl + this.props.searchConfig.reference + '/data/' +
+      this.props.searchConfig.defaultQtyRecordsToRetrieve + "/" + 
+      this.props.searchConfig.defaultStartFrom + "/" +
+      this.props.searchConfig.customer +
+      this.props.searchConfig.searchDirection
+  
+      if (query_rsql && query_rsql.length > 0) {
+        url = url + "?" + query_rsql.join(";");
       }
-      }else{
-        if (_c.searchingColumn !== "all") {                
-          // check
-          if (_c.searchingKeyword.indexOf("'") !== -1 || _c.searchingKeyword.indexOf("\"") !== -1) {
-            //escape single and double quotes
-            var _tempSearch = _c.searchingKeyword.replace("\"", "\\\"");
-            _tempSearch = "\"" + _tempSearch + "\"";
-            query_rsql.push(_c.searchingColumn + _c.searchingType.replace("?", _tempSearch) + "");
-          }else{
-            query_rsql.push(_c.searchingColumn + _c.searchingType.replace("?", _c.searchingKeyword) + "");
-          }
-        } else if(_c.searchingColumn === "all"){
-          // put all column names here
-          _tempRSQL = "(";
-          this.props.SearchConfig.searchingColumns.forEach(function(_column, _index){
-            if(_column.column !== "all"){
-              if(_index <  this.props.SearchConfig.searchingColumns.length - 1){
-                _tempRSQL += _column.column + "" + _c.searchingType.replace("?", newSearch) + ",";
-              }else{
-                _tempRSQL += _column.column + "" + _c.searchingType.replace("?", newSearch);
-              }
-            }
-          });
-          _tempRSQL += ")";
-          query_rsql.push(_tempRSQL);   
-        }    
-      }
-    });
-   
-    let url =  this.props.baseApiUrl + this.props.searchConfig.reference + '/data/' +
-    this.props.searchConfig.defaultQtyRecordsToRetrieve + "/" + 
-    this.props.searchConfig.defaultStartFrom + "/" +
-    this.props.searchConfig.customer +
-    this.props.searchConfig.searchDirection
-
-    if (query_rsql && query_rsql.length > 0) {
-      url = url + "?" + query_rsql.join(";");
+      // console.log(url)
+      axios.get(url)
+        .then(res => {
+          this.setState({
+            data: res.data
+          })
+          this.setState({
+            hasLoaded: true
+          })
+        }).catch(function (error) {
+          console.error(error)
+        });     
     }
-    // console.log(url)
-    axios.get(url)
-      .then(res => {
-        this.setState({
-          data: res.data
-        })
-        this.setState({
-          hasLoaded: true
-        })
-      }).catch(function (error) {
-        console.error(error)
-      });     
   }
 
   removeSearchCriteria(indexKey) {
@@ -231,6 +241,11 @@ export class Search extends Component {
     temp[resultRow][key] = value.target.value
     this.setState({searchRows: temp})
   }
+
+  // handlePagination(pageSize, pageIndex){
+  //   let startFrom = "hello"
+  //   return startFrom
+  // }
 
 
   render() {
@@ -276,6 +291,7 @@ export class Search extends Component {
               data={this.state.data}
               columns={this.props.searchConfig.columns}
               redirectTo={this.props.redirectTo}
+              // paginationHandler={this.handlePagination}
             />
             ) : 
             <FontAwesomeIcon className="centerSpinner fa-spin" icon={["fas", "spinner"]}/>

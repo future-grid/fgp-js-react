@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './Home.css';
 import { Navigation } from '../../navigation/Navigation';
 import { Search } from '../../search/Search';
-import searchConfig from '../../../configs/searchconfigTA.json'
+import searchConfig from '../../../configs/WEL.json'
 
 export class Home extends Component {
   
@@ -16,9 +16,9 @@ export class Home extends Component {
           sideNavLogoPath={this.props.sideNavLogoPath}
         />
         <Search
-          baseApiUrl="http://thingat-api.thingsat.10.1.14.69.xip.io/thingsat/"
-          title="Asset Search"
-          defaultSearchColumn="serialNumber"
+          baseApiUrl="https://compass-api.dev.welnet.co.nz/compass/"
+          title="WEL Example search"
+          defaultSearchColumn="icpNumber"
           defaultSearchType="==*?*"
           searchConfig={searchConfig}
         />

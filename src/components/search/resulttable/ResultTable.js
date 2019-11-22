@@ -65,6 +65,8 @@ export class ResultTable extends Component {
             columns={this.buildColumns(this.props.columns)}
             minRows={this.props.defaultRowSize}
             pageSizeOptions={this.props.defaultRowSizeArray}
+            // onPageChange={this.props.paginationHandler}
+            // onPageSizeChange={this.props.paginationHandler}
             // getTdProps={(state, rowInfo, column, instance) => {
             //   return{
             //     onClick: e => 

@@ -31,14 +31,14 @@ export class SideNavigationItem extends Component {
                   })
                 }}
               > 
-                  <FontAwesomeIcon icon={[this.props.fontAwesomeLib, this.props.FontAwesomeIcon]}/>
+                  <FontAwesomeIcon icon={[this.props.fontAwesomeLib, this.props.fontAwesomeIcon]}/>
               </div>
                 { this.props.extensionShown ? <div className="fgReact_SideNavigationItemIconExtension">{this.props.description}</div> : null }
             </div>
           ) : (
             <NavLink to={this.props.linkTo} >
               <div className={"fgReact_SideNavigationItemIcon " + (this.props.linkTo === this.props.currentPage ? "fgReact_SideNavigationItemIcon-active" : "") }>
-                <FontAwesomeIcon icon={[this.props.fontAwesomeLib, this.props.FontAwesomeIcon]}/>
+                <FontAwesomeIcon icon={[this.props.fontAwesomeLib, this.props.fontAwesomeIcon]}/>
               </div>
               
               { this.props.extensionShown ? <div className="fgReact_SideNavigationItemIconExtension">{this.props.description}</div> : null }

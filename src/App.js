@@ -39,8 +39,8 @@ library.add(faMap);
 function App() {
 
   return (
-    <Router>
       <div className="App">
+    <Router>
          <Switch>
           <ProtectedRoute path="/Home" exact 
             component={props => 
@@ -87,8 +87,8 @@ function App() {
           <Route exact path="*" component={() => "404 NOT FOUND"}  />  
         </Switch>
         <FloatingFooter />
-      </div>
     </Router>
+      </div>  
   );
 }
 

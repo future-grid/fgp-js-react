@@ -263,6 +263,10 @@ export class BasicMapFGP extends Component {
       // map.on('click', this.handleMapClick.bind(this));      
       // making sure its the right dimension
       map.updateSize() 
+      console.log(map.getLayers())
+      console.log(map.getOverlays())
+      console.log(map.getProperties())
+      
     }
 
     componentDidMount(){

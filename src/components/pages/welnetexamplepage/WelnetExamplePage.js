@@ -14,6 +14,7 @@ export class WelnetExamplePage extends Component {
   constructor(props){
     super(props);
     this.state = {
+      attempt : window.location.href,
       sampleIcpHasLoaded : false,
       sampleTx: this.props.match.params.handle,
       txLocations:false,
@@ -140,6 +141,10 @@ export class WelnetExamplePage extends Component {
     };  
     
   } 
+
+  componentDidMount(){
+
+  }
 
   render() {
     return (

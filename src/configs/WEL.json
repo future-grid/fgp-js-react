@@ -1,0 +1,54 @@
+{
+    "columns": [
+        {"accessor":"icpNumber", "Header":"ICP", "minWidth" : 210, "fgpRedirect" : "/ICP/"}
+    ],
+    "searchingColumns": [{
+        "column": "icpNumber",
+        "label":"ICP"
+    }],
+
+    "searchingTypes": [
+        {
+            "key": "==*?*",
+            "label": "Include"
+        },{
+            "key": "==\"*?*\"",
+            "label": "Like"
+        },{
+            "key": "<?",
+            "label": "Less Than"
+        },{
+            "key": ">?",
+            "label": "Greater Than"
+        },{
+            "key": "<=?",
+            "label": "Less Than or Equal To"
+        },{
+            "key": ">=?",
+            "label": "Greater Than or Equal To"
+        },{
+            "key": "!=\"?\"",
+            "label": "Not Equal To"
+        },{
+            "key": "==\"?\"",
+            "label": "Equal To"
+        },{
+            "key": "=isnull=true",
+            "label": "Is Null"
+        },{
+            "key": "=isnull=false",
+            "label": "Not Null"
+        }
+    ],
+
+    "locationColumns":["icpLat","icpLng"] ,
+    "customer": "icpNumber",
+    "reference":"icp_reference",
+    "defaultQtyRecordsToRetrieve" : 125,
+    "defaultStartFrom" : 0,
+    "searchDirection" : "%20asc",
+    "hz": false,
+    "map":{
+        "centre" : [-37.569041,175.148775]
+    }
+}
