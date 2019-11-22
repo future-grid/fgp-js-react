@@ -1,0 +1,16 @@
+.categoryContainer{
+    font-size: 1rem;
+}
+
+.operations{
+    background: transparent;
+    border: none;
+    padding-left: 0 !important;
+    padding-top: 0;
+    padding-right: 0 !important;
+    box-shadow: none;
+}
+
+.tooltipText{
+    display: none;
+}

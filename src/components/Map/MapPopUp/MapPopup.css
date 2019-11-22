@@ -1,0 +1,25 @@
+.fgpReactMapPopup{
+    position: absolute;
+    right: 0;
+    width: 200px;
+    z-index: 999;
+    opacity: 0.8;
+    top: 4px;
+    font-size: 0.8rem;
+    line-height: 30px;
+    height: fit-content;
+    width: 250px;
+    right: 19px;
+    background: var(--fgReact_v0_pureWhite);
+    border: 1px solid var(--fgReact_v0_cmpntBorderGrey);
+    box-sizing: border-box;
+    text-align: left;
+    padding-left: 8px;
+    border-radius: 1px;
+    box-shadow: 0px 10px 20px var(--fgReact_V0_cmpntShadowGrey);
+}
+
+.fgpReactMapPopupFocusItem:not(:first-child) {
+    padding-top: 1px;
+    border-top: 1px black dashed; 
+}

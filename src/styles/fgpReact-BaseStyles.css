@@ -1,0 +1,198 @@
+/* Root Colors */
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+      "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--fgReact_v0_dashboardGrey);;
+  }
+  
+  code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+      monospace;
+  }
+  
+:root {
+    --fgReact_v0_pureWhite: #ffffff;
+    --fgReact_V0_paleGreen: #d2e9e8;
+    --fgReact_V0_boldGreen: #89af34;
+    --fgReact_V0_dangerRed: #dc3545;
+    --fgReact_V0_bcrmbGrey: #e6e6e6;
+    --fgReact_V0_boldBlue: #217ec6;
+    --fgReact_v0_atnYellow: #f4a142;
+    --fgReact_V0_darkBlue: #173f4f;
+    --fgReact_v0_dashboardGrey: #fcfcfc;
+    --fgReact_v0_boldBlack: #333333;
+    --fgReact_V0_cmpntShadowGrey: rgba(37, 168, 168, 0.07);
+    --fgReact_v0_borderGrey: #E4E8F0;
+    --fgReact_v0_cmpntBorderGrey: rgba(37, 168, 168, 0.08);
+    --fgReact_v0_paleBlack: #BDBDBD;
+  }
+
+  .App {
+    text-align: center;
+    background: #ffffff;
+  }
+  
+  .App-header {
+    background: #1D1D1D;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(10px + 2vmin);
+    color: white;
+  }
+  
+  .App-header-link {
+    color: #22CCDD;
+    font-size: 40px;
+    animation: App-links-fade-in 0.5s linear;
+    text-align: center;
+    letter-spacing: 20px;
+    text-decoration: none;
+  }
+  
+  a.App-link {
+    color: #22CCDD;
+    text-align: center;
+    text-decoration: none;
+  }
+  
+  
+  a.App-link:visited{ 
+    color: #22CCDD;
+    text-decoration: none;
+  }
+  
+  .App-home-links{
+    animation: App-links-fade-in 0.5s linear;
+    text-align: center;
+    display: flex;
+    color: #22CCDD;
+    font-size: 15px;
+    font-style: italic;
+  }
+  
+  a.App-link:hover {
+    color: #52FFB8;
+  }
+  
+  .App-home-link-item{
+    display: inline-flex;
+    padding: 20px 80px 0 0;
+    list-style: none;
+  }
+  
+  .App-home-link-item-icon{
+    padding-right: 10px;
+    font-weight: normal;
+  }
+  
+  @keyframes App-links-fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  .codeArticle{
+    background: #eaeaea;
+    padding: 10px;
+    border-radius: 4px;
+  }
+
+  .codeArticleLabel{
+    font-size: 12px;
+    background: #868686;
+    color: white;
+    padding: 1px 10px;
+  }
+
+  .fgReact_SearchPageTitle{
+    text-align: left;
+    padding-left: 0 !important;
+    color: var(--fgReact_V0_boldGreen);
+    margin-top: 38px;
+    font-size: 1.2em;
+  }
+  
+  .fgReact_tabs{
+    font-size: 16px;
+  }
+  
+  .fgReact_workingArea{
+    /* position: relative;
+    left: 35px; */
+    z-index: 1;
+    /* top: 70px; */
+    z-index: 1;
+    width: 96%;
+    min-height: calc(100% - 70px);
+    /* padding-bottom: 100px; */
+  }
+  
+  .fgReact_regContainer{
+    min-height: 20px;
+    /* height: fit-content; */
+    background: var(--fgReact_v0_pureWhite);
+    border: 1px solid var(--fgReact_v0_borderGrey);
+    padding: 40px;
+    box-sizing: border-box;
+    border-radius: 1px;
+    box-shadow: 0px 10px 20px var(--fgReact_V0_cmpntShadowGrey);
+    margin-bottom: 40px;
+  }
+  
+  .fgReact_componentContainer{
+    text-align: center;
+    align-items: center;
+    display: flex;
+    z-index: 1;
+    min-height: 100px;
+    width: 100%;
+    background: var(--fgReact_v0_pureWhite);
+    border: 1px solid var(--fgReact_v0_cmpntBorderGrey);
+    box-sizing: border-box;
+    border-radius: 1px;
+    box-shadow: 0px 10px 20px var(--fgReact_V0_cmpntShadowGrey);
+    /* margin-top: 30px; */
+    padding-left: 26px;
+    padding-right: 26px;
+    padding-top: 35px;
+    padding-bottom: 35px;
+    margin-bottom: 12px;
+  }
+  
+  .mtop-30{
+    margin-top: 30px;
+  }
+  
+  .fgReact_startTop{
+    align-items: start;
+  }
+  
+  
+  @media screen and (min-width: 768px) {
+    .App-header    {
+      background: red;
+    }
+  
+  }
+
+  .ls-none{
+    list-style: none;
+  }
+  .ResultTable .ReactTable .rt-td {
+    overflow: visible !important;
+  }
+
+  .react-tabs__tab{
+    font-size: 16px !important;
+  }
