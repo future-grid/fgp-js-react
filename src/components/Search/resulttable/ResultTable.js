@@ -23,7 +23,7 @@ export class ResultTable extends Component {
     // console.log(this.props)
     this.buildData = this.buildData.bind(this);
     this.buildColumns = this.buildColumns.bind(this);
-
+    this.dynamicWidth = this.dynamicWidth.bind(this);
     this.mutationHandler = this.mutationHandler.bind(this);
     // this.toggleMap = this.toggleMap.bind(this);
   }
@@ -31,6 +31,10 @@ export class ResultTable extends Component {
   componentDidMount(){
     this.buildData(this.props.data)
     this.buildColumns(this.props.columns)
+    if(this.props.isDynamicWidth){
+      this.dynamicWidth(this.props.columns, this.props.data);
+    }
+    //console.log(this.props.columns);
   }
 
   buildData(data){
@@ -262,7 +266,8 @@ export class ResultTable extends Component {
           element["Cell"] = row => (
             this.mutationHandler(element, row)
           )
-        });  
+          
+        });
     }
     this.setState({
       columns : data,
@@ -272,6 +277,21 @@ export class ResultTable extends Component {
 
   HandlePagination(){
       
+  }
+
+  dynamicWidth(columns, data){
+    columns.forEach(element => {
+      let widthMultipleFactor = element["widthMultipleFactor"] !== undefined ? element["widthMultipleFactor"] : 10;
+      element["width"] = this.getColumnWidth(data, element["accessor"], element["Header"], element["minWidth"], widthMultipleFactor);
+    });
+  }
+
+  getColumnWidth = (rows, accessor, headerText, minWidth, widthMultipleFactor) => {
+    const cellLength = Math.max(
+      ...rows.map(row => (`${row[accessor]}` || '').length),
+      headerText.length,
+    )
+    return Math.max(minWidth, cellLength * widthMultipleFactor)
   }
 
   
