@@ -6,7 +6,6 @@ import axios from "axios";
 import ResultTable from './resulttable/ResultTable';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-
 export class Search extends Component {
   constructor(props){
     super(props);
@@ -80,12 +79,11 @@ export class Search extends Component {
                           console.log(error);
                         })
     }else{
-
       this.setState({
         hasLoaded: false
       })
       let query_rsql = [];
-  
+      
       this.state.searchRows.forEach(_c => {
         if(_c.searchingType === "==*?*" || _c.searchingType === "==\"*?*\""){
           // var _tempSearch = _c.searchingKeyword.replace("\"", "\\\"");
@@ -109,7 +107,7 @@ export class Search extends Component {
               query_rsql.push(_c.searchingColumn + _c.searchingType.replace("?", newSearch) + "");
             }else if(_c.searchingType === "==*?*"){
               var final = "";
-              items.forEach(function(_item, _in){
+              items.forEach((_item, _in)=>{
                 var _tempRSQL = _c.searchingColumn + "" + "==\"*?*\"".replace("?", _item);
                 if(_in < items.length - 1){
                   final += _tempRSQL + ",";
@@ -125,7 +123,7 @@ export class Search extends Component {
           if(_c.searchingType === "==\"*?*\""){
             // put all column names here
             var _tempRSQL = "(";
-            this.state.searchConfig.searchingColumns.forEach(function(_column, _index){
+            this.state.searchConfig.searchingColumns.forEach((_column, _index)=>{
               if(_column.column !== "all"){
                 if(_index <  this.props.searchConfig.searchingColumns.length -1){
                   _tempRSQL += _column.column + "" + _c.searchingType.replace("?", newSearch) + ",";
@@ -139,9 +137,12 @@ export class Search extends Component {
           }else if(_c.searchingType === "==*?*"){
                   //
             final = "";
-            items.forEach(function(_item, _in){
+            
+            //let _searchConfig = this.state.searchConfig;
+            items.forEach((_item, _in)=>{
               var _tempRSQL = "(";
-              this.state.searchConfig.searchingColumns.forEach(function(_column, _index){
+              
+              this.state.searchConfig.searchingColumns.forEach((_column, _index)=>{
                 if(_column.column !== "all"){
                   if(_index <  this.state.searchConfig.searchingColumns.length -1){
                     _tempRSQL += _column.column + "" + "==\"*?*\"".replace("?", _item) + ",";
@@ -176,7 +177,7 @@ export class Search extends Component {
           } else if(_c.searchingColumn === "all"){
             // put all column names here
             _tempRSQL = "(";
-            this.state.searchConfig.searchingColumns.forEach(function(_column, _index){
+            this.state.searchConfig.searchingColumns.forEach((_column, _index)=>{
               if(_column.column !== "all"){
                 if(_index <  this.state.searchConfig.searchingColumns.length - 1){
                   _tempRSQL += _column.column + "" + _c.searchingType.replace("?", newSearch) + ",";
@@ -314,6 +315,8 @@ export class Search extends Component {
                         isFirst={row.isFirst}
                         hasResultMap={this.props.hasResultMap === true ? this.props.hasResultMap : false}
                         toggleMap={this.toggleMap}
+                        exportCsv={this.props.exportCsv}
+                        csvData={this.state.data}
                       />)
                   })
                 }
@@ -340,6 +343,7 @@ export class Search extends Component {
               mapProjection={this.props.mapProjection ? this.props.mapProjection : "EPSG:4326"}
               mapInteractions={this.props.mapInteractions ? this.props.mapInteractions : []} 
               mapVisible={this.state.mapVisible}
+              isDynamicWidth={this.props.isDynamicWidth}
             />
             ) : 
             <FontAwesomeIcon className="centerSpinner fa-spin" icon={["fas", "spinner"]}/>
