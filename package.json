@@ -1,6 +1,6 @@
 {
   "name": "@future-grid/fgp-js-react",
-  "version": "19.10.1-rc.7",
+  "version": "19.10.1-rc.9",
   "description": "Building the component library for Future-Grid, here first, then making an official released when it is ready under the FGP organisation",
   "main": "build/index.js",
   "module": "build/index.js",
@@ -41,7 +41,7 @@
     "i": "^0.3.6",
     "moment": "^2.24.0",
     "ol": "^5.3.3",
-    "react-csv": "^1.1.1",
+    "react-csv": "^1.1.2",
     "react-datepicker": "^2.9.6",
     "react-forms": "^1.0.0-rc6",
     "react-openlayers": "^0.2.1",
@@ -49,8 +49,7 @@
     "react-table": "^6.10.0",
     "recharts": "^1.6.2",
     "resolve-from": "^5.0.0",
-    "webpack": "^4.41.1",
-    "react-csv": "^1.1.2"
+    "webpack": "^4.41.1"
   },
   "devDependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.25",
