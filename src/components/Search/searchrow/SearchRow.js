@@ -67,7 +67,11 @@ export class SearchRow extends Component {
             />
             )  : (
             <div className={"col-md-3 col-12 d-md-inline-flex align-items-center fgReact_searchInputContainer "}>
-              <input className="form-control" placeholder="Keyword..." value={this.props.searchingKeyword} onChange={this.props.updateKeyword}>
+              <input className="form-control" placeholder="Keyword..." value={this.props.searchingKeyword} onChange={this.props.updateKeyword} onKeyPress={(event) => {
+                            if (event.key === "Enter") {
+                              this.props.makeSearch()
+                            }
+                          }}>
               </input>
             </div>   
           ) 
