@@ -91,7 +91,7 @@ export class StandardGraphV2 extends Component {
                         zoom: true,
                         scroll: true,
                         rangeBar: true,
-                        legend: formatter.legendForAllSeries
+                        legend: formatter.legendForAllSeries,
                     },
                     entities: this.state.sampleEntities,
                     rangeEntity: this.state.sampleEntities[0],
@@ -136,7 +136,8 @@ export class StandardGraphV2 extends Component {
                             zoom: config.graphConfig.features.zoom === false ? false : true ,
                             scroll: config.graphConfig.features.scroll === false ? false : true ,
                             rangeBar: config.graphConfig.features.rangeBar === false ? false : true ,
-                            legend: formatter.legendForAllSeries
+                            legend: config.graphConfig.features.legend ? config.graphConfig.features.legend : formatter.legendForAllSeries,
+                            exports: ["data"]
                         },
                         entities: config.graphConfig.entities,
                         rangeEntity: config.graphConfig.rangeEntity,
@@ -171,7 +172,7 @@ export class StandardGraphV2 extends Component {
             childGraphPropertiesArray.forEach( graphConfig => {
                 var childGraphViewConfigs = []
                 graphConfig.viewConfigs.forEach( viewConfig =>{
-                    let dateTime = viewConfig.graphConfig.initRange
+                    let dateTime = viewConfig.graphConfig.initRange;
                     var graphConf = {
                         name: viewConfig.name,
                         graphConfig: {
@@ -179,7 +180,8 @@ export class StandardGraphV2 extends Component {
                                 zoom: viewConfig.graphConfig.features.zoom === false ? false : true ,
                                 scroll: viewConfig.graphConfig.features.scroll === false ? false : true ,
                                 rangeBar: viewConfig.graphConfig.features.rangeBar === false ? false : true ,
-                                legend: formatter.legendForAllSeries
+                                legend: viewConfig.graphConfig.features.legend ? viewConfig.graphConfig.features.legend : formatter.legendForAllSeries,
+                                exports: ["data"]
                             },
                             entities: viewConfig.graphConfig.entities,
                             rangeEntity: viewConfig.graphConfig.rangeEntity,
@@ -200,8 +202,13 @@ export class StandardGraphV2 extends Component {
                         interaction: viewConfig.graphConfig.interaction,
                         timezone: viewConfig.graphConfig.timezone
                     };
-                    childGraphViewConfigs.push(graphConf)
-                })
+                    childGraphViewConfigs.push(graphConf);
+                });
+
+                
+
+
+
                 var graphX = new FgpGraph(document.getElementById(graphConfig.id), childGraphViewConfigs);
                 graphX.initGraph();
                 childGraphArray.push(graphX)
