@@ -286,12 +286,20 @@ export class ResultTable extends Component {
     });
   }
 
-  getColumnWidth = (rows, accessor, headerText, minWidth, widthMultipleFactor) => {
+  // getColumnWidth = (rows, accessor, headerText, minWidth, widthMultipleFactor) => {
+  //   const cellLength = Math.max(
+  //     ...rows.map(row => (`${row[accessor]}` || '').length),
+  //     headerText.length,
+  //   )
+  //   return Math.max(minWidth, cellLength * widthMultipleFactor)
+  // }
+
+  getColumnWidth(rows, accessor, headerText, minWidth, widthMultipleFactor){
     const cellLength = Math.max(
       ...rows.map(row => (`${row[accessor]}` || '').length),
       headerText.length,
     )
-    return Math.max(minWidth, cellLength * widthMultipleFactor)
+    return Math.max(minWidth, cellLength * widthMultipleFactor);
   }
 
   
