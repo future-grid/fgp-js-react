@@ -3,6 +3,8 @@ import './SearchRow.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DatePickerWrapper } from '../../MultiReferenceFilterSearch/DatePickerWrapper/DatePickerWrapper';
 import moment from 'moment'
+import {CSVLink } from "react-csv";
+
 export class SearchRow extends Component {
   constructor(props){
     super(props);
@@ -99,9 +101,22 @@ export class SearchRow extends Component {
                         ""
                       )
                     }
+                    
                   </div>  
               ) 
               : (
+                ""
+              )
+            }
+            {
+              this.props.exportCsv === true ? (
+                <div style={{"display" : "contents"}}>
+                  <CSVLink data={this.props.csvData} filename={"search_result.csv"} className="btn btn-secondary" style={{"marginLeft":"10px"}}>
+                      <FontAwesomeIcon className="" icon={["fas", "download"]}>
+                      </FontAwesomeIcon>
+                  </CSVLink> 
+                </div>            
+              ) : (
                 ""
               )
             }
