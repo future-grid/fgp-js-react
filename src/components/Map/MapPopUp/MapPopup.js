@@ -47,11 +47,20 @@ export class MapPopup extends Component {
                 } */}
                 {
                     this.props.focusedFeatures ?
-                        this.props.focusedFeatures.map(function(feature, index){
+                        this.props.focusedFeatures.map((feature, index)=>{
                             return (
                                 <div className={"fgpReactMapPopupFocusItem"} key={index}>
                                     <span>{feature.type}: {feature.name}</span>
-                                    {
+                                    { this.props.mapPopupInfo ?
+                                        this.props.mapPopupInfo.map((col)=>{
+                                            return (
+                                                <div className={"fgpReactMapPopupInfo"} key={col.colName}>
+                                                    <span>{col.label}: {feature.additionalInfo[col.colName]}</span>
+                                                </div>
+                                            )
+                                         }) : ""
+                                    }
+                                    {/* {
                                         this.props.propertiesToDisplay && this.props.visibility === true ? 
                                             this.props.propertiesToDisplay.map(function(displayProperty, index ){
                                                 return (
@@ -62,7 +71,7 @@ export class MapPopup extends Component {
                                             })
                                         :
                                         null
-                                    }
+                                    } */}
                                 </div>    
                             )
                         },this) :
@@ -70,6 +79,7 @@ export class MapPopup extends Component {
                         // :
                         false
                 }
+                
             </div>
         )
     }

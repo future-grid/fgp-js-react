@@ -62,6 +62,7 @@ export class BasicMapFGP extends Component {
             hasChildren : this.props.featuresChildren ? true : false,
             id: Math.random().toString(36).substr(2, 11),
             draw : null,
+            drawType : 'None',
             selectedFeaturesStyle : this.props.selectedFeaturesStyle ? this.props.selectedFeaturesStyle : {fillColor:'lightgoldenrodyellow', borderColor:"orange", radius:4, borderWidth:2}
         };
         // this.buildMap = this.buildMap.bind(this)
@@ -169,11 +170,12 @@ export class BasicMapFGP extends Component {
               return styles[feature.getGeometry().getType()];
             };
             this.props.featuresChildren[x].children.forEach( child =>{
-              console.log('plotting child', child)
+              //console.log('plotting child', child)
               // console.log(child)
               let featureObj = {
                 'type' : "Feature",
                 'id': '_' + Math.random().toString(36).substr(2, 11),
+                'additionalInfo': child.additionalInfo,
                 'geometry': {
                   'type': "Point",
                   'crs': {
@@ -197,6 +199,7 @@ export class BasicMapFGP extends Component {
                   "borderColor": this.props.featuresChildren[x].style.borderColor,
                   "borderWidth": this.props.featuresChildren[x].style.borderWidth,
                   "fillColor": this.props.featuresChildren[x].style.fillColor,
+                  "additionalInfo": child
                 }
               }
               if(isNaN(child.lat) === false && isNaN(child.lng) === false &&
@@ -249,6 +252,7 @@ export class BasicMapFGP extends Component {
             "type": this.props.featuresParentStyles.label,
             "id": '_' + Math.random().toString(36).substr(2, 11),
             "name": this.props.featuresParent.deviceName,
+            "additionalInfo": this.props.featuresParent.additionalInfo,
             "borderColor": this.props.featuresParentStyles.borderColor,
             "borderWidth": this.props.featuresParentStyles.borderWidth,
             "fillColor": this.props.featuresParentStyles.fillColor,
@@ -428,7 +432,10 @@ export class BasicMapFGP extends Component {
           this.state.map.forEachFeatureAtPixel(event.pixel, feature => {    
             this.state.selectedFeatures.indexOf(feature) === -1 ? selectedFeatures.push(feature) : resettingFeatures.push(selectedFeatures.splice(this.state.selectedFeatures.indexOf(feature), 1)[0]);
           });
-  
+          if(this.props.isHighlightRow){
+            this.props.highlightRow(selectedFeatures);
+          }
+          
           var image = new CircleStyle({
             radius: this.state.selectedFeaturesStyle.radius,
             fill: new Fill({
@@ -540,6 +547,7 @@ export class BasicMapFGP extends Component {
             <MapPopup
               visibility={this.state.popupVisible}
               focusedFeatures={this.state.focusedFeatures}
+              mapPopupInfo={this.props.mapPopupInfo}
             />
             {/* {
               this.state.drawInteraction === true ? (
