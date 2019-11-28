@@ -54,7 +54,7 @@ export class MapPopup extends Component {
                                     { this.props.mapPopupInfo ?
                                         this.props.mapPopupInfo.map((col)=>{
                                             return (
-                                                <div classname={"fgpReactMapPopupInfo"} key={col.colName}>
+                                                <div className={"fgpReactMapPopupInfo"} key={col.colName}>
                                                     <span>{col.label}: {feature.additionalInfo[col.colName]}</span>
                                                 </div>
                                             )
