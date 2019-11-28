@@ -10,6 +10,7 @@ export class Search extends Component {
   constructor(props){
     super(props);
     this.state = {
+      popupInfo: [],
       searchConfig : {
         searchingTypes : this.props.searchConfig.searchingTypes,
         searchingColumns : this.props.searchConfig.searchingColumns,
@@ -43,6 +44,31 @@ export class Search extends Component {
   }
 
   componentDidMount(){
+    let popupInfo = [];
+    if(this.props.mapPopupInfo !== undefined ){
+      if(this.props.mapPopupInfo === 'all' || this.props.mapPopupInfo === 'ALL'){
+        //console.log(this.props.searchConfig.columns)
+        this.props.searchConfig.columns.forEach((row) => {
+          let obj = {};
+          obj.label=row.Header;
+          obj.colName=row.accessor;
+          popupInfo.push(obj)
+        })
+      } else {
+        this.props.mapPopupInfo.forEach((col)=>{
+          this.props.searchConfig.columns.forEach((row) => {
+            if(col === row.accessor){
+              let obj = {};
+              obj.label=row.Header;
+              obj.colName=row.accessor;
+              popupInfo.push(obj)
+            }
+          });
+        })
+      }
+    }
+    //console.log(popupInfo);
+    this.setState({popupInfo: popupInfo})
     this.makeSearch(true)
   }
 
@@ -343,7 +369,10 @@ export class Search extends Component {
               mapProjection={this.props.mapProjection ? this.props.mapProjection : "EPSG:4326"}
               mapInteractions={this.props.mapInteractions ? this.props.mapInteractions : []} 
               mapVisible={this.state.mapVisible}
+              isHighlightRow={this.props.isHighlightRow === true ? this.props.isHighlightRow : false}
+              keyColumns={this.props.keyColumns.length > 0 ? this.props.keyColumns : []}
               isDynamicWidth={this.props.isDynamicWidth}
+              mapPopupInfo={this.state.popupInfo}
             />
             ) : 
             <FontAwesomeIcon className="centerSpinner fa-spin" icon={["fas", "spinner"]}/>

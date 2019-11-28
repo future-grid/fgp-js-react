@@ -18,7 +18,9 @@ export class ResultTable extends Component {
       mapData : [],
       dataReady : false, 
       mapReady : false,
-      data:[]
+      data:[],
+      originaldata: this.props.data,
+      highlightedRowLength: 0
     };  
     // console.log(this.props)
     this.buildData = this.buildData.bind(this);
@@ -34,7 +36,6 @@ export class ResultTable extends Component {
     if(this.props.isDynamicWidth){
       this.dynamicWidth(this.props.columns, this.props.data);
     }
-    //console.log(this.props.columns);
   }
 
   buildData(data){
@@ -49,18 +50,26 @@ export class ResultTable extends Component {
       }]
       // building up the map data
       data.forEach(element => {
-        locationArray[0].children.push(
-          {
-            lat: element[`${this.props.latColumn}`],
-            lng: element[`${this.props.lngColumn}`],
-            name : element[`${this.props.mapDeviceColumnName}`],
-            style : {
-              fillColor : "blue",
-              fillColor : "lightblue"
-            },
-            type : "Device ID"
-          }
-        )
+        let childObj = element;
+        //console.log(element)
+        childObj.lat = element[`${this.props.latColumn}`];
+        childObj.lng = element[`${this.props.lngColumn}`];
+        childObj.name = element[`${this.props.mapDeviceColumnName}`];
+        childObj.style = {fillColor : "blue",fillColor : "lightblue"}
+        childObj.type = "Device ID";
+        locationArray[0].children.push(childObj);
+        // locationArray[0].children.push(
+        //   {
+        //     lat: element[`${this.props.latColumn}`],
+        //     lng: element[`${this.props.lngColumn}`],
+        //     name : element[`${this.props.mapDeviceColumnName}`],
+        //     style : {
+        //       fillColor : "blue",
+        //       fillColor : "lightblue"
+        //     },
+        //     type : "Device ID"
+        //   }
+        // )
       });
     }
     this.setState({
@@ -302,6 +311,34 @@ export class ResultTable extends Component {
     return Math.max(minWidth, cellLength * widthMultipleFactor);
   }
 
+  highlightRow(mapInteractions){
+    //console.log(mapInteractions);
+    // put the click feature on top of result table
+    let highlightedRow = [];
+    mapInteractions.forEach((feature)=>{
+      //console.log(feature.getProperties());
+      let featureObj = feature.getProperties();
+      if(featureObj !== undefined && featureObj !== null){
+        if(this.props.keyColumns !== undefined || this.props.keyColumns !== null){
+          this.state.originaldata.forEach((row) => {
+            let isRow = true;
+            this.props.keyColumns.forEach((col) => {
+              if(row[col] !== featureObj.additionalInfo[col]){
+                isRow = false;
+              }
+            })
+            if(isRow){
+              highlightedRow.push(row);
+            }
+          })
+        }
+      }
+    })
+    //console.log(highlightedRow);
+    let newData = [...highlightedRow, ...this.state.originaldata];
+    this.setState({data: newData,highlightedRowLength: highlightedRow.length})
+    this.buildData(newData);
+  }
   
   render() {
     const filterCaseInsensitive = ({ id, value }, row) => 
@@ -313,11 +350,13 @@ export class ResultTable extends Component {
         {
           this.props.mapVisible === true ? (
             
-            <div className={"w-100"}>
+            <div className={"col-12 row"}>
             {
               this.state.mapReady === true ? (
                 <BasicMapFGP 
                   mapInteractions={this.props.mapInteractions}
+                  isHighlightRow={this.props.isHighlightRow}
+                  highlightRow={this.highlightRow.bind(this)}
                   isBefore1910={this.props.isBefore1910}
                   mapProjection={this.props.mapProjection}
                   featuresParent={{
@@ -332,6 +371,7 @@ export class ResultTable extends Component {
                     fillColor : 'red',
                 }}
                 featuresChildren={this.state.mapData}
+                mapPopupInfo={this.props.mapPopupInfo}
                 />
               ) : (
                 <FontAwesomeIcon className="centerSpinner fa-spin" icon={["fas", "spinner"]}/>
@@ -344,7 +384,23 @@ export class ResultTable extends Component {
         <div style={{"display":"contents"}}>
         {
           this.state.dataReady === true && this.state.columnsReady ?  (
-            <ReactTable 
+            <ReactTable
+                getTrProps={(state, rowInfo, column, instance) => {
+                  if(rowInfo!==undefined && rowInfo!== null & rowInfo.index < this.state.highlightedRowLength){
+                    return {
+                      style: {
+                        background: '#d28f287d'
+                      }
+                    }
+                  }
+                  else{
+                    return {
+                      style: {
+                        background: 'white'
+                      }
+                    }
+                  }
+                }}  
                 showPagination={this.props.showPagination}
                 showPageSizeOptions={this.props.showPageSizeOptions}
                 showPageJump={this.props.showPageJump}
