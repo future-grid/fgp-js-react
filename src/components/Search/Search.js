@@ -370,7 +370,7 @@ export class Search extends Component {
               mapInteractions={this.props.mapInteractions ? this.props.mapInteractions : []} 
               mapVisible={this.state.mapVisible}
               isHighlightRow={this.props.isHighlightRow === true ? this.props.isHighlightRow : false}
-              keyColumns={this.props.keyColumns.length > 0 ? this.props.keyColumns : []}
+              keyColumns={this.props.keyColumns ? this.props.keyColumns : []}
               isDynamicWidth={this.props.isDynamicWidth}
               mapPopupInfo={this.state.popupInfo}
             />
