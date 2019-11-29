@@ -142,7 +142,8 @@ export class StandardGraphV2 extends Component {
                         entities: config.graphConfig.entities,
                         rangeEntity: config.graphConfig.rangeEntity,
                         rangeCollection: config.graphConfig.rangeCollection,
-                        collections: config.graphConfig.collections
+                        collections: config.graphConfig.collections,
+                        filters: config.graphConfig.filters ? config.graphConfig.filters : null
                     },
                     dataService: dataService,
                     show: config.show,
@@ -186,7 +187,8 @@ export class StandardGraphV2 extends Component {
                             entities: viewConfig.graphConfig.entities,
                             rangeEntity: viewConfig.graphConfig.rangeEntity,
                             rangeCollection: viewConfig.graphConfig.rangeCollection,
-                            collections: viewConfig.graphConfig.collections
+                            collections: viewConfig.graphConfig.collections,
+                            filters: viewConfig.graphConfig.filters ? viewConfig.graphConfig.filters : null
                         },
                         dataService: dataService,
                         show: viewConfig.show === false ? false : true,
