@@ -16,12 +16,12 @@ export class ResultTable extends Component {
       columnsReady : false,
       columns : [],
       mapData : [],
-      dataReady : false, 
+      dataReady : false,
       mapReady : false,
       data:[],
       originaldata: this.props.data,
       highlightedRowLength: 0
-    };  
+    };
     // console.log(this.props)
     this.buildData = this.buildData.bind(this);
     this.buildColumns = this.buildColumns.bind(this);
@@ -74,20 +74,20 @@ export class ResultTable extends Component {
     }
     this.setState({
       mapData : locationArray,
-      dataReady : true, 
+      dataReady : true,
       data : data,
       mapReady : true
     })
   }
 
-    
+
 
   // mutates each row of data to present how we want it, returns a row after processing
   mutationHandler(element, row){
     // then we want to collect data along the way
     let processedRow = {...row};
     // mutating the value
-    // ensuring we have a split-able value 
+    // ensuring we have a split-able value
     // !null === true
     // !"" === true
     // !undefined === true
@@ -100,17 +100,17 @@ export class ResultTable extends Component {
           processedRow.value = row.value.split(element.fgpValueMutate)[0];
         }
       }
-      
+
       // formatting mutations
       if(element["fgpMutate"]){
         if(element.fgpMutate === "date"){
           if(element["fgpMutateConfig"]){
             processedRow.value = moment(row.value).format(element.fgpMutateConfig)
-          
+
           }else{
             processedRow.value = moment(row.value).format("lll")
           }
-        }else if(element.fgpMutate === "round"){  
+        }else if(element.fgpMutate === "round"){
           if(element["fgpMutateConfig"]){
             processedRow.value = Math.round((row.value * Math.pow(10, element.fgpMutateConfig))) / Math.pow(10, element.fgpMutateConfig);
             if(element["fgpAdditionalSymbol"]){
@@ -141,7 +141,7 @@ export class ResultTable extends Component {
                     return(
                     <a target={"_blank"} href={`${window.location.origin}${element.fgpRedirect}${link.split(element.fgpRedirectMutate)[element.fgpRedirectMutateIndex]}`}>
                        {String(processedRow.value)}
-                    </a>  
+                    </a>
                     )
                   }else{
                     return(
@@ -155,7 +155,7 @@ export class ResultTable extends Component {
                     return(
                     <a target={"_blank"} href={`${window.location.origin}${element.fgpRedirect}${link.split(element.fgpRedirectMutate)[0]}`}>
                        {String(processedRow.value)}
-                    </a>                
+                    </a>
                     )
                   }else{
                     return(
@@ -171,18 +171,18 @@ export class ResultTable extends Component {
                   return (
                     <a target={"_blank"} href={`${window.location.origin}${element.fgpRedirect}${link}`}>
                        {String(processedRow.value)}
-                    </a>  
+                    </a>
                   )
                 }else{
                   return (
                     <NavLink to={`${element.fgpRedirect}${link}`}>
                        {String(processedRow.value)}
                     </NavLink>
-                  )  
+                  )
                 }
               }
             }else{
-              return (<div>  {String(processedRow.value)} </div>)  
+              return (<div>  {String(processedRow.value)} </div>)
             }
           }
         }else{
@@ -194,7 +194,7 @@ export class ResultTable extends Component {
                 return(
                 <a target={"_blank"} href={`${window.location.origin}${element.fgpRedirect}${link.split(element.fgpRedirectMutate)[element.fgpRedirectMutateIndex]}`}>
                   {String(processedRow.value)}
-                </a>  
+                </a>
                 )
               }else{
                 return(
@@ -208,7 +208,7 @@ export class ResultTable extends Component {
                 return(
                 <a target={"_blank"} href={`${window.location.origin}${element.fgpRedirect}${link.split(element.fgpRedirectMutate)[0]}`}>
                   {String(processedRow.value)}
-                </a>                
+                </a>
                 )
               }else{
                 return(
@@ -224,42 +224,42 @@ export class ResultTable extends Component {
               return (
                 <a target={"_blank"} href={`${window.location.origin}${element.fgpRedirect}${link}`}>
                   {String(processedRow.value)}
-                </a>  
+                </a>
               )
             }else{
               return (
                 <NavLink to={`${element.fgpRedirect}${link}`}>
                   {String(processedRow.value)}
                 </NavLink>
-              )  
+              )
             }
           }
         }
       // redirect the whole row (the fgpRedirectRow variable will consist of a string like this, you should know the properties from your config of the search)
-      // example of a fgpRedirectRow config is 
+      // example of a fgpRedirectRow config is
       // fgpRedirectRow : "/icp/"
       // fgpRedirectRowPath : "accessor1->accessor2->accessor3"
       }else if(element["fgpRedirectRow"]){
         let path = new String;
         let accessorArr = element.fgpRedirectRowPath.split("->");
         accessorArr.forEach( (accessor, i) => {
-            path += row.original[accessor] +  "/" 
+            path += row.original[accessor] +  "/"
         });
         if(this.props.openInNewPage === true){
           return (
             <a target={"_blank"} href={`${window.location.origin}/${element.fgpRedirectRow}${path}`}>
               {String(processedRow.value)}
-            </a>  
+            </a>
           )
         }else{
           return (
             <NavLink to={`${element.fgpRedirectRow}${path}`}>
               {String(processedRow.value)}
             </NavLink>
-          )  
+          )
         }
       }else{
-        return(<div> {String(processedRow.value)} </div>)  
+        return(<div> {String(processedRow.value)} </div>)
       }
     }else{
       return(<div> {String("")} </div>)
@@ -275,7 +275,7 @@ export class ResultTable extends Component {
           element["Cell"] = row => (
             this.mutationHandler(element, row)
           )
-          
+
         });
     }
     this.setState({
@@ -285,7 +285,7 @@ export class ResultTable extends Component {
   }
 
   HandlePagination(){
-      
+
   }
 
   dynamicWidth(columns, data){
@@ -339,9 +339,9 @@ export class ResultTable extends Component {
     this.setState({data: newData,highlightedRowLength: highlightedRow.length})
     this.buildData(newData);
   }
-  
+
   render() {
-    const filterCaseInsensitive = ({ id, value }, row) => 
+    const filterCaseInsensitive = ({ id, value }, row) =>
       row[id] ? row[id].toLowerCase() .includes(value.toLowerCase()) : true
 
     return (
@@ -349,11 +349,11 @@ export class ResultTable extends Component {
         {/* <span className="ResultTable-title">{this.props.title}</span> */}
         {
           this.props.mapVisible === true ? (
-            
+
             <div className={"col-12 row"}>
             {
               this.state.mapReady === true ? (
-                <BasicMapFGP 
+                <BasicMapFGP
                   mapInteractions={this.props.mapInteractions}
                   isHighlightRow={this.props.isHighlightRow}
                   highlightRow={this.highlightRow.bind(this)}
@@ -377,7 +377,7 @@ export class ResultTable extends Component {
                 <FontAwesomeIcon className="centerSpinner fa-spin" icon={["fas", "spinner"]}/>
               )
             }
-              
+
             </div>
           ) : ""
         }
@@ -400,7 +400,7 @@ export class ResultTable extends Component {
                       }
                     }
                   }
-                }}  
+                }}
                 showPagination={this.props.showPagination}
                 showPageSizeOptions={this.props.showPageSizeOptions}
                 showPageJump={this.props.showPageJump}

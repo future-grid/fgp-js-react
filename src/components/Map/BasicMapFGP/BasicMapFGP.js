@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { Form, Dropdown } from 'react-bootstrap';
 import { MapPopup } from '../MapPopUp/MapPopUp'
 import { BasicMapDrawSelector } from '../BasicMapDrawSelector/BasicMapDrawSelector'
 import './BasicMapFGP.css';
@@ -11,10 +12,13 @@ import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
 import {OSM, Vector as VectorSource} from 'ol/source.js';
 import Draw, {createRegularPolygon, createBox} from 'ol/interaction/Draw';
 import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style.js';
+import {get as getProjection} from 'ol/proj';
+import {WMTS, TileArcGISRest} from 'ol/source';
+import WMTSTileGrid from 'ol/tilegrid/WMTS';
+import {getWidth, getTopLeft} from 'ol/extent';
 
-
-/* 
-Basic Map - The basic map functionality is present here, that includes a popover on hover and support for 
+/*
+Basic Map - The basic map functionality is present here, that includes a popover on hover and support for
             a children device set and a single parent device
 
 Properties to pass through to this Component (it will handle everything else)
@@ -66,6 +70,7 @@ export class BasicMapFGP extends Component {
             selectedFeaturesStyle : this.props.selectedFeaturesStyle ? this.props.selectedFeaturesStyle : {fillColor:'lightgoldenrodyellow', borderColor:"orange", radius:4, borderWidth:2}
         };
         // this.buildMap = this.buildMap.bind(this)
+        this.updateExternalLayers = this.updateExternalLayers.bind(this);
     }
 
     createInteractions(){
@@ -73,7 +78,7 @@ export class BasicMapFGP extends Component {
         if(interaction.type === "draw"){
           this.setState({
             drawInteraction : true,
-            drawType : "None"  
+            drawType : "None"
           })
         }
         if(interaction.type === "redirect"){
@@ -83,14 +88,14 @@ export class BasicMapFGP extends Component {
         }
       });
     }
-    
+
     buildMap(){
       this.createInteractions();
 
 
       var hasChildrenIn = this.state.hasChildren
       if(this.props.featuresParent.lat === 0 &&
-        this.props.featuresParent.lng === 0 && 
+        this.props.featuresParent.lng === 0 &&
         this.props.featuresChildren.length === 0 ){
         this.setState({
           noMapData : true,
@@ -118,7 +123,7 @@ export class BasicMapFGP extends Component {
           }
         }
         styleZoomer = styleZoomer.bind(this); // binding the state
-  
+
         // parent style - blue inner, dark blue outer
         var imageParent = styleZoomer("parent", 4)
         var stylesParent = {
@@ -128,7 +133,7 @@ export class BasicMapFGP extends Component {
         };
         var styleFunctionParent = function(feature) {
           return stylesParent[feature.getGeometry().getType()];
-        };      
+        };
 
         var imageSelectedFeatures = styleZoomer("selectedFeatures", 4)
         var stylesSelectedFeatures  = {
@@ -138,16 +143,16 @@ export class BasicMapFGP extends Component {
         }
         var styleFunctionSelectedFeatures = function(feature) {
           return stylesSelectedFeatures[feature.getGeometry().getType()];
-        };     
+        };
         this.setState({
           compiledSelectedFeatureStyle : styleFunctionSelectedFeatures,
           styleFunctionParent : styleFunctionParent
         })
-  
+
         // intitializing the geojson
         let points = [];
-  
-  
+
+
         // setting the style, labels and location for the children which are passed through props
         if(hasChildrenIn === true){
           console.log("have children", this.props.featuresChildren)
@@ -155,8 +160,8 @@ export class BasicMapFGP extends Component {
           var geojsonObjectChildren = {
             'type': 'FeatureCollection',
             'features': [ ]
-          };  
-  
+          };
+
           //iterating through the types of children
           for(var x = 0; x < this.props.featuresChildren.length; x++ ){
             // creating styles of the children
@@ -222,12 +227,12 @@ export class BasicMapFGP extends Component {
             vectorLayerChildrenArr.push(vectorLayerChildren)
           }
         }
-        
+
         var geojsonObjectParent = {
           'type': 'FeatureCollection',
           'features': [ ]
         };
-  
+
         // setting the style, labels and location for the parent
         let featureObjParent = {
           'type' : "Feature",
@@ -265,37 +270,37 @@ export class BasicMapFGP extends Component {
           geojsonObjectParent.features.push(featureObjParent)
           console.log('pushing despite null', featureObjParent)
         }
-        
-        
+
+
         var geojsonObjectSelectedFeatures = {
           'type': 'FeatureCollection',
           'features': [ ]
         };
-  
+
         // setting the style, labels and location for the parent
 
-  
+
 
         // creates a vector source
         var vectorSourceParent = new VectorSource({
           features: (new GeoJSON()).readFeatures(geojsonObjectParent)
         });
-  
+
         var vectorLayerParent = new VectorLayer({
           source: vectorSourceParent,
           style: styleFunctionParent
         });
-        
+
         // creates a vector source
         var vectorSourceSelectedFeatures = new VectorSource({
           features: (new GeoJSON()).readFeatures(geojsonObjectSelectedFeatures)
         });
-  
+
         var vectorLayerSelectedFeatures = new VectorLayer({
           source: vectorSourceSelectedFeatures,
           style: styleFunctionSelectedFeatures
         });
-        
+
         var getCentroid = function (coord) {
           var center = coord.reduce(function (x, y) {
               return [x[0] + y[0] / coord.length, x[1] + y[1] / coord.length]
@@ -341,7 +346,7 @@ export class BasicMapFGP extends Component {
         vectorLayerChildrenArr.forEach( layer => {
           map.addLayer(layer)
         })
-        
+
         if(hasChildrenIn === true){
             this.setState({
               map:map,
@@ -358,12 +363,18 @@ export class BasicMapFGP extends Component {
         }
         map.addLayer(vectorLayerParent)
         map.addLayer(vectorLayerSelectedFeatures)
+        // add external layers
+        if(this.props.mapLayers){
+          this.props.mapLayers.forEach((layer)=>{
+            this.addExternalLayers(map, layer);
+          });
+        }
         // map.add
         // binding the hover event (popup dialogue)
-        map.on('pointermove', this.handleMapHover.bind(this));     
+        map.on('pointermove', this.handleMapHover.bind(this));
         map.on('click', this.handleMapClick.bind(this, map))
         // this.handleDrawingSelection.bind(this, map)
-        // changing the size of the features on the map with zoom level 
+        // changing the size of the features on the map with zoom level
         map.getView().on('change:resolution', function(evt) {
           var currZoomLevel = map.getView().getZoom();
           var radius
@@ -382,21 +393,80 @@ export class BasicMapFGP extends Component {
           var stylesSelectedFeatures = new Style({image: styleZoomer("selectedFeatures", radius)});
           vectorLayerParent.setStyle(stylesParent);
           vectorLayerSelectedFeatures.setStyle(stylesSelectedFeatures);
-  
+
           if(hasChildrenIn === true){
             for(var x = 0; x < vectorLayerChildrenArr.length; x ++){
               var stylesChild = new Style({image: styleZoomer("child", radius, x)});
               vectorLayerChildrenArr[x].setStyle(stylesChild)
             }
           }
-        });     
-        map.updateSize() 
+        });
+        map.updateSize()
       }
     }
 
+    addExternalLayers(map, layer){
+      if(layer.active && layer.source.type === 'WMTS'){
+        let projection = getProjection(layer.projection ? layer.projection : "EPSG:4326");
+        let projectionExtent = projection.getExtent();
+        let size = getWidth(projectionExtent) / 256;
+        let resolutions = new Array(30);
+        let matrixIds = new Array(30);
+        for (var z = 0; z < 30; ++z) {
+          // generate resolutions and matrixIds arrays for this WMTS
+          resolutions[z] = size / Math.pow(2, z);
+          matrixIds[z] = z;
+        }
+        let tileLayer = new TileLayer({
+              source: new WMTS({
+                type: WMTS,
+                url: layer.source.url,
+                format: layer.source.format ? layer.source.format : 'image/png',
+                projection: projection,
+                tileGrid: new WMTSTileGrid({
+                  origin: getTopLeft(projectionExtent),
+                  resolutions: resolutions,
+                  matrixIds: matrixIds
+                }),
+                style: layer.source.style ? layer.source.style : 'default',
+                wrapX: layer.source.wrapX ? layer.source.wrapX : true
+              })
+        })
+        tileLayer.set('name', layer.name);
+        map.addLayer(tileLayer);
+      }
+      else if(layer.active && layer.source.type === 'ArcGIS'){
+        let tileLayer = new TileLayer({
+              source: new TileArcGISRest({
+                url: layer.source.url
+              })
+      })
+      tileLayer.set('name', layer.name);
+      map.addLayer(tileLayer);
+    }
+  }
+
+  updateExternalLayers(event){
+    const layerName = event.target.value;
+    this.props.mapLayers.forEach((layer)=>{
+      if(layer.name === layerName){
+        layer.active = !layer.active;
+        if(!layer.active){
+          this.state.map.getLayers().getArray().forEach(_layer => {
+            if (_layer && _layer.get('name') === layerName) {
+              this.state.map.removeLayer(_layer);
+            }
+          });
+        } else{
+          this.addExternalLayers(this.state.map, layer);
+        }
+      }
+    })
+  }
+
     componentDidMount(){
       this.buildMap()
-      
+
     }
 
     // different on click handlers
@@ -410,14 +480,14 @@ export class BasicMapFGP extends Component {
 
     createGroup(){
       // creates a group of assets with a drawing shape
-      
+
     }
 
     handleDrawingSelection(event){
       // console.log(map, event)
       this.setState({
         drawType : event.target.value
-      });      
+      });
       console.log(this.state.map)
       // this.state.map
 
@@ -429,20 +499,20 @@ export class BasicMapFGP extends Component {
           let selectedFeatures = [...this.state.selectedFeatures]
           let resettingFeatures = [];
           // adding or removing feature from list of selected features, then setting state
-          this.state.map.forEachFeatureAtPixel(event.pixel, feature => {    
+          this.state.map.forEachFeatureAtPixel(event.pixel, feature => {
             this.state.selectedFeatures.indexOf(feature) === -1 ? selectedFeatures.push(feature) : resettingFeatures.push(selectedFeatures.splice(this.state.selectedFeatures.indexOf(feature), 1)[0]);
           });
           if(this.props.isHighlightRow){
             this.props.highlightRow(selectedFeatures);
           }
-          
+
           var image = new CircleStyle({
             radius: this.state.selectedFeaturesStyle.radius,
             fill: new Fill({
               color: this.state.selectedFeaturesStyle.fillColor
             }),
             stroke: new Stroke({
-              color: this.state.selectedFeaturesStyle.borderColor, 
+              color: this.state.selectedFeaturesStyle.borderColor,
               width: this.state.selectedFeaturesStyle.borderWidth
             })
           });
@@ -454,12 +524,12 @@ export class BasicMapFGP extends Component {
           // Returning the actual style function, needed for first time creation, not modifying functions
           var style = function(feature) {
             return styles[feature.getGeometry().getType()];
-          };  
-        
+          };
+
           selectedFeatures.map( feature => {
             feature.setStyle(style)
           })
-  
+
           resettingFeatures.map( feature => {
             let fProps = feature.getProperties()
             var image2 = new CircleStyle({
@@ -468,7 +538,7 @@ export class BasicMapFGP extends Component {
                 color: fProps.fillColor
               }),
               stroke: new Stroke({
-                color: fProps.borderColor, 
+                color: fProps.borderColor,
                 width: fProps.borderWidth
               })
             });
@@ -480,14 +550,14 @@ export class BasicMapFGP extends Component {
             // Returning the actual style function, needed for first time creation, not modifying functions
             var style2 = function(feature) {
               return styles2[feature.getGeometry().getType()];
-            };  
+            };
             feature.setStyle(style2)
           })
           this.setState({
             selectedFeatures : selectedFeatures,
             map: map
           })
-          
+
         }else if(this.state.drawType === "Square"){
           let draw;
           let value = this.state.drawType;
@@ -504,15 +574,15 @@ export class BasicMapFGP extends Component {
             });
             map.addInteraction(draw);
           }
-          
+
           addInteraction(source);
-          console.log('Is a Square nibba') 
-        } 
+          console.log('Is a Square nibba')
+        }
       }else if(this.state.redirectInteraction === true){
         let selectedFeatures = [...this.state.selectedFeatures]
         let resettingFeatures = [];
         // redirecting
-        this.state.map.forEachFeatureAtPixel(event.pixel, feature => {    
+        this.state.map.forEachFeatureAtPixel(event.pixel, feature => {
           window.open ( `http://${window.location.host}/${feature.getProperties().type}/${feature.getProperties().name}`, '_blank' )
         });
       }
@@ -521,9 +591,9 @@ export class BasicMapFGP extends Component {
     handleMapHover(event){
       if(this.state.drawType === "None" || this.state.drawInteraction !== true){
         let featureArr = [];
-        this.state.map.forEachFeatureAtPixel(event.pixel, feature => {    
+        this.state.map.forEachFeatureAtPixel(event.pixel, feature => {
           featureArr.push(feature.values_);
-        });     
+        });
         if(featureArr.length > 0){
           this.setState({
             focusedFeatures: featureArr,
@@ -539,11 +609,26 @@ export class BasicMapFGP extends Component {
     }
 
     render() {
-        
-
         return (
           <div className={"w-100 map fgpReactMap"} id={this.state.id}>
             {/* {this.state.noMapData === true ? <div className={"noMapData"}>No Location Data</div> : null} */}
+            {this.props.mapLayers ?
+                <div className=" fgpReactMapLayer">
+                  <Dropdown>
+                    <Dropdown.Toggle variant="" id="dropdown-basic">
+                      LAYERS
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu style={{padding: '0'}}>
+                      {this.props.mapLayers.map(layer => {
+                        return(
+                          <Dropdown.Item key={layer.name}> <Form.Check type="checkbox" onChange={this.updateExternalLayers} value={layer.name} checked={layer.active} label={layer.name} /></Dropdown.Item>
+                        )
+                      })}
+                    </Dropdown.Menu>
+                  </Dropdown>
+                </div>
+                :""
+            }
             <MapPopup
               visibility={this.state.popupVisible}
               focusedFeatures={this.state.focusedFeatures}
@@ -566,4 +651,3 @@ export class BasicMapFGP extends Component {
 }
 
 export default BasicMapFGP
-

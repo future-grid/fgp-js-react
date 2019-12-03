@@ -289,7 +289,10 @@ export class DevicePage extends Component {
           childDeviceNames: this.state.childDeviceNames,
           lookupKey : this.state.lookupKey,
           deviceNameAsMeterLookup : this.state.deviceNameAsMeterLookup,
-          mapInteractions : this.props.mapInteractions ? this.props.mapInteractions : []
+          mapInteractions : this.props.mapInteractions ? this.props.mapInteractions : [],
+          additionalDeviceInfo: this.props.additionalDeviceInfo,
+          customDeviceInfo: this.props.customDeviceInfo,
+          mapLayers: this.props.mapLayers
         }))
       }else{
         return child

@@ -18,8 +18,8 @@ export class DeviceWidget extends Component {
     this.toggleVisibility = this.toggleVisibility.bind(this);
 
     console.log("props", props)
-  } 
-  
+  }
+
   componentDidMount() {
     this.renderData();
   }
@@ -56,7 +56,7 @@ export class DeviceWidget extends Component {
             showWidget : "show"
         })
     }
-    
+
     console.log(this.state.showWidget)
   }
 
@@ -75,8 +75,19 @@ export class DeviceWidget extends Component {
     console.log("Hey Dev, here is the device extensions tweak your processorConfig <3 ^_^ <3 ", this.props.extensions);
     console.log("Hey Dev, here is the pre-cleaned rows so you can tweak your processorConfig <3 ^_^ <3 ", rawData);
     let cleanedData = this.state.widgetDataProcessor.cleanData(rawData); // clean up the data configured by the JSON
+    //console.log(this.props.additionalDeviceInfo);
+    let deviceData = [];
+    if(this.props.customDeviceInfo !== undefined && this.props.customDeviceInfo!== null){
+        deviceData = [...this.props.customDeviceInfo]
+    } else{
+        deviceData = [...cleanedData];
+        if(this.props.additionalDeviceInfo !== undefined && this.props.additionalDeviceInfo!== null){
+            deviceData = [...cleanedData, ...this.props.additionalDeviceInfo];
+        }
+    }
+
     this.setState({
-      data : cleanedData
+      data : deviceData
     });
   }
 
@@ -101,25 +112,25 @@ export class DeviceWidget extends Component {
                     ""
                 )
             }
-        <div className={" fgReact_componentContainer fgReact_startTop " + (this.props.hasBreadCrumbs === true ? 'mt-0 ' : ' ') + (this.props.isFluid === true ? " container-fluid " : " container ")} >            
+        <div className={" fgReact_componentContainer fgReact_startTop " + (this.props.hasBreadCrumbs === true ? 'mt-0 ' : ' ') + (this.props.isFluid === true ? " container-fluid " : " container ")} >
             {
                     this.state.showWidget === "show" ? (
                         <div className="row col-12 fgReact_assetName alignLeft">
                         <div className={"row col-12"}>
                         <div className={"col-9"} style={{"textAlign" : "left"}}>
-                        {   
+                        {
                             // Formatting the Device type string for a title
                             this.caseString(this.props.deviceType, this.props.deviceTypeTitleCasing)
-                        }   
+                        }
                         :&nbsp;
                         <label className="fgReact_assetLabel">
                             {
                                 this.props.deviceNameAsMeterLookup !== false? (
                                     this.props.deviceNameAsMeterLookup
                                 ) : (
-                                    this.props.deviceName    
+                                    this.props.deviceName
                                 )
-                                
+
                             }
                         </label>
                         </div>
@@ -136,7 +147,7 @@ export class DeviceWidget extends Component {
                                         {
                                             // Iterates over the data set and renders each as a title and label
                                             // Will not work for things that pass in objects/lists/null.
-                                            this.state.data ? 
+                                            this.state.data ?
                                             this.state.data.map((row, i) => {
                                             if(typeof row.data !== 'object') {
                                                 if(row.redirect) {
@@ -157,25 +168,25 @@ export class DeviceWidget extends Component {
                                         }
                                         </ul>
                                     </div>
-                                </div> 
-                                
+                                </div>
+
                                 {   //rendering the basic map
                                     this.props.mapType === "basic" || this.props.mapType === "" ? (
                                     <div className={"col-7"}>
-                                        <BasicMapFGP 
+                                        <BasicMapFGP
                                             mapInteractions={this.props.mapInteractions}
                                             isBefore1910={this.props.isBefore1910}
                                             mapProjection={this.props.mapProjection}
                                             featuresParent={{
                                                 deviceName: this.props.deviceName,
-                                                lat: this.props.extensions["location"] ? 
+                                                lat: this.props.extensions["location"] ?
                                                     this.props.extensions.location["lat"] ?
-                                                        this.props.extensions.location.lat : this.props.extensions.location["latitude"] ? 
-                                                            this.props.extensions.location.latitude : null : 
+                                                        this.props.extensions.location.lat : this.props.extensions.location["latitude"] ?
+                                                            this.props.extensions.location.latitude : null :
                                                         null ,
-                                                lng : this.props.extensions["location"] ? this.props.extensions.location["lng"] ? 
-                                                    this.props.extensions.location.lng : this.props.extensions.location["longitude"] ? 
-                                                        this.props.extensions.location.longitude : null : 
+                                                lng : this.props.extensions["location"] ? this.props.extensions.location["lng"] ?
+                                                    this.props.extensions.location.lng : this.props.extensions.location["longitude"] ?
+                                                        this.props.extensions.location.longitude : null :
                                                     null
                                             }}
                                             featuresParentStyles={{
@@ -185,15 +196,15 @@ export class DeviceWidget extends Component {
                                                 fillColor : this.props.mapParentColors.fillColor,
                                             }}
                                             featuresChildren={this.props.childrenWithLocationAndStyles}
-                                            
+                                            mapLayers={this.props.mapLayers}
                                         />
-                                    </div> 
+                                    </div>
                                     ) : (
                                     ""
                                     )
-                                } 
+                                }
                             </div>
-        
+
                         ) : (
                             <div className="col-12">
                                 <div className="row info_r">
@@ -201,7 +212,7 @@ export class DeviceWidget extends Component {
                                     {
                                         // Iterates over the data set and renders each as a title and label
                                         // Will not work for things that pass in objects/lists/null.
-                                        this.state.data ? 
+                                        this.state.data ?
                                         this.state.data.map((row, i) => {
                                         if(typeof row.data !== 'object') {
                                             if(row.redirect) {
@@ -222,25 +233,25 @@ export class DeviceWidget extends Component {
                                     }
                                     </ul>
                                 </div>
-                            </div>  
+                            </div>
                         )
-        
+
                     }
                     </div>
                     ): (
                         <div className={"row col-12 fgReact_assetName"}>
                         <div className={"col-9"} style={{"textAlign" : "left"}}>
-                        {   
+                        {
                             // Formatting the Device type string for a title
                             this.caseString(this.props.deviceType, this.props.deviceTypeTitleCasing)
-                        }   
+                        }
                         :&nbsp;
                         <label className="fgReact_assetLabel">
                         {
                             this.props.deviceNameAsMeterLookup !== false? (
                                 this.props.deviceNameAsMeterLookup
                             ) : (
-                                this.props.deviceName    
+                                this.props.deviceName
                             )
                         }
                         </label>
