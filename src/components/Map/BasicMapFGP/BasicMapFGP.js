@@ -492,66 +492,62 @@ export class BasicMapFGP extends Component {
             map.updateSize();
         }
     }
-  }
-
-  addExternalLayers(map, layer){
-    if(layer.active && layer.source.type === 'WMTS'){
-      let projection = getProjection(layer.projection ? layer.projection : "EPSG:4326");
-      let projectionExtent = projection.getExtent();
-      let size = getWidth(projectionExtent) / 256;
-      let resolutions = new Array(30);
-      let matrixIds = new Array(30);
-      for (var z = 0; z < 30; ++z) {
-        // generate resolutions and matrixIds arrays for this WMTS
-        resolutions[z] = size / Math.pow(2, z);
-        matrixIds[z] = z;
-      }
-      let tileLayer = new TileLayer({
-            source: new WMTS({
-              type: WMTS,
-              url: layer.source.url,
-              format: layer.source.format ? layer.source.format : 'image/png',
-              projection: projection,
-              tileGrid: new WMTSTileGrid({
-                origin: getTopLeft(projectionExtent),
-                resolutions: resolutions,
-                matrixIds: matrixIds
-              }),
-              style: layer.source.style ? layer.source.style : 'default',
-              wrapX: layer.source.wrapX ? layer.source.wrapX : true
-            })
-      })
-      tileLayer.set('name', layer.name);
-      map.addLayer(tileLayer);
-    }
-    else if(layer.active && layer.source.type === 'ArcGIS'){
-      let tileLayer = new TileLayer({
-            source: new TileArcGISRest({
-              url: layer.source.url
-            })
-    })
-    tileLayer.set('name', layer.name);
-    map.addLayer(tileLayer);
-  }
-}
-
-  updateExternalLayers(event){
-    const layerName = event.target.value;
-    this.props.mapLayers.forEach((layer)=>{
-      if(layer.name === layerName){
-        layer.active = !layer.active;
-        if(!layer.active){
-          this.state.map.getLayers().getArray().forEach(_layer => {
-            if (_layer && _layer.get('name') === layerName) {
-              this.state.map.removeLayer(_layer);
-            }
-          });
-        } else{
-          this.addExternalLayers(this.state.map, layer);
+    addExternalLayers(map, layer){
+        if(layer.active && layer.source.type === 'WMTS'){
+        let projection = getProjection(layer.projection ? layer.projection : "EPSG:4326");
+        let projectionExtent = projection.getExtent();
+        let size = getWidth(projectionExtent) / 256;
+        let resolutions = new Array(30);
+        let matrixIds = new Array(30);
+        for (var z = 0; z < 30; ++z) {
+            // generate resolutions and matrixIds arrays for this WMTS
+            resolutions[z] = size / Math.pow(2, z);
+            matrixIds[z] = z;
         }
-      }
-    })
-  }
+        let tileLayer = new TileLayer({
+                source: new WMTS({
+                type: WMTS,
+                url: layer.source.url,
+                format: layer.source.format ? layer.source.format : 'image/png',
+                projection: projection,
+                tileGrid: new WMTSTileGrid({
+                    origin: getTopLeft(projectionExtent),
+                    resolutions: resolutions,
+                    matrixIds: matrixIds
+                }),
+                style: layer.source.style ? layer.source.style : 'default',
+                wrapX: layer.source.wrapX ? layer.source.wrapX : true
+                })
+        })
+        tileLayer.set('name', layer.name);
+        map.addLayer(tileLayer);
+        }
+        else if(layer.active && layer.source.type === 'ArcGIS'){
+        let tileLayer = new TileLayer({
+                source: new TileArcGISRest({
+                url: layer.source.url
+                })
+        })
+        tileLayer.set('name', layer.name);
+        map.addLayer(tileLayer);
+    }
+    }
+    updateExternalLayers(event){
+        const layerName = event.target.value;
+        this.props.mapLayers.forEach((layer)=>{
+        if(layer.name === layerName){
+            layer.active = !layer.active;
+            if(!layer.active){
+            this.state.map.getLayers().getArray().forEach(_layer => {
+                if (_layer && _layer.get('name') === layerName) {
+                this.state.map.removeLayer(_layer);
+                }
+            });
+            } else{
+            this.addExternalLayers(this.state.map, layer);
+            }
+        }});
+    }
 
     componentDidMount() {
         this.buildMap();
@@ -570,7 +566,7 @@ export class BasicMapFGP extends Component {
         // creates a group of assets with a drawing shape
     }
 
-    handleDrawingSelection = (event) => {
+    handleDrawingSelection(event){
         this.setState({
             drawType: event.target.value
         }, () => {
@@ -761,44 +757,34 @@ export class BasicMapFGP extends Component {
 
     render() {
         return (
-          <div className={"w-100 map fgpReactMap"} id={this.state.id}>
-            {/* {this.state.noMapData === true ? <div className={"noMapData"}>No Location Data</div> : null} */}
+            <div className={"w-100 map fgpReactMap"} id={this.state.id}>
             {this.props.mapLayers ?
                 <div className=" fgpReactMapLayer">
-                  <Dropdown>
+                    <Dropdown>
                     <Dropdown.Toggle variant="" id="dropdown-basic">
-                      LAYERS
+                        LAYERS
                     </Dropdown.Toggle>
                     <Dropdown.Menu style={{padding: '0'}}>
-                      {this.props.mapLayers.map(layer => {
+                        {this.props.mapLayers.map(layer => {
                         return(
-                          <Dropdown.Item key={layer.name}> <Form.Check type="checkbox" onChange={this.updateExternalLayers} value={layer.name} checked={layer.active} label={layer.name} /></Dropdown.Item>
+                            <Dropdown.Item key={layer.name}> <Form.Check type="checkbox" onChange={this.updateExternalLayers} value={layer.name} checked={layer.active} label={layer.name} /></Dropdown.Item>
                         )
-                      })}
+                        })}
                     </Dropdown.Menu>
-                  </Dropdown>
+                    </Dropdown>
                 </div>
                 :""
             }
-            <MapPopup
-              visibility={this.state.popupVisible}
-              focusedFeatures={this.state.focusedFeatures}
-              mapPopupInfo={this.props.mapPopupInfo}
+            <MapPopup visibility={this.state.popupVisible} focusedFeatures={this.state.focusedFeatures} mapPopupInfo={this.props.mapPopupInfo}
             />
-            {/* {
-              this.state.drawInteraction === true ? (
-                <BasicMapDrawSelector
-                  handleDrawingSelection={this.handleDrawingSelection.bind(this)}
-                  drawType={this.state.drawType}
-                  selectedFeatures={this.state.selectedFeatures}
-                />
-                {this.state.drawInteraction === true ? (
+            {   this.state.drawInteraction === true ? (
                     <BasicMapDrawSelector
-                        handleDrawingSelection={this.handleDrawingSelection}
+                        handleDrawingSelection={this.handleDrawingSelection.bind(this)}
                         drawType={this.state.drawType}
                         selectedFeatures={this.state.selectedFeatures}
                     />
-                ) : null}
+                ) : null
+                }
             </div>
         );
     }
