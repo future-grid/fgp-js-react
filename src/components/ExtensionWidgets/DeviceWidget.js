@@ -36,7 +36,9 @@ export class DeviceWidget extends Component {
         }else if(caseType === "none"){
             newString += word
         }
-        index === string.split("_").length -1 ? null : newString += " "
+        if(index != string.split("_").length -1){
+            newString += " ";
+        }
     });
     let temp = newString.split("%");
     newString = new String();
@@ -62,16 +64,16 @@ export class DeviceWidget extends Component {
 
   renderData () {
     let rawData = [];
-    this.props.extensions ? (
-    Object.keys(this.props.extensions).forEach(key => {
-        rawData.push(
-            {
-            data: this.props.extensions[key],
-            relationship: key
-            }
-        )
-    })
-    ) : "";
+    if(this.props.extensions){
+        Object.keys(this.props.extensions).forEach(key => {
+            rawData.push(
+                {
+                data: this.props.extensions[key],
+                relationship: key
+                }
+            )
+        });
+    }
     console.log("Hey Dev, here is the device extensions tweak your processorConfig <3 ^_^ <3 ", this.props.extensions);
     console.log("Hey Dev, here is the pre-cleaned rows so you can tweak your processorConfig <3 ^_^ <3 ", rawData);
     let cleanedData = this.state.widgetDataProcessor.cleanData(rawData); // clean up the data configured by the JSON

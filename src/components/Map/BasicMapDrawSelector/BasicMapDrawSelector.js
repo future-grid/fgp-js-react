@@ -5,9 +5,6 @@ import Draw, {createRegularPolygon, createBox} from 'ol/interaction/Draw';
 export class BasicMapDrawSelector extends Component {
     constructor(props){
         super(props);
-        this.state = {
-          
-        };
     }
 
 
@@ -25,15 +22,15 @@ export class BasicMapDrawSelector extends Component {
                     <option value={"None"}>
                         Single
                     </option>
-                    {/* <option value={"Circle"}>
-                        Circle
+                    <option value={"Circle"}>
+                        Multi-Selection-Circle
                     </option>
                     <option value={"Square"}>
-                        Square
+                        Multi-Selection-Square
                     </option>
-                    <option value={"Box"}>
-                        Box
-                    </option> */}
+                    <option value={"Polygon"}>
+                        Polygon
+                    </option>
                 </select>
             </div>
         )

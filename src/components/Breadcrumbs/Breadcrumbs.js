@@ -84,7 +84,9 @@ export class Breadcrumbs extends Component {
             await axios.get(`${this.state.baseUrl}${formedRelations[x].deviceType}/${deviceName}/relation/${formedRelations[x].relation}?isParent=true`    
             ).then( response => {
                 response.data["relationName"] = `${formedRelations[x].relation}`;
-                formedRelations[x].isSplitBranch === false ? deviceName = response.data.name : null;
+                if(formedRelations[x].isSplitBranch === false){
+                    deviceName = response.data.name;
+                }
                 breadcrumbs.push(
                     {
                        redirect: formedRelations[x].urlPath,
