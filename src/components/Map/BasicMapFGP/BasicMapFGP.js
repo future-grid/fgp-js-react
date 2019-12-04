@@ -1,12 +1,15 @@
 import React, { Component } from 'react'
 import { Form, Dropdown } from 'react-bootstrap';
-import { MapPopup } from '../MapPopUp/MapPopUp'
+import { MapPopup } from '../MapPopUp/MapPopup'
 import { BasicMapDrawSelector } from '../BasicMapDrawSelector/BasicMapDrawSelector'
 import './BasicMapFGP.css';
 import Map from 'ol/Map.js';
+import Feature from 'ol/Feature';
 import View from 'ol/View.js';
 import Polygon from 'ol/geom/Polygon';
+import {fromLonLat} from 'ol/proj';
 import 'ol/ol.css';
+import Point from 'ol/geom/Point';
 import GeoJSON from 'ol/format/GeoJSON.js';
 import {defaults as defaultControls, OverviewMap} from 'ol/control.js';
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
@@ -55,6 +58,10 @@ Properties to pass through to this Component (it will handle everything else)
 */
 
 export class BasicMapFGP extends Component {
+
+
+
+
     constructor(props) {
         super(props);
         this.state = {
@@ -72,6 +79,7 @@ export class BasicMapFGP extends Component {
             drawType: 'None',
             drawSource: null,
             highlight: null,
+            highlightLayer: null,
             selectedFeaturesStyle: this.props.selectedFeaturesStyle
                 ? this.props.selectedFeaturesStyle
                 : {
@@ -84,6 +92,63 @@ export class BasicMapFGP extends Component {
         // this.buildMap = this.buildMap.bind(this)
         this.updateExternalLayers = this.updateExternalLayers.bind(this);
     }
+
+
+    componentWillReceiveProps(props){
+        if(props.mapHighlightPoints && props.mapHighlightPoints.length > 0){
+            // highlight on map
+            const layers = this.state.featuresLayerChildren;
+            // demo data
+            // props.mapHighlightPoints = ["001350030033dfe4"];
+            const highlightLayer = this.state.highlightLayer;
+            props.mapHighlightPoints.forEach(point => {
+                layers.forEach(layer => {
+                    // put all features together
+                    let features = layer.getSource().getFeatures();
+                    features.forEach(feature => {
+                        //
+                        const props = feature.getProperties();
+                        if(props.name === point){
+                            let coordinates = feature.getGeometry().getCoordinates();
+                            // add feature to layer
+                            let featuresNew = [{
+                                type: 'Feature',
+                                id:
+                                    '_' +
+                                    Math.random()
+                                        .toString(36)
+                                        .substr(2, 11),
+                                // additionalInfo: child.additionalInfo,
+                                geometry: {
+                                    type: 'Point',
+                                    crs: {
+                                        type: 'name',
+                                        properties: {
+                                            name: this.props.mapProjection
+                                        }
+                                    },
+                                    coordinates: coordinates
+                                },
+                                geometry_name: 'geom',
+                                properties: {
+                                    lat: coordinates[0],
+                                    lng: coordinates[1],
+                                    id:
+                                        '_' +
+                                        Math.random()
+                                            .toString(36)
+                                            .substr(2, 11),
+                                    name: "wtf"
+                                }
+                            }];
+                            highlightLayer.getSource().addFeatures(new GeoJSON().readFeatures(featuresNew));
+                        }
+                    });
+                });
+            });
+        }
+    }
+
 
     createInteractions() {
         this.props.mapInteractions.forEach(interaction => {
@@ -350,6 +415,7 @@ export class BasicMapFGP extends Component {
                 features: new GeoJSON().readFeatures(geojsonObjectParent)
             });
 
+
             var vectorLayerParent = new VectorLayer({
                 source: vectorSourceParent,
                 style: styleFunctionParent
@@ -417,6 +483,23 @@ export class BasicMapFGP extends Component {
             vectorLayerChildrenArr.forEach(layer => {
                 map.addLayer(layer);
             });
+            // add highlight layer
+            let highlightLayer = new VectorLayer({
+                source: new VectorSource(),
+                style: new Style({
+                    stroke: new Stroke({
+                      color: '#f00',
+                      width: 1
+                    }),
+                    fill: new Fill({
+                      color: 'rgba(255,0,0,0.1)'
+                    })
+                  })
+                });
+
+            this.setState({highlightLayer: highlightLayer});
+            map.addLayer(highlightLayer);
+            
 
             let drawSource = new VectorSource({wrapX: false});
             let drawLayer = new VectorLayer({
@@ -626,9 +709,17 @@ export class BasicMapFGP extends Component {
                                 }
                             }
                         });
+
+                        
                         // call outside
                         if(selectedPoints.length > 0){
-                            highlight(selectedPoints);
+                            let points = [];
+                            selectedPoints.forEach(_feature => {
+                                points.push(_feature.getProperties());
+                            });
+                            highlight(points);
+                        } else {
+                            highlight([]);
                         }
                     })
 
@@ -640,10 +731,12 @@ export class BasicMapFGP extends Component {
                 console.log('Is a Square nibba');
             } else {
                 const _map = this.state.map;
+                const highlight = this.state.highlight;
                 const drawSource = this.state.drawSource;
                 drawSource.clear();
                 let draw = this.state.drawInt;
                 _map.removeInteraction(draw);
+                highlight([]);
             }
         });
     }
