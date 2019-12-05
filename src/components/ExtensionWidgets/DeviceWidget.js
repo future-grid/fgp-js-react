@@ -177,6 +177,7 @@ export class DeviceWidget extends Component {
                                     <div className={"col-7"}>
                                         <BasicMapFGP
                                             mapInteractions={this.props.mapInteractions}
+                                            mapHighlightPoints={this.props.mapHighlightPoints}
                                             isBefore1910={this.props.isBefore1910}
                                             mapProjection={this.props.mapProjection}
                                             featuresParent={{
