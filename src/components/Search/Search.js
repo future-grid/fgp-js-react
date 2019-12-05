@@ -88,7 +88,7 @@ export class Search extends Component {
   makeSearch(isFirstTime) {
     if(isFirstTime === true){
       axios.get(this.props.baseApiUrl + this.props.searchConfig.reference + '/data/' +
-      this.props.searchConfig.defaultQtyRecordsToRetrieve + "/" + 
+      this.props.searchConfig.defaultQtyRecordsToRetrieve + "/" +
       this.props.searchConfig.startFrom + "/" +
       this.props.searchConfig.customer +
       this.props.searchConfig.searchDirection
@@ -109,26 +109,26 @@ export class Search extends Component {
         hasLoaded: false
       })
       let query_rsql = [];
-      
+
       this.state.searchRows.forEach(_c => {
         if(_c.searchingType === "==*?*" || _c.searchingType === "==\"*?*\""){
           // var _tempSearch = _c.searchingKeyword.replace("\"", "\\\"");
-          
+
           var items = [];
           var newSearch = null;
-  
+
           if(_c.searchingType === "==\"*?*\""){
               // single like address with comma
             newSearch = _c.searchingKeyword;
           }else if(_c.searchingType === "==*?*"){
-               // multi split by comma                     
+               // multi split by comma
             for(var i = 0; i < _c.searchingKeyword.split(',').length; i++){
               items.push(_c.searchingKeyword.split(',')[i].trim());
             }
           }
-          
-          if (_c.searchingColumn !== "all") {           
-            if(_c.searchingType === "==\"*?*\""){ 
+
+          if (_c.searchingColumn !== "all") {
+            if(_c.searchingType === "==\"*?*\""){
               // check
               query_rsql.push(_c.searchingColumn + _c.searchingType.replace("?", newSearch) + "");
             }else if(_c.searchingType === "==*?*"){
@@ -143,8 +143,8 @@ export class Search extends Component {
               });
               query_rsql.push(final);
             }
-              
-        } else if(_c.searchingColumn === "all" && _c.searchingKeyword !== null && 
+
+        } else if(_c.searchingColumn === "all" && _c.searchingKeyword !== null &&
                   _c.searchingKeyword.trim() !== ""){
           if(_c.searchingType === "==\"*?*\""){
             // put all column names here
@@ -163,11 +163,11 @@ export class Search extends Component {
           }else if(_c.searchingType === "==*?*"){
                   //
             final = "";
-            
+
             //let _searchConfig = this.state.searchConfig;
             items.forEach((_item, _in)=>{
               var _tempRSQL = "(";
-              
+
               this.state.searchConfig.searchingColumns.forEach((_column, _index)=>{
                 if(_column.column !== "all"){
                   if(_index <  this.state.searchConfig.searchingColumns.length -1){
@@ -186,10 +186,10 @@ export class Search extends Component {
             });
             query_rsql.push(final);
           }
-              
+
         }
         }else{
-          if (_c.searchingColumn !== "all") {                
+          if (_c.searchingColumn !== "all") {
             // check
             console.log(_c.searchingKeyword);
             if (String(_c.searchingKeyword).indexOf("'") !== -1 || String(_c.searchingKeyword).indexOf("\"") !== -1) {
@@ -213,17 +213,17 @@ export class Search extends Component {
               }
             });
             _tempRSQL += ")";
-            query_rsql.push(_tempRSQL);   
-          }    
+            query_rsql.push(_tempRSQL);
+          }
         }
       });
-     
+
       let url =  this.props.baseApiUrl + this.props.searchConfig.reference + '/data/' +
-      this.props.searchConfig.defaultQtyRecordsToRetrieve + "/" + 
+      this.props.searchConfig.defaultQtyRecordsToRetrieve + "/" +
       this.props.searchConfig.startFrom + "/" +
       this.props.searchConfig.customer +
       this.props.searchConfig.searchDirection
-  
+
       if (query_rsql && query_rsql.length > 0) {
         url = url + "?" + query_rsql.join(";");
       }
@@ -238,7 +238,7 @@ export class Search extends Component {
           })
         }).catch(function (error) {
           console.error(error)
-        });     
+        });
     }
   }
 
@@ -281,7 +281,7 @@ export class Search extends Component {
   }
 
   updateSearchingType(key, rowKey, value) {
-    
+
     let resultRow = this.state.searchRows.findIndex(p => p.indexKey === rowKey);
     let temp = [...this.state.searchRows];
     temp[resultRow][key] = value.target.value
@@ -295,7 +295,7 @@ export class Search extends Component {
     let initialPages = 5;
 
     let amountOfDataToRetrieve = pageSize * 5;
-    
+
   }
 
   dynamicResultFunctionPage(){
@@ -304,7 +304,7 @@ export class Search extends Component {
     // let initialSize = 25;
     // let initialPages = 5;
 
-    
+
   }
 
 
@@ -313,31 +313,31 @@ export class Search extends Component {
       <div className="fgReact_workingArea">
         <div className={"fgReact_SearchPageTitle " + (this.props.isFluid === true ? " container-fluid " : " container ")}>{this.props.title}</div>
           {
-            this.props.hideFilter === true ?            
+            this.props.hideFilter === true ?
             "" :
             <div className={"fgReact_componentContainer " + (this.props.isFluid === true ? " container-fluid " : " container ")}>
             <div className="col-12">
               <div>
-                {   
+                {
                    this.state.searchRows.map((row, i) => {
-                    return (     
-                      <SearchRow 
+                    return (
+                      <SearchRow
                         isFluid={this.props.isFluid}
-                        key={row.indexKey} 
-                        indexKey={row.indexKey} 
+                        key={row.indexKey}
+                        indexKey={row.indexKey}
                         addSearchCriteria={this.addSearchCriteria}
-                        removeSearchCriteria={this.removeSearchCriteria}           
-                        searchingKeyword = {row.searchingKeyword}      
-                        searchingType = {row.searchingType}      
-                        searchingColumn = {row.searchingColumn}      
-                        updateKeyword={this.updateKeyword.bind(this , 'searchingKeyword', row.indexKey )}                  
-                        updateSearchingType={this.updateSearchingType.bind(this , 'searchingType', row.indexKey )}                  
-                        updateSearchingColumn={this.updateSearchingColumn.bind(this , 'searchingColumn', row.indexKey )}                  
-                        updateDateTime={this.updateDateTime.bind(this , 'searchingKeyword', row.indexKey )}                  
+                        removeSearchCriteria={this.removeSearchCriteria}
+                        searchingKeyword = {row.searchingKeyword}
+                        searchingType = {row.searchingType}
+                        searchingColumn = {row.searchingColumn}
+                        updateKeyword={this.updateKeyword.bind(this , 'searchingKeyword', row.indexKey )}
+                        updateSearchingType={this.updateSearchingType.bind(this , 'searchingType', row.indexKey )}
+                        updateSearchingColumn={this.updateSearchingColumn.bind(this , 'searchingColumn', row.indexKey )}
+                        updateDateTime={this.updateDateTime.bind(this , 'searchingKeyword', row.indexKey )}
                         makeSearch={this.makeSearch}
-                        searchingTypes={this.props.searchConfig.searchingTypes} 
-                        dateSearchingTypes={this.props.searchConfig.dateSearchingTypes ? this.props.searchConfig.dateSearchingTypes : [{"key": "<?","label": "Less Than"},{"key": ">?","label": "Greater Than"}] } 
-                        searchingColumns={this.props.searchConfig.searchingColumns} 
+                        searchingTypes={this.props.searchConfig.searchingTypes}
+                        dateSearchingTypes={this.props.searchConfig.dateSearchingTypes ? this.props.searchConfig.dateSearchingTypes : [{"key": "<?","label": "Less Than"},{"key": ">?","label": "Greater Than"}] }
+                        searchingColumns={this.props.searchConfig.searchingColumns}
                         isFirst={row.isFirst}
                         hasResultMap={this.props.hasResultMap === true ? this.props.hasResultMap : false}
                         toggleMap={this.toggleMap}
@@ -352,7 +352,7 @@ export class Search extends Component {
           }
 
         <div className={"fgReact_componentContainer " + (this.props.isFluid === true ? " container-fluid " : " container ")}>
-          { 
+          {
             this.state.hasLoaded ? (
             <ResultTable
               data={this.state.data}
@@ -367,14 +367,15 @@ export class Search extends Component {
               dynamicResultFunction={this.dynamicResultFunction.bind(this)}
               dynamicResultFunctionPage={this.dynamicResultFunctionPage.bind(this)}
               mapProjection={this.props.mapProjection ? this.props.mapProjection : "EPSG:4326"}
-              mapInteractions={this.props.mapInteractions ? this.props.mapInteractions : []} 
+              mapInteractions={this.props.mapInteractions ? this.props.mapInteractions : []}
               mapVisible={this.state.mapVisible}
               isHighlightRow={this.props.isHighlightRow === true ? this.props.isHighlightRow : false}
               keyColumns={this.props.keyColumns ? this.props.keyColumns : []}
               isDynamicWidth={this.props.isDynamicWidth}
               mapPopupInfo={this.state.popupInfo}
+              mapLayers={this.props.mapLayers}
             />
-            ) : 
+            ) :
             <FontAwesomeIcon className="centerSpinner fa-spin" icon={["fas", "spinner"]}/>
           }
         </div>

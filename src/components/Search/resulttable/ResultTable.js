@@ -372,6 +372,7 @@ export class ResultTable extends Component {
                 }}
                 featuresChildren={this.state.mapData}
                 mapPopupInfo={this.props.mapPopupInfo}
+                mapLayers={this.props.mapLayers}
                 />
               ) : (
                 <FontAwesomeIcon className="centerSpinner fa-spin" icon={["fas", "spinner"]}/>
