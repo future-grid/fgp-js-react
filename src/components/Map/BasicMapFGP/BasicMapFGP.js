@@ -15,7 +15,7 @@ import {defaults as defaultControls, OverviewMap} from 'ol/control.js';
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
 import {OSM, Vector as VectorSource} from 'ol/source.js';
 import Draw, {createRegularPolygon, createBox} from 'ol/interaction/Draw';
-import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style.js';
+import {Circle as CircleStyle, Circle, Fill, Stroke, Style} from 'ol/style.js';
 import {get as getProjection} from 'ol/proj';
 import {WMTS, TileArcGISRest} from 'ol/source';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
@@ -101,47 +101,20 @@ export class BasicMapFGP extends Component {
             // demo data
             // props.mapHighlightPoints = ["001350030033dfe4"];
             const highlightLayer = this.state.highlightLayer;
+            // clear layer
+            highlightLayer.getSource().clear();
             props.mapHighlightPoints.forEach(point => {
                 layers.forEach(layer => {
                     // put all features together
                     let features = layer.getSource().getFeatures();
                     features.forEach(feature => {
-                        //
                         const props = feature.getProperties();
                         if(props.name === point){
                             let coordinates = feature.getGeometry().getCoordinates();
-                            // add feature to layer
-                            let featuresNew = [{
-                                type: 'Feature',
-                                id:
-                                    '_' +
-                                    Math.random()
-                                        .toString(36)
-                                        .substr(2, 11),
-                                // additionalInfo: child.additionalInfo,
-                                geometry: {
-                                    type: 'Point',
-                                    crs: {
-                                        type: 'name',
-                                        properties: {
-                                            name: this.props.mapProjection
-                                        }
-                                    },
-                                    coordinates: coordinates
-                                },
-                                geometry_name: 'geom',
-                                properties: {
-                                    lat: coordinates[0],
-                                    lng: coordinates[1],
-                                    id:
-                                        '_' +
-                                        Math.random()
-                                            .toString(36)
-                                            .substr(2, 11),
-                                    name: "wtf"
-                                }
-                            }];
-                            highlightLayer.getSource().addFeatures(new GeoJSON().readFeatures(featuresNew));
+                            let _newFeature = new Feature({
+                                geometry: new Point(coordinates)
+                            });
+                            highlightLayer.getSource().addFeature(_newFeature);
                         }
                     });
                 });
@@ -485,17 +458,22 @@ export class BasicMapFGP extends Component {
             });
             // add highlight layer
             let highlightLayer = new VectorLayer({
-                source: new VectorSource(),
+                source: new VectorSource({
+                    features: []
+                }),
                 style: new Style({
-                    stroke: new Stroke({
-                      color: '#f00',
-                      width: 1
-                    }),
-                    fill: new Fill({
-                      color: 'rgba(255,0,0,0.1)'
+                    image: new Circle({
+                        radius: 10,
+                        stroke: new Stroke({
+                            color: 'red',
+                            width: 2
+                        }),
+                        fill: new Fill({
+                            color: 'blue'
+                        })
                     })
-                  })
-                });
+                })
+            });
 
             this.setState({highlightLayer: highlightLayer});
             map.addLayer(highlightLayer);

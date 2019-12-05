@@ -6,9 +6,13 @@ import FgpGraph from '@future-grid/fgp-graph';
 import './StandardGraphV2.css'
 
 export class StandardGraphV2 extends Component {
+
+    
+
     constructor(props){
         super(props);
         this.state = {
+            mainGraph: null,
             childGraphs: [],
             sampleEntities : [
                 {
@@ -78,11 +82,35 @@ export class StandardGraphV2 extends Component {
     }
 
 
+    /**
+     * 
+     * @param {*} props 
+     */
+    componentWillReceiveProps(props){
+
+        if(props.highlight && props.highlight.length > 0){
+            //
+            if(this.state.mainGraph){
+                console.info("highlights:", props.highlight);
+                this.state.mainGraph.highlightSeries(props.highlight);
+            }
+        } 
+        
+        // else if(props.highlight && props.highlight.length == 0) {
+        //     if(this.state.mainGraph){
+        //         console.info("highlights:", props.highlight);
+        //         this.state.mainGraph.highlightSeries([]);
+        //     }
+        // }
+
+    }
+
+
 
     componentDidMount(){
         let formatter = this.props.timeZone ? new Formatters(this.props.timeZone) : new Formatters('Australia/Melbourne')
         let dataService = new DataServiceV2(this.props.baseUrl)
-
+        let mainGraph;
         if(this.props.debugging === true){
             var vdConfig = {
                 name: 'device view',
@@ -122,7 +150,7 @@ export class StandardGraphV2 extends Component {
                 timezone: 'Australia/Melbourne'
                 // timezone: 'Pacific/Auckland'
             };
-            var graph1 = new FgpGraph(document.getElementById(this.state.id), [
+            mainGraph = new FgpGraph(document.getElementById(this.state.id), [
                 vdConfig
             ]);
         }else{
@@ -161,10 +189,10 @@ export class StandardGraphV2 extends Component {
                 };
                 completeConfigs.push(vdConfig)
             });
-            var graph1 = new FgpGraph(document.getElementById(this.state.id), completeConfigs);
+            mainGraph = new FgpGraph(document.getElementById(this.state.id), completeConfigs);
         }
         // render graph
-        graph1.initGraph();
+        mainGraph.initGraph();
         
         if(this.props.isParent === true){
             console.log('> Creating child graphs...')
@@ -206,11 +234,6 @@ export class StandardGraphV2 extends Component {
                     };
                     childGraphViewConfigs.push(graphConf);
                 });
-
-                
-
-
-
                 var graphX = new FgpGraph(document.getElementById(graphConfig.id), childGraphViewConfigs);
                 graphX.initGraph();
                 childGraphArray.push(graphX)
@@ -218,13 +241,13 @@ export class StandardGraphV2 extends Component {
             this.setState({
                 childGraphs:childGraphArray
             })
-            graph1.setChildren(childGraphArray)
+            mainGraph.setChildren(childGraphArray)
         }
     
         this.setState({
             formatters : formatter,
             dataService : dataService,
-            graph1 : graph1
+            mainGraph : mainGraph
         })
     }
 
