@@ -180,8 +180,10 @@ export class DeviceWidget extends Component {
                                             mapHighlightPoints={this.props.mapHighlightPoints}
                                             isBefore1910={this.props.isBefore1910}
                                             mapProjection={this.props.mapProjection}
+                                            showDescriptionOnHover={this.props.showDescriptionOnHover}
                                             featuresParent={{
                                                 deviceName: this.props.deviceName,
+                                                deviceDescription: this.props.extensions.device.description,
                                                 lat: this.props.extensions["location"] ?
                                                     this.props.extensions.location["lat"] ?
                                                         this.props.extensions.location.lat : this.props.extensions.location["latitude"] ?

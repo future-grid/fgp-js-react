@@ -354,6 +354,7 @@ export class BasicMapFGP extends Component {
                             .toString(36)
                             .substr(2, 11),
                     name: this.props.featuresParent.deviceName,
+                    description: this.props.featuresParent.deviceDescription,
                     additionalInfo: this.props.featuresParent.additionalInfo,
                     borderColor: this.props.featuresParentStyles.borderColor,
                     borderWidth: this.props.featuresParentStyles.borderWidth,
@@ -477,7 +478,7 @@ export class BasicMapFGP extends Component {
 
             this.setState({highlightLayer: highlightLayer});
             map.addLayer(highlightLayer);
-            
+
 
             let drawSource = new VectorSource({wrapX: false});
             let drawLayer = new VectorLayer({
@@ -688,7 +689,7 @@ export class BasicMapFGP extends Component {
                             }
                         });
 
-                        
+
                         // call outside
                         if(selectedPoints.length > 0){
                             let points = [];
@@ -846,7 +847,7 @@ export class BasicMapFGP extends Component {
                 </div>
                 :""
             }
-            <MapPopup visibility={this.state.popupVisible} focusedFeatures={this.state.focusedFeatures} mapPopupInfo={this.props.mapPopupInfo}
+            <MapPopup visibility={this.state.popupVisible} focusedFeatures={this.state.focusedFeatures} mapPopupInfo={this.props.mapPopupInfo} showDescriptionOnHover={this.props.showDescriptionOnHover}
             />
             {   this.state.drawInteraction === true ? (
                     <BasicMapDrawSelector
