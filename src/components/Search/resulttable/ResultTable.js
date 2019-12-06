@@ -30,6 +30,18 @@ export class ResultTable extends Component {
     // this.toggleMap = this.toggleMap.bind(this);
   }
 
+  /**
+     * props event listener
+     */
+    componentWillReceiveProps(props){
+      if(props.highlight.length > 0){
+          let makeupDevices = [];
+          console.info("highlightDevices: ", props.highlight);
+          this.highlightRow(props.highlight);
+      }
+  }
+
+
   componentDidMount(){
     this.buildData(this.props.data)
     this.buildColumns(this.props.columns)
@@ -315,9 +327,8 @@ export class ResultTable extends Component {
     //console.log(mapInteractions);
     // put the click feature on top of result table
     let highlightedRow = [];
-    mapInteractions.forEach((feature)=>{
-      //console.log(feature.getProperties());
-      let featureObj = feature.getProperties();
+    mapInteractions.forEach((featureObj)=>{
+      //let featureObj = feature.getProperties();
       if(featureObj !== undefined && featureObj !== null){
         if(this.props.keyColumns !== undefined || this.props.keyColumns !== null){
           this.state.originaldata.forEach((row) => {

@@ -690,7 +690,6 @@ export class BasicMapFGP extends Component {
                             }
                         });
 
-
                         // call outside
                         if(selectedPoints.length > 0){
                             let points = [];
@@ -725,6 +724,7 @@ export class BasicMapFGP extends Component {
         if (this.state.redirectInteraction !== true) {
             if (this.state.drawType === 'None') {
                 let selectedFeatures = [...this.state.selectedFeatures];
+                let highlightFeatures = [];
                 let resettingFeatures = [];
                 // adding or removing feature from list of selected features, then setting state
                 this.state.map.forEachFeatureAtPixel(event.pixel, feature => {
@@ -737,8 +737,11 @@ export class BasicMapFGP extends Component {
                             )[0]
                         );
                 });
+                selectedFeatures.forEach((feature)=>{
+                    highlightFeatures.push(feature.getProperties());
+                })
                 if (this.props.isHighlightRow) {
-                    this.props.highlightRow(selectedFeatures);
+                    this.props.highlightRow(highlightFeatures);
                 }
 
                 var image = new CircleStyle({

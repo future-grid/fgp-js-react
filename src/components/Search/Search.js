@@ -369,6 +369,7 @@ export class Search extends Component {
               mapProjection={this.props.mapProjection ? this.props.mapProjection : "EPSG:4326"}
               mapInteractions={this.props.mapInteractions ? this.props.mapInteractions : []}
               mapVisible={this.state.mapVisible}
+              highlight={this.props.highlight}
               isHighlightRow={this.props.isHighlightRow === true ? this.props.isHighlightRow : false}
               keyColumns={this.props.keyColumns ? this.props.keyColumns : []}
               isDynamicWidth={this.props.isDynamicWidth}
