@@ -280,6 +280,7 @@ export class BasicMapFGP extends Component {
                                         .toString(36)
                                         .substr(2, 11),
                                 name: child.name,
+                                description: child.description,
                                 borderColor: this.props.featuresChildren[x]
                                     .style.borderColor,
                                 borderWidth: this.props.featuresChildren[x]
