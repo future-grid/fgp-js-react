@@ -34,12 +34,22 @@ export class ResultTable extends Component {
      * props event listener
      */
     componentWillReceiveProps(props){
-      if(props.highlight.length > 0){
-          let makeupDevices = [];
-          console.info("highlightDevices: ", props.highlight);
+      if(props.highlight !== undefined && props.highlight.length > 0){
           this.highlightRow(props.highlight);
       }
-  }
+    }
+
+    componentDidUpdate(prevProps){
+      if(prevProps.data !== this.props.data){
+        // console.log(prevProps.data)
+        // console.log(this.props.data)
+        // console.log("Data changed in resultTable component")
+        this.buildData(this.props.data);
+        if(this.props.isDynamicWidth){
+          this.dynamicWidth(this.props.columns, this.props.data);
+        }
+      }
+    }
 
 
   componentDidMount(){
