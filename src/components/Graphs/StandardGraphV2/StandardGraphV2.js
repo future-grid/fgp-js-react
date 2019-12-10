@@ -114,6 +114,7 @@ export class StandardGraphV2 extends Component {
         if(this.props.debugging === true){
             var vdConfig = {
                 name: 'device view',
+                connectSeparatedPoints: true,
                 graphConfig: {
                     features: { 
                         zoom: true,
@@ -159,6 +160,7 @@ export class StandardGraphV2 extends Component {
             rawConfigs.forEach(config => {
                 var vdConfig = {
                     name: config.name,
+                    connectSeparatedPoints: config.connectSeparatedPoints? config.connectSeparatedPoints : true,
                     graphConfig: {
                         features: { 
                             zoom: config.graphConfig.features.zoom === false ? false : true ,
@@ -204,6 +206,7 @@ export class StandardGraphV2 extends Component {
                     let dateTime = viewConfig.graphConfig.initRange;
                     var graphConf = {
                         name: viewConfig.name,
+                        connectSeparatedPoints: viewConfig.connectSeparatedPoints? viewConfig.connectSeparatedPoints : true,
                         graphConfig: {
                             features: { 
                                 zoom: viewConfig.graphConfig.features.zoom === false ? false : true ,
