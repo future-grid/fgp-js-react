@@ -465,13 +465,13 @@ export class BasicMapFGP extends Component {
                 }),
                 style: new Style({
                     image: new Circle({
-                        radius: 10,
+                        radius: 4,
                         stroke: new Stroke({
                             color: 'red',
-                            width: 2
+                            width: 1
                         }),
                         fill: new Fill({
-                            color: 'blue'
+                            color: 'red'
                         })
                     })
                 })
@@ -551,6 +551,21 @@ export class BasicMapFGP extends Component {
                         vectorLayerChildrenArr[x].setStyle(stylesChild);
                     }
                 }
+
+                // change radius size for highlight layers
+                highlightLayer.setStyle(new Style({
+                    image: new Circle({
+                        radius: radius,
+                        stroke: new Stroke({
+                            color: 'red',
+                            width: 1
+                        }),
+                        fill: new Fill({
+                            color: 'red'
+                        })
+                    })
+                }));
+
             });
             map.updateSize();
         }
