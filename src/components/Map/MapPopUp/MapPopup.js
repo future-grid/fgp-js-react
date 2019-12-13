@@ -50,7 +50,8 @@ export class MapPopup extends Component {
                         this.props.focusedFeatures.map((feature, index)=>{
                             return (
                                 <div className={"fgpReactMapPopupFocusItem"} key={index}>
-                                    <span>{feature.type}: {feature.name}</span>
+                                    {feature.type ?
+                                    <span>{feature.type}: {feature.name}</span> : ""}
                                     {this.props.showDescriptionOnHover ?
                                       <div className={"fgpReactMapPopupInfo"} key={"desc_key"}>
                                         <span> Description: {feature.description}</span> 
