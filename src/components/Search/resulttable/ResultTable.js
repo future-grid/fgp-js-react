@@ -267,18 +267,41 @@ export class ResultTable extends Component {
         accessorArr.forEach( (accessor, i) => {
             path += row.original[accessor] +  "/"
         });
-        if(this.props.openInNewPage === true){
-          return (
-            <a target={"_blank"} href={`${window.location.origin}/${element.fgpRedirectRow}${path}`}>
-              {String(processedRow.value)}
-            </a>
-          )
+        // check if the row itself is allowed to redirect based on rules
+        if(element["fgpLimitRedirectAccessor"]){
+          if(element.fgpLimitRedirectCriteria === "notEmpty"){
+            if(row.original[element.fgpLimitRedirectAccessor]){
+              if(this.props.openInNewPage === true){
+                return (
+                  <a target={"_blank"} href={`${window.location.origin}/${element.fgpRedirectRow}${path}`}>
+                    {String(processedRow.value)}
+                  </a>
+                )
+              }else{
+                return (
+                  <NavLink to={`${element.fgpRedirectRow}${path}`}>
+                    {String(processedRow.value)}
+                  </NavLink>
+                )
+              }
+            }else{
+              return (<div>  {String(processedRow.value)} </div>)
+            }
+          }
         }else{
-          return (
-            <NavLink to={`${element.fgpRedirectRow}${path}`}>
-              {String(processedRow.value)}
-            </NavLink>
-          )
+          if(this.props.openInNewPage === true){
+            return (
+              <a target={"_blank"} href={`${window.location.origin}/${element.fgpRedirectRow}${path}`}>
+                {String(processedRow.value)}
+              </a>
+            )
+          }else{
+            return (
+              <NavLink to={`${element.fgpRedirectRow}${path}`}>
+                {String(processedRow.value)}
+              </NavLink>
+            )
+          }
         }
       }else{
         return(<div> {String(processedRow.value)} </div>)
