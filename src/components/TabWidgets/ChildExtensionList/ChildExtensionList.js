@@ -15,12 +15,12 @@ export class ChildExtensionList extends Component {
     
 
     getChildExt(){
-        let selectedDeviceNames;
-        this.props.childDeviceNames.forEach( childType => {
-            childType.type === this.props.childType ? selectedDeviceNames = childType.deviceNames : null;
-        });
+        // let selectedDeviceNames;
+        // this.props.childDeviceNames.forEach( childType => {
+        //     childType.type === this.props.childType ? selectedDeviceNames = childType.deviceNames : null;
+        // });
         axios.post(`${this.props.baseUrl}${this.props.childType}/${this.props.childExtension}`,
-            {devices : selectedDeviceNames}
+            {devices : this.props.childDeviceNames}
         ).then( resp => {
             this.setState({
                 data: resp.data
