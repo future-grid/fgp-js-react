@@ -517,7 +517,11 @@ export class BasicMapFGP extends Component {
             // map.add
             // binding the hover event (popup dialogue)
             map.on('pointermove', this.handleMapHover.bind(this));
-            map.on('click', this.handleMapClick.bind(this, map));
+            // map.on('click', );
+
+            map.on('dblclick', this.handleMapClick.bind(this, map));
+
+
             // this.handleDrawingSelection.bind(this, map)
             // changing the size of the features on the map with zoom level
             map.getView().on('change:resolution', function(evt) {
