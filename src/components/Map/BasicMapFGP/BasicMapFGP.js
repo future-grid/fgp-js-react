@@ -89,21 +89,44 @@ export class BasicMapFGP extends Component {
                     borderWidth: 2
                 }
         };
+        this.featureWithProperties = [],
         // this.buildMap = this.buildMap.bind(this)
         this.updateExternalLayers = this.updateExternalLayers.bind(this);
     }
 
 
-    componentWillReceiveProps(props){
-        if(props.mapHighlightPoints && props.mapHighlightPoints.length > 0){
+    componentWillUpdate(props){
+
+        if(this.props.mapHighlightPoints && this.props.mapHighlightPoints.length > 0){
+
+            let realPoints = [];
+            this.props.mapHighlightPoints.forEach(_p => {
+                if(_p && _p != ""){
+                    realPoints.push(_p);
+                }
+            });
+
+            if(realPoints.length  === 0){
+                return 0;
+            }
+
             // highlight on map
             const layers = this.state.featuresLayerChildren;
             // demo data
             // props.mapHighlightPoints = ["001350030033dfe4"];
-            const highlightLayer = this.state.highlightLayer;
+            
             // clear layer
-            highlightLayer.getSource().clear();
-            props.mapHighlightPoints.forEach(point => {
+
+            console.info("clear highlight layer");
+            const highlightLayer = this.state.highlightLayer;
+            if(highlightLayer){
+                highlightLayer.getSource().clear();
+            }
+            
+            console.info("highlight points : ", this.props.mapHighlightPoints);
+
+            this.featureWithProperties= [];
+            this.props.mapHighlightPoints.forEach(point => {
                 layers.forEach(layer => {
                     // put all features together
                     let features = layer.getSource().getFeatures();
@@ -112,13 +135,17 @@ export class BasicMapFGP extends Component {
                         if(props.name === point){
                             let coordinates = feature.getGeometry().getCoordinates();
                             let _newFeature = new Feature({
-                                geometry: new Point(coordinates)
+                                geometry: new Point(coordinates),
+                                properties: feature.getProperties()
                             });
                             highlightLayer.getSource().addFeature(_newFeature);
+                            this.featureWithProperties.push(feature.getProperties());
                         }
                     });
                 });
             });
+        } else {
+            
         }
     }
 
@@ -455,9 +482,21 @@ export class BasicMapFGP extends Component {
             }
 
             this.setState({map: map});
+
+            // add external layers
+            if(this.props.mapLayers){
+                this.props.mapLayers.forEach((layer)=>{
+                  this.addExternalLayers(map, layer);
+                });
+              }
+
             vectorLayerChildrenArr.forEach(layer => {
                 map.addLayer(layer);
             });
+
+            
+
+
             // add highlight layer
             let highlightLayer = new VectorLayer({
                 source: new VectorSource({
@@ -507,17 +546,16 @@ export class BasicMapFGP extends Component {
             map.addLayer(vectorLayerParent);
             map.addLayer(vectorLayerSelectedFeatures);
 
-            // add external layers
-            if(this.props.mapLayers){
-              this.props.mapLayers.forEach((layer)=>{
-                this.addExternalLayers(map, layer);
-              });
-            }
+            
 
             // map.add
             // binding the hover event (popup dialogue)
             map.on('pointermove', this.handleMapHover.bind(this));
-            map.on('click', this.handleMapClick.bind(this, map));
+            map.on('click', this.handleMapSelect.bind(this, map));
+
+            map.on('dblclick', this.handleMapClick.bind(this, map));
+
+
             // this.handleDrawingSelection.bind(this, map)
             // changing the size of the features on the map with zoom level
             map.getView().on('change:resolution', function(evt) {
@@ -735,6 +773,121 @@ export class BasicMapFGP extends Component {
         });
     }
 
+
+    handleMapSelect(map, event){
+        console.info("start select point on map!");
+        // tell outside I got something to highlight
+        let callback = this.state.highlight;
+        let selectedFeatures = [];
+        this.state.map.forEachFeatureAtPixel(event.pixel, feature => {
+            const fP = feature.getProperties();
+            console.info("found feature: ", fP);
+            const foundExistFeature = selectedFeatures.filter(existFeature => {
+                const existP = existFeature.getProperties();
+                return fP.name && fP.name === existP.name;
+            });
+            if(foundExistFeature.length === 0 && fP.name){
+                console.info("same feature not found ", feature);
+                selectedFeatures.push(feature);
+            } else {
+                console.info("same feature found, ignroe ", foundExistFeature);
+            }
+        });
+        
+        if(selectedFeatures.length > 0){
+            let coordinates = [];
+            // 
+            console.info("start adding feature into highlight array!");
+            let featuresNeedRemove = [];
+            selectedFeatures.forEach(_feature => {
+                const newFeature = _feature.getProperties();
+                coordinates = _feature.getGeometry().getCoordinates();
+                // exists?
+                const featureExist = this.featureWithProperties.filter(_f => {
+                    return _f.name === newFeature.name;
+                });
+                
+                if(featureExist.length === 0){
+                    console.info("highlight device not found, create one!", _feature);
+                    this.featureWithProperties.push(_feature.getProperties());
+                } else {
+                    console.info("highlight device exist! ", featureExist);
+                    featuresNeedRemove = featuresNeedRemove.concat(featureExist);
+                }
+                
+            });
+            // 
+            if(featuresNeedRemove.length > 0){
+                console.info("need to remove:  ", featuresNeedRemove);
+                let newHighlightArray = [];
+
+                this.featureWithProperties.forEach(_f => {
+
+                    let needsToRemove = false;
+                    featuresNeedRemove.forEach(_r => {
+                        if(_r.name === _f.name){
+                            needsToRemove = true;
+                        }
+                    });
+
+                    if(!needsToRemove){
+                        newHighlightArray.push(_f); 
+                    }
+                });
+
+                this.featureWithProperties = newHighlightArray;
+            }
+
+
+            console.info("send highlight points to graph!", this.featureWithProperties);
+            // just need to add one point on highlight layer
+            if(coordinates.length > 0 && featuresNeedRemove.length === 0 ){
+                let _newFeature = new Feature({
+                    geometry: new Point(coordinates),
+                    properties: {}
+                });
+                this.state.highlightLayer.getSource().addFeature(_newFeature);
+            } else if(coordinates.length > 0 && featuresNeedRemove.length != 0 ) {
+                // remove highlight point on map
+                const highlightFeatures = this.state.highlightLayer.getSource().getFeatures();
+                let featureRM = null;
+                highlightFeatures.forEach(_f => {
+                    const coor = _f.getGeometry().getCoordinates();
+
+                    if(coor[0] === coordinates[0] && coor[1] === coordinates[1]){
+                        // found it
+                        featureRM = _f;
+                    }
+                });
+
+                if(featureRM){
+                    this.state.highlightLayer.getSource().removeFeature(featureRM);
+                }
+
+            }
+
+            if(this.featureWithProperties.length === 0){
+                callback(["bring all back"]);
+            } else {
+                callback(this.featureWithProperties);
+            }
+        } 
+        
+
+
+
+        // else {
+        //     // clean highlight
+        //     this.state.highlightLayer.getSource().clear();
+        //     this.setState({featureWithProperties: []});
+        //     callback([]);
+        // }
+
+
+    }
+
+
+
     handleMapClick(map, event) {
         if (this.state.redirectInteraction !== true) {
             if (this.state.drawType === 'None') {
@@ -830,7 +983,11 @@ export class BasicMapFGP extends Component {
         if (this.state.drawType === 'None' || this.state.drawInteraction !== true) {
             let featureArr = [];
             this.state.map.forEachFeatureAtPixel(event.pixel, feature => {
-                featureArr.push(feature.values_);
+                const prop = feature.getProperties();
+                if(prop && prop.name){
+                    featureArr.push(feature.values_);
+                }
+                
             });
             if (featureArr.length > 0) {
                 this.setState({

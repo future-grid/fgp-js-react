@@ -37,7 +37,8 @@ export class DataServiceV2{
                 {
                     "start" : range.start,
                     "end" : range.end,
-                    "devices" : ids
+                    "devices" : ids,
+                    "fields" : fields
                 })
                 .then(res => {
                     //console.log(res);
