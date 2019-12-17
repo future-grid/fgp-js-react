@@ -86,10 +86,15 @@ export class StandardGraphV2 extends Component {
      * 
      * @param {*} props 
      */
-    componentWillReceiveProps(props){
+    // componentWillReceiveProps(props){
 
+        
+
+    // }
+
+
+    componentWillReceiveProps(props){
         if(props.highlight && props.highlight.length > 0){
-            //
             if(this.state.mainGraph){
                 console.info("highlights:", props.highlight);
                 this.state.mainGraph.highlightSeries(props.highlight);
@@ -102,9 +107,7 @@ export class StandardGraphV2 extends Component {
         //         this.state.mainGraph.highlightSeries([]);
         //     }
         // }
-
     }
-
 
 
     componentDidMount(){
