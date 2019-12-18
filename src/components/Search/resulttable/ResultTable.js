@@ -141,7 +141,7 @@ export class ResultTable extends Component {
           }else{
             processedRow.value = Math.round(row.value);
             if(element["fgpAdditionalSymbol"]){
-              processedRow.value = `${(processedRow.value * 100)}${element.fgpAdditionalSymbol}`
+              processedRow.value = `${Math.trunc(processedRow.value * 100)}${element.fgpAdditionalSymbol}`
             }
           }
         }
