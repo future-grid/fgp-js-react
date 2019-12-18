@@ -89,7 +89,7 @@ export class BasicMapFGP extends Component {
                     borderWidth: 2
                 }
         };
-        this.featureWithProperties = [],
+        this.featureWithProperties = [];
         // this.buildMap = this.buildMap.bind(this)
         this.updateExternalLayers = this.updateExternalLayers.bind(this);
     }
