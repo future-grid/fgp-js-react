@@ -795,6 +795,7 @@ export class BasicMapFGP extends Component {
         });
         
         if(selectedFeatures.length > 0){
+            
             let coordinates = [];
             // 
             console.info("start adding feature into highlight array!");
@@ -965,16 +966,26 @@ export class BasicMapFGP extends Component {
                 });
             }
         } else if (this.state.redirectInteraction === true && this.state.drawType == "None") {
+            
+
             let selectedFeatures = [...this.state.selectedFeatures];
             let resettingFeatures = [];
             // redirecting
             this.state.map.forEachFeatureAtPixel(event.pixel, feature => {
-                window.open(
-                    `http://${window.location.host}/${
-                        feature.getProperties().type
-                    }/${feature.getProperties().name}`,
-                    '_blank'
-                );
+                let p = feature.getProperties();
+                if(p && p.type && p.name){
+                    // disable dblclick for zoom in
+                    event.stopPropagation();
+                    event.preventDefault();
+                    window.open(
+                        `http://${window.location.host}/${
+                            feature.getProperties().type
+                        }/${feature.getProperties().name}`,
+                        '_blank'
+                    );
+
+                }
+                
             });
         }
     }
