@@ -36,6 +36,7 @@ export class Search extends Component {
       hasLoaded : false,
       data : []
     };
+
     // console.log(this.props)
     this.addSearchCriteria = this.addSearchCriteria.bind(this);
     this.removeSearchCriteria = this.removeSearchCriteria.bind(this);
