@@ -45,6 +45,7 @@ export class ResultTable extends Component {
         // console.log(this.props.data)
         // console.log("Data changed in resultTable component")
         this.buildData(this.props.data);
+        this.buildColumns(this.props.columns);
         if(this.props.isDynamicWidth){
           this.dynamicWidth(this.props.columns, this.props.data);
         }
