@@ -136,12 +136,12 @@ export class ResultTable extends Component {
           if(element["fgpMutateConfig"]){
             processedRow.value = Math.round((row.value * Math.pow(10, element.fgpMutateConfig))) / Math.pow(10, element.fgpMutateConfig);
             if(element["fgpAdditionalSymbol"]){
-              processedRow.value = `${processedRow.value * 100}${element.fgpAdditionalSymbol}`
+              processedRow.value = `${Math.trunc(processedRow.value * 100)}${element.fgpAdditionalSymbol}`
             }
           }else{
             processedRow.value = Math.round(row.value);
             if(element["fgpAdditionalSymbol"]){
-              processedRow.value = `${(processedRow.value * 100)}${element.fgpAdditionalSymbol}`
+              processedRow.value = `${Math.trunc(processedRow.value * 100)}${element.fgpAdditionalSymbol}`
             }
           }
         }
