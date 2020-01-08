@@ -113,7 +113,7 @@ export class SearchRow extends Component {
               )
             }
             {
-              this.props.exportCsv === true ? (
+              this.props.exportCsv === true && this.props.isFirst === true ? (
                 <div style={{"display" : "contents"}}>
                   <CSVLink data={this.props.csvData} filename={"search_result.csv"} className="btn btn-secondary" style={{"marginLeft":"10px"}}>
                       <FontAwesomeIcon className="" icon={["fas", "download"]}>
