@@ -170,7 +170,9 @@ export class StandardGraphV2 extends Component {
                             scroll: config.graphConfig.features.scroll === false ? false : true ,
                             rangeBar: config.graphConfig.features.rangeBar === false ? false : true ,
                             legend: config.graphConfig.features.legend ? config.graphConfig.features.legend : formatter.legendForAllSeries,
-                            exports: ["data"]
+                            exports: ["data"],
+                            rangeLocked: config.graphConfig.features.rangeLocked ? config.graphConfig.features.rangeLocked : false,
+                            toolbar: config.graphConfig.features.toolbar 
                         },
                         entities: config.graphConfig.entities,
                         rangeEntity: config.graphConfig.rangeEntity,
@@ -216,7 +218,9 @@ export class StandardGraphV2 extends Component {
                                 scroll: viewConfig.graphConfig.features.scroll === false ? false : true ,
                                 rangeBar: viewConfig.graphConfig.features.rangeBar === false ? false : true ,
                                 legend: viewConfig.graphConfig.features.legend ? viewConfig.graphConfig.features.legend : formatter.legendForAllSeries,
-                                exports: ["data"]
+                                exports: ["data"],
+                                rangeLocked: viewConfig.graphConfig.features.rangeLocked ? viewConfig.graphConfig.features.rangeLocked : false,
+                                toolbar: viewConfig.graphConfig.features.toolbar
                             },
                             entities: viewConfig.graphConfig.entities,
                             rangeEntity: viewConfig.graphConfig.rangeEntity,
