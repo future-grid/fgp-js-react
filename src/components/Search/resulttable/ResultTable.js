@@ -30,9 +30,7 @@ export class ResultTable extends Component {
     // this.toggleMap = this.toggleMap.bind(this);
   }
 
-  /**
-     * props event listener
-     */
+    
     componentWillReceiveProps(props){
       if(props.highlight !== undefined && props.highlight.length > 0){
           this.highlightRow(props.highlight);
@@ -430,42 +428,76 @@ export class ResultTable extends Component {
         <div style={{"display":"contents"}}>
         {
           this.state.dataReady === true && this.state.columnsReady ?  (
-            <ReactTable
-                getTrProps={(state, rowInfo, column, instance) => {
-                  if(rowInfo!==undefined && rowInfo!== null & rowInfo.index < this.state.highlightedRowLength){
-                    return {
-                      style: {
-                        background: '#d28f287d'
+            this.props.serverSidePagination === true ? (
+              <ReactTable
+                  getTrProps={(state, rowInfo, column, instance) => {
+                    if(rowInfo!==undefined && rowInfo!== null & rowInfo.index < this.state.highlightedRowLength){
+                      return {
+                        style: {
+                          background: '#d28f287d'
+                        }
                       }
                     }
-                  }
-                  else{
-                    return {
-                      style: {
-                        background: 'white'
+                    else{
+                      return {
+                        style: {
+                          background: 'white'
+                        }
                       }
                     }
-                  }
-                }}
-                showPagination={this.props.showPagination}
-                showPageSizeOptions={this.props.showPageSizeOptions}
-                showPageJump={this.props.showPageJump}
-                filterable={this.props.filterable}
-                data={this.state.data}
-                columns={this.state.columns}
-                minRows={this.props.defaultRowSize}
-                defaultPageSize={this.props.defaultPageSize ? this.props.defaultPageSize : 25}
-                pageSizeOptions={this.props.defaultRowSizeArray}
-                defaultFilterMethod={filterCaseInsensitive}
-                // onPageChange={(pageSize,pageIndex) => {
-                //   console.log("pagesize = ", pageIndex, "pageindex = ", pageSize)
-                //   this.props.dynamicResultFunctionPage(pageIndex)
-                // }}
-                // onPageSizeChange={(pageSize,pageIndex) => {
-                //   console.log("pagesize = ", pageIndex, "pageindex = ", pageSize)
-                //   this.props.dynamicResultFunction(pageSize,pageIndex)
-                // }}
-            />
+                  }}
+                  showPagination={this.props.showPagination}
+                  showPageSizeOptions={this.props.showPageSizeOptions}
+                  showPageJump={this.props.showPageJump}
+                  filterable={this.props.filterable}
+                  data={this.state.data}
+                  columns={this.state.columns}
+                  minRows={this.props.defaultRowSize}
+                  defaultPageSize={this.props.defaultPageSize ? this.props.defaultPageSize : 25}
+                  pageSizeOptions={this.props.defaultRowSizeArray}
+                  defaultFilterMethod={filterCaseInsensitive}
+                  page={this.props.clientPage}
+                  // onPageChange={(pageSize,pageIndex) => {
+                  //   console.log("pagesize = ", pageIndex, "pageindex = ", pageSize)
+                  //   this.props.dynamicResultFunctionPage(pageIndex)
+                  // }}
+                  onPageChange={this.props.onPageChange}
+                  // onPageSizeChange={(pageSize,pageIndex) => {
+                  //   console.log("pagesize = ", pageIndex, "pageindex = ", pageSize)
+                  //   this.props.dynamicResultFunction(pageSize,pageIndex)
+                  // }}
+                  onPageSizeChange={this.props.onRowCountChange}
+              />
+            ) : (
+              <ReactTable
+                  getTrProps={(state, rowInfo, column, instance) => {
+                    if(rowInfo!==undefined && rowInfo!== null & rowInfo.index < this.state.highlightedRowLength){
+                      return {
+                        style: {
+                          background: '#d28f287d'
+                        }
+                      }
+                    }
+                    else{
+                      return {
+                        style: {
+                          background: 'white'
+                        }
+                      }
+                    }
+                  }}
+                  showPagination={this.props.showPagination}
+                  showPageSizeOptions={this.props.showPageSizeOptions}
+                  showPageJump={this.props.showPageJump}
+                  filterable={this.props.filterable}
+                  data={this.state.data}
+                  columns={this.state.columns}
+                  minRows={this.props.defaultRowSize}
+                  defaultPageSize={this.props.defaultPageSize ? this.props.defaultPageSize : 25}
+                  pageSizeOptions={this.props.defaultRowSizeArray}
+                  defaultFilterMethod={filterCaseInsensitive}
+              />
+            )
           ) : (
             <FontAwesomeIcon className="centerSpinner fa-spin" icon={["fas", "spinner"]}/>
           )
