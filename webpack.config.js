@@ -31,6 +31,7 @@ module.exports = {
   },
   externals: {
     'react': 'commonjs react',
-    'axios': 'axios'
+    'axios': 'axios',
+    'FgpGraph': '@future-grid/fgp-graph'
   }
 };
