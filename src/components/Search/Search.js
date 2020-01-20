@@ -123,7 +123,7 @@ export class Search extends Component {
       let query_rsql = [];
   
       this.state.searchRows.forEach(_c => {
-        if(_c.searchingType === "==*?*" || _c.searchingType === "==\"*?*\""){
+        if(_c.searchingType === "==*?*" || _c.searchingType === "==\"*?*\"" ||  _c.searchingType === "!=*?*"){
           // var _tempSearch = _c.searchingKeyword.replace("\"", "\\\"");
 
           var items = [];
@@ -132,7 +132,7 @@ export class Search extends Component {
           if(_c.searchingType === "==\"*?*\""){
               // single like address with comma
             newSearch = _c.searchingKeyword;
-          }else if(_c.searchingType === "==*?*"){
+          }else if(_c.searchingType === "==*?*" ||  _c.searchingType === "!=*?*"){
                // multi split by comma
             for(var i = 0; i < _c.searchingKeyword.split(',').length; i++){
               items.push(_c.searchingKeyword.split(',')[i].trim());
@@ -143,12 +143,16 @@ export class Search extends Component {
             if(_c.searchingType === "==\"*?*\""){
               // check
               query_rsql.push(_c.searchingColumn + _c.searchingType.replace("?", newSearch) + "");
-            }else if(_c.searchingType === "==*?*"){
+            }else if(_c.searchingType === "==*?*" ||  _c.searchingType === "!=*?*"){
               var final = "";
               items.forEach((_item, _in)=>{
-                var _tempRSQL = _c.searchingColumn + "" + "==\"*?*\"".replace("?", _item);
+                if(_c.searchingType === "!=*?*"){
+                  var _tempRSQL = _c.searchingColumn + "" + "!=\"?\"".replace("?", _item);
+                }else{
+                  var _tempRSQL = _c.searchingColumn + "" + "==\"*?*\"".replace("?", _item);
+                }
                 if(_in < items.length - 1){
-                  final += _tempRSQL + ",";
+                  _c.searchingType === "!=*?*" ? final += _tempRSQL + ";" : final += _tempRSQL + ",";
                 }else{
                   final += _tempRSQL;
                 }
@@ -172,7 +176,7 @@ export class Search extends Component {
             });
             _tempRSQL += ")";
                   query_rsql.push(_tempRSQL);
-          }else if(_c.searchingType === "==*?*"){
+          }else if(_c.searchingType === "==*?*" ||  _c.searchingType === "!=*?*"){
                   //
             final = "";
 
@@ -183,15 +187,15 @@ export class Search extends Component {
               this.state.searchConfig.searchingColumns.forEach((_column, _index)=>{
                 if(_column.column !== "all"){
                   if(_index <  this.state.searchConfig.searchingColumns.length -1){
-                    _tempRSQL += _column.column + "" + "==\"*?*\"".replace("?", _item) + ",";
+                    _c.searchingType === "!=*?*" ? _tempRSQL += _column.column + "" + "!=\"?\"".replace("?", _item) + ";" : _tempRSQL += _column.column + "" + "==\"*?*\"".replace("?", _item) + ",";
                   }else{
-                    _tempRSQL += _column.column + "" + "==\"*?*\"".replace("?", _item);
+                    _c.searchingType === "!=*?*" ? _tempRSQL += _column.column + "" + "!=\"*?*\"".replace("?", _item) : _tempRSQL += _column.column + "" + "==\"*?*\"".replace("?", _item);
                   }
                 }
               });
               _tempRSQL += ")";
               if(_in < items.length - 1){
-                final += _tempRSQL + ",";
+                _c.searchingType === "!=*?*" ? final += _tempRSQL + ";" : final += _tempRSQL + ",";
               }else{
                 final += _tempRSQL;
               }
@@ -303,7 +307,7 @@ export class Search extends Component {
         // meter_lookup_vw/data/350/0/meterSerialNum%20asc?nicMacId==%22*000011*%22,nicMacId==%22*0000135*%22
 
         this.state.searchRows.forEach(_c => {
-          if(_c.searchingType === "==*?*" || _c.searchingType === "==\"*?*\""){
+          if(_c.searchingType === "==*?*" || _c.searchingType === "==\"*?*\"" ||  _c.searchingType === "!=*?*"){
             // var _tempSearch = _c.searchingKeyword.replace("\"", "\\\"");
   
             var items = [];
@@ -312,7 +316,7 @@ export class Search extends Component {
             if(_c.searchingType === "==\"*?*\""){
                 // single like address with comma
               newSearch = _c.searchingKeyword;
-            }else if(_c.searchingType === "==*?*"){
+            }else if(_c.searchingType === "==*?*" ||  _c.searchingType === "!=*?*"){
                  // multi split by comma
               for(var i = 0; i < _c.searchingKeyword.split(',').length; i++){
                 items.push(_c.searchingKeyword.split(',')[i].trim());
@@ -323,12 +327,13 @@ export class Search extends Component {
               if(_c.searchingType === "==\"*?*\""){
                 // check
                 query_rsql.push(_c.searchingColumn + _c.searchingType.replace("?", newSearch) + "");
-              }else if(_c.searchingType === "==*?*"){
+              }else if(_c.searchingType === "==*?*" ||  _c.searchingType === "!=*?*"){
                 var final = "";
                 items.forEach((_item, _in)=>{
-                  var _tempRSQL = _c.searchingColumn + "" + "==\"*?*\"".replace("?", _item);
+                  var _tempRSQL
+                  _c.searchingType === "!=*?*" ?  _tempRSQL = _c.searchingColumn + "" + "!=\"?\"".replace("?", _item) : _c.searchingColumn + "" + "==\"*?*\"".replace("?", _item);
                   if(_in < items.length - 1){
-                    final += _tempRSQL + ",";
+                    _c.searchingType === "!=*?*" ? final += _tempRSQL + ";" : final += _tempRSQL + ",";
                   }else{
                     final += _tempRSQL;
                   }
@@ -352,7 +357,7 @@ export class Search extends Component {
               });
               _tempRSQL += ")";
                     query_rsql.push(_tempRSQL);
-            }else if(_c.searchingType === "==*?*"){
+            }else if(_c.searchingType === "==*?*" ||  _c.searchingType === "!=*?*"){
                     //
               final = "";
   
@@ -363,15 +368,15 @@ export class Search extends Component {
                 this.state.searchConfig.searchingColumns.forEach((_column, _index)=>{
                   if(_column.column !== "all"){
                     if(_index <  this.state.searchConfig.searchingColumns.length -1){
-                      _tempRSQL += _column.column + "" + "==\"*?*\"".replace("?", _item) + ",";
+                      _c.searchingType === "!=*?*" ?  _tempRSQL += _column.column + "" + "!=\"?\"".replace("?", _item) + ";" : _tempRSQL += _column.column + "" + "==\"*?*\"".replace("?", _item) + ",";
                     }else{
-                      _tempRSQL += _column.column + "" + "==\"*?*\"".replace("?", _item);
+                      _c.searchingType === "!=*?*" ? _tempRSQL += _column.column + "" + "!=\"?\"".replace("?", _item) : _tempRSQL += _column.column + "" + "==\"*?*\"".replace("?", _item);
                     }
                   }
                 });
                 _tempRSQL += ")";
                 if(_in < items.length - 1){
-                  final += _tempRSQL + ",";
+                  _c.searchingType === "!=*?*" ? final += _tempRSQL + ";" : final += _tempRSQL + ",";
                 }else{
                   final += _tempRSQL;
                 }
@@ -510,9 +515,11 @@ export class Search extends Component {
 
     // increase the current page number if the table component page number is more than current
     if(currentPageFromArgs  > currentPage_frontEnd){
+      console.log('changing page ')
       currentPage_frontEnd ++;
       // checking if we need to fetch more data (at last page)
       if(currentPagesCount_frontend === currentPage_frontEnd + 1 ){
+        console.log('reached end ')
         //increasing the count of the page in the query string
         currentQueryString = currentQueryString.split("/"+currentPage_serverSide+"/")[0] + 
           `/${currentPage_serverSide+1}/` +
@@ -551,10 +558,17 @@ export class Search extends Component {
           this.props.sspCache.setStorageKey()
           this.props.sspCache.setQueryStringData(currentQueryString, res.data)
         }
+      }else{
+        this.setState({
+          clientPage : currentPage_frontEnd,
+        })
       }
     // decrease the page number, no other code really needed here
     }else{
       currentPage_frontEnd --;
+      this.setState({
+        clientPage : currentPage_frontEnd,
+      })
     }
   }
 
