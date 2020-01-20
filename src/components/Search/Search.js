@@ -40,7 +40,7 @@ export class Search extends Component {
       searchRows : [
         { searchingType : this.props.defaultSearchType,
           searchingColumn : this.props.defaultSearchColumn,
-          searchingKeyword : "",
+          searchingKeyword : this.props.defaultSearchValue,
           isFirst : true,
           indexKey : Math.random()
         }],
@@ -88,7 +88,12 @@ export class Search extends Component {
     }
     //console.log(popupInfo);
     this.setState({popupInfo: popupInfo})
-    this.makeSearch(true)
+    if(this.props.defaultSearchValue === undefined || this.props.defaultSearchValue === null || this.props.defaultSearchValue === ""){
+      this.makeSearch(true)
+    } else {
+      this.makeSearch(false)
+    }
+    
   }
 
   addSearchCriteria() {
