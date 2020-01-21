@@ -130,10 +130,8 @@ export class Search extends Component {
       this.state.searchRows.forEach(_c => {
         if(_c.searchingType === "==*?*" || _c.searchingType === "==\"*?*\"" ||  _c.searchingType === "!=*?*"){
           // var _tempSearch = _c.searchingKeyword.replace("\"", "\\\"");
-
           var items = [];
           var newSearch = null;
-
           if(_c.searchingType === "==\"*?*\""){
               // single like address with comma
             newSearch = _c.searchingKeyword;
@@ -167,6 +165,7 @@ export class Search extends Component {
 
         } else if(_c.searchingColumn === "all" && _c.searchingKeyword !== null &&
                   _c.searchingKeyword.trim() !== ""){
+                    console.log('trap in here3')
           if(_c.searchingType === "==\"*?*\""){
             // put all column names here
             var _tempRSQL = "(";
@@ -184,7 +183,6 @@ export class Search extends Component {
           }else if(_c.searchingType === "==*?*" ||  _c.searchingType === "!=*?*"){
                   //
             final = "";
-
             //let _searchConfig = this.state.searchConfig;
             items.forEach((_item, _in)=>{
               var _tempRSQL = "(";
@@ -226,9 +224,9 @@ export class Search extends Component {
             this.state.searchConfig.searchingColumns.forEach((_column, _index)=>{
               if(_column.column !== "all"){
                 if(_index <  this.state.searchConfig.searchingColumns.length - 1){
-                  _tempRSQL += _column.column + "" + _c.searchingType.replace("?", newSearch) + ",";
+                  _c.searchingType === "!=\"?\"" || _c.searchingType === "=isnull=true" ? _tempRSQL += _column.column + "" + _c.searchingType.replace("?", _c.searchingKeyword) + ";" : _tempRSQL += _column.column + "" + _c.searchingType.replace("?", _c.searchingKeyword) + ",";
                 }else{
-                  _tempRSQL += _column.column + "" + _c.searchingType.replace("?", newSearch);
+                  _tempRSQL += _column.column + "" + _c.searchingType.replace("?", _c.searchingKeyword);
                 }
               }
             });
@@ -354,9 +352,9 @@ export class Search extends Component {
               this.state.searchConfig.searchingColumns.forEach((_column, _index)=>{
                 if(_column.column !== "all"){
                   if(_index <  this.props.searchConfig.searchingColumns.length -1){
-                    _tempRSQL += _column.column + "" + _c.searchingType.replace("?", newSearch) + ",";
+                    _tempRSQL += _column.column + "" + _c.searchingType.replace("?", _c.searchingKeyword) + ",";
                   }else{
-                    _tempRSQL += _column.column + "" + _c.searchingType.replace("?", newSearch);
+                    _tempRSQL += _column.column + "" + _c.searchingType.replace("?", _c.searchingKeyword);
                   }
                 }
               });
@@ -407,9 +405,9 @@ export class Search extends Component {
               this.state.searchConfig.searchingColumns.forEach((_column, _index)=>{
                 if(_column.column !== "all"){
                   if(_index <  this.state.searchConfig.searchingColumns.length - 1){
-                    _tempRSQL += _column.column + "" + _c.searchingType.replace("?", newSearch) + ",";
+                    _tempRSQL += _column.column + "" + _c.searchingType.replace("?", _c.searchingKeyword) + ",";
                   }else{
-                    _tempRSQL += _column.column + "" + _c.searchingType.replace("?", newSearch);
+                    _tempRSQL += _column.column + "" + _c.searchingType.replace("?", _c.searchingKeyword);
                   }
                 }
               });
