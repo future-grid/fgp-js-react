@@ -224,7 +224,7 @@ export class Search extends Component {
             this.state.searchConfig.searchingColumns.forEach((_column, _index)=>{
               if(_column.column !== "all"){
                 if(_index <  this.state.searchConfig.searchingColumns.length - 1){
-                  _c.searchingType === "!=\"?\"" || _c.searchingType === "=isnull=true" ? _tempRSQL += _column.column + "" + _c.searchingType.replace("?", _c.searchingKeyword) + ";" : _tempRSQL += _column.column + "" + _c.searchingType.replace("?", _c.searchingKeyword) + ",";
+                  _c.searchingType === "!=\"?\"" || _c.searchingType === "=isnull=true" || _c.searchingType === "=isnull=false" ? _tempRSQL += _column.column + "" + _c.searchingType.replace("?", _c.searchingKeyword) + ";" : _tempRSQL += _column.column + "" + _c.searchingType.replace("?", _c.searchingKeyword) + ",";
                 }else{
                   _tempRSQL += _column.column + "" + _c.searchingType.replace("?", _c.searchingKeyword);
                 }
