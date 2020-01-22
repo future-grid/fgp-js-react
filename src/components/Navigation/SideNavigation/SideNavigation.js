@@ -45,6 +45,7 @@ export class SideNavigation extends Component {
           fontAwesomeLib="fa"
           description="Sign Out"
           isSignOut={true}
+          signOutMethod={this.props.signOutMethod}
         />
         
       </div>
