@@ -1,6 +1,6 @@
 {
   "name": "@future-grid/fgp-js-react",
-  "version": "20.02.1-RC2",
+  "version": "20.02.1-RC3",
   "description": "Building the component library for Future-Grid, here first, then making an official released when it is ready under the FGP organisation",
   "main": "build/index.js",
   "module": "build/index.js",
