@@ -487,7 +487,6 @@ export class Search extends Component {
   }
 
   slide(val, isButton){
-    console.log("s",arguments)
     if(isButton){
       document.getElementsByClassName('rt-table')[0].scrollTo(this.state.scrollInterval * val, 0)
     }else{
