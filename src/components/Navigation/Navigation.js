@@ -40,6 +40,8 @@ export class Navigation extends Component {
           items={this.props.items}
           sideNavLogo={this.props.sideNavLogo ? this.props.sideNavLogo : fgLogo}
           signOutMethod={this.props.signOutMethod}
+          buildVersion={this.props.buildVersion}
+          buildEnv={this.props.buildEnv}
         />    
 
       </header>

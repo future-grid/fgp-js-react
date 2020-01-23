@@ -47,6 +47,18 @@ export class SideNavigation extends Component {
           isSignOut={true}
           signOutMethod={this.props.signOutMethod}
         />
+        <div className="fgReact_SideNavigationBuildVersion">
+          {this.props.isOpen === true && this.props.buildVersion && this.props.buildVersion !== null ? 
+            <div >
+                <span style={{paddingLeft: '10px'}}>Version: {this.props.buildVersion}</span>
+            </div>
+          : null}
+          {this.props.isOpen === true && this.props.buildEnv && this.props.buildEnv !== null ? 
+            <div >
+                <span style={{paddingLeft: '10px'}}>Env: {this.props.buildEnv}</span>
+            </div>
+          : null}
+        </div>
         
       </div>
     )

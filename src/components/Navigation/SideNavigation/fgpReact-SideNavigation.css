@@ -156,3 +156,13 @@
     -webkit-animation: App-links-fade-in 1s none; /* Safari 4.0 - 8.0 */
     animation: App-links-fade-in 1s none;
 }
+
+.fgReact_SideNavigationBuildVersion{
+    bottom: 25px;
+    position: fixed;
+    margin: 10px;
+    text-align: center;
+    font-size: 14px;
+    height: 70px;
+    transition: 0.2s ease 0s;
+}
