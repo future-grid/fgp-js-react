@@ -107,6 +107,9 @@ export class StandardGraphV2 extends Component {
         //         this.state.mainGraph.highlightSeries([]);
         //     }
         // }
+        if(this.props.globalDateWindow !== props.globalDateWindow ){
+            this.state.mainGraph.updateDatewinow(props.globalDateWindow)
+        }
     }
 
 
