@@ -99,16 +99,17 @@ export class StandardGraphV2 extends Component {
                 console.info("highlights:", props.highlight);
                 this.state.mainGraph.highlightSeries(props.highlight);
             }
-        } 
-        
+        }
+
         // else if(props.highlight && props.highlight.length == 0) {
         //     if(this.state.mainGraph){
         //         console.info("highlights:", props.highlight);
         //         this.state.mainGraph.highlightSeries([]);
         //     }
         // }
-        if(this.props.globalDateWindow !== props.globalDateWindow ){
-            this.state.mainGraph.updateDatewinow(props.globalDateWindow)
+        if(this.props.externalDateWindow !== props.externalDateWindow ){
+            if(props.externalDateWindow !== null && props.externalDateWindow !== undefined && props.externalDateWindow.length === 2 && props.externalDateWindow[0] < props.externalDateWindow[1])
+            this.state.mainGraph.updateDatewinow(props.externalDateWindow);
         }
     }
 
@@ -273,7 +274,7 @@ export class StandardGraphV2 extends Component {
             <div className={"container-fluid"}>
                 <div className={"w-100"} style={{"marginBottom" : "20px"}}>
                     <div id={this.state.id} style={this.state.graphStyles}>
-                        
+
                     </div>
                 </div>
                 {
@@ -281,7 +282,7 @@ export class StandardGraphV2 extends Component {
                         this.state.childGraphConfigs.map( childGraph => {
                             return(
                                 <div className={"w-100"} style={{"marginBottom" : "20px"}}>
-                                    <div id={childGraph.id} style={this.state.graphStyles}> 
+                                    <div id={childGraph.id} style={this.state.graphStyles}>
 
                                     </div>
                                 </div>
