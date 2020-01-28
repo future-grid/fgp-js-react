@@ -7,8 +7,6 @@ import './StandardGraphV2.css'
 
 export class StandardGraphV2 extends Component {
 
-    
-
     constructor(props){
         super(props);
         this.state = {
@@ -99,16 +97,17 @@ export class StandardGraphV2 extends Component {
                 console.info("highlights:", props.highlight);
                 this.state.mainGraph.highlightSeries(props.highlight);
             }
-        } 
-        
+        }
+
         // else if(props.highlight && props.highlight.length == 0) {
         //     if(this.state.mainGraph){
         //         console.info("highlights:", props.highlight);
         //         this.state.mainGraph.highlightSeries([]);
         //     }
         // }
-        if(this.props.globalDateWindow !== props.globalDateWindow ){
-            this.state.mainGraph.updateDatewinow(props.globalDateWindow)
+        if(this.props.externalDateWindow !== props.externalDateWindow ){
+            if(props.externalDateWindow !== null && props.externalDateWindow !== undefined && props.externalDateWindow.length === 2 && props.externalDateWindow[0] < props.externalDateWindow[1])
+            this.state.mainGraph.updateDatewinow(props.externalDateWindow);
         }
     }
 
@@ -168,10 +167,11 @@ export class StandardGraphV2 extends Component {
                     name: config.name,
                     connectSeparatedPoints: config.connectSeparatedPoints? config.connectSeparatedPoints : true,
                     graphConfig: {
+                        hideHeader: config.graphConfig.hideHeader? config.graphConfig.hideHeader: false,
                         features: { 
                             zoom: config.graphConfig.features.zoom === false ? false : true ,
                             scroll: config.graphConfig.features.scroll === false ? false : true ,
-                            rangeBar: config.graphConfig.features.rangeBar === false ? false : true ,
+                            rangeBar: config.graphConfig.features.rangeBar ? config.graphConfig.features.rangeBar : false ,
                             legend: config.graphConfig.features.legend ? config.graphConfig.features.legend : formatter.legendForAllSeries,
                             exports: ["data"],
                             rangeLocked: config.graphConfig.features.rangeLocked ? config.graphConfig.features.rangeLocked : false,
@@ -183,7 +183,7 @@ export class StandardGraphV2 extends Component {
                         collections: config.graphConfig.collections,
                         filters: config.graphConfig.filters ? config.graphConfig.filters : null
                     },
-                    dataService: dataService,
+                    dataService: config.dataService ? config.dataService : dataService ,
                     show: config.show,
                     ranges: config.graphConfig.ranges,
                     initRange: this.props.globalDateWindow ? (
@@ -216,10 +216,11 @@ export class StandardGraphV2 extends Component {
                         name: viewConfig.name,
                         connectSeparatedPoints: viewConfig.connectSeparatedPoints? viewConfig.connectSeparatedPoints : true,
                         graphConfig: {
+                            hideHeader: viewConfig.graphConfig.hideHeader? viewConfig.graphConfig.hideHeader: false,
                             features: { 
                                 zoom: viewConfig.graphConfig.features.zoom === false ? false : true ,
                                 scroll: viewConfig.graphConfig.features.scroll === false ? false : true ,
-                                rangeBar: viewConfig.graphConfig.features.rangeBar === false ? false : true ,
+                                rangeBar: viewConfig.graphConfig.features.rangeBar ? viewConfig.graphConfig.features.rangeBar : false ,
                                 legend: viewConfig.graphConfig.features.legend ? viewConfig.graphConfig.features.legend : formatter.legendForAllSeries,
                                 exports: ["data"],
                                 rangeLocked: viewConfig.graphConfig.features.rangeLocked ? viewConfig.graphConfig.features.rangeLocked : false,
@@ -231,7 +232,7 @@ export class StandardGraphV2 extends Component {
                             collections: viewConfig.graphConfig.collections,
                             filters: viewConfig.graphConfig.filters ? viewConfig.graphConfig.filters : null
                         },
-                        dataService: dataService,
+                        dataService: viewConfig.dataService ? viewConfig.dataService : dataService ,
                         show: viewConfig.show === false ? false : true,
                         ranges: viewConfig.graphConfig.ranges,
                         initRange: this.props.globalDateWindow ? (
@@ -273,7 +274,7 @@ export class StandardGraphV2 extends Component {
             <div className={"container-fluid"}>
                 <div className={"w-100"} style={{"marginBottom" : "20px"}}>
                     <div id={this.state.id} style={this.state.graphStyles}>
-                        
+
                     </div>
                 </div>
                 {
@@ -281,7 +282,7 @@ export class StandardGraphV2 extends Component {
                         this.state.childGraphConfigs.map( childGraph => {
                             return(
                                 <div className={"w-100"} style={{"marginBottom" : "20px"}}>
-                                    <div id={childGraph.id} style={this.state.graphStyles}> 
+                                    <div id={childGraph.id} style={this.state.graphStyles}>
 
                                     </div>
                                 </div>
