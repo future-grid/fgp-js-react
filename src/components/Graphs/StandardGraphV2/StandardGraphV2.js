@@ -183,7 +183,7 @@ export class StandardGraphV2 extends Component {
                         collections: config.graphConfig.collections,
                         filters: config.graphConfig.filters ? config.graphConfig.filters : null
                     },
-                    dataService: dataService,
+                    dataService: config.dataService ? config.dataService : dataService ,
                     show: config.show,
                     ranges: config.graphConfig.ranges,
                     initRange: this.props.globalDateWindow ? (
@@ -232,7 +232,7 @@ export class StandardGraphV2 extends Component {
                             collections: viewConfig.graphConfig.collections,
                             filters: viewConfig.graphConfig.filters ? viewConfig.graphConfig.filters : null
                         },
-                        dataService: dataService,
+                        dataService: viewConfig.dataService ? viewConfig.dataService : dataService ,
                         show: viewConfig.show === false ? false : true,
                         ranges: viewConfig.graphConfig.ranges,
                         initRange: this.props.globalDateWindow ? (
