@@ -7,8 +7,6 @@ import './StandardGraphV2.css'
 
 export class StandardGraphV2 extends Component {
 
-    
-
     constructor(props){
         super(props);
         this.state = {
@@ -169,10 +167,11 @@ export class StandardGraphV2 extends Component {
                     name: config.name,
                     connectSeparatedPoints: config.connectSeparatedPoints? config.connectSeparatedPoints : true,
                     graphConfig: {
+                        hideHeader: config.graphConfig.hideHeader? config.graphConfig.hideHeader: false,
                         features: { 
                             zoom: config.graphConfig.features.zoom === false ? false : true ,
                             scroll: config.graphConfig.features.scroll === false ? false : true ,
-                            rangeBar: config.graphConfig.features.rangeBar === false ? false : true ,
+                            rangeBar: config.graphConfig.features.rangeBar ? config.graphConfig.features.rangeBar : false ,
                             legend: config.graphConfig.features.legend ? config.graphConfig.features.legend : formatter.legendForAllSeries,
                             exports: ["data"],
                             rangeLocked: config.graphConfig.features.rangeLocked ? config.graphConfig.features.rangeLocked : false,
@@ -217,10 +216,11 @@ export class StandardGraphV2 extends Component {
                         name: viewConfig.name,
                         connectSeparatedPoints: viewConfig.connectSeparatedPoints? viewConfig.connectSeparatedPoints : true,
                         graphConfig: {
+                            hideHeader: viewConfig.graphConfig.hideHeader? viewConfig.graphConfig.hideHeader: false,
                             features: { 
                                 zoom: viewConfig.graphConfig.features.zoom === false ? false : true ,
                                 scroll: viewConfig.graphConfig.features.scroll === false ? false : true ,
-                                rangeBar: viewConfig.graphConfig.features.rangeBar === false ? false : true ,
+                                rangeBar: viewConfig.graphConfig.features.rangeBar ? viewConfig.graphConfig.features.rangeBar : false ,
                                 legend: viewConfig.graphConfig.features.legend ? viewConfig.graphConfig.features.legend : formatter.legendForAllSeries,
                                 exports: ["data"],
                                 rangeLocked: viewConfig.graphConfig.features.rangeLocked ? viewConfig.graphConfig.features.rangeLocked : false,
