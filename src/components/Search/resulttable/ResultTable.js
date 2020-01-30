@@ -30,7 +30,7 @@ export class ResultTable extends Component {
     // this.toggleMap = this.toggleMap.bind(this);
   }
 
-    
+
     componentWillReceiveProps(props){
       if(props.highlight !== undefined && props.highlight.length > 0){
           this.highlightRow(props.highlight);
@@ -113,6 +113,12 @@ export class ResultTable extends Component {
     // !"" === true
     // !undefined === true
     if(!row.value === false){
+      // Replace ASCII control characters with a space.
+      if (typeof row.value === 'string' || row.value instanceof String){
+        row.value = row.value.replace(/[^ -~]+/g, " ");
+        processedRow = {...row};
+      }
+
       // value mutation
       if(element["fgpValueMutate"]){
         if(element["fgpValueMutateIndex"]){
