@@ -3,16 +3,16 @@ export default class WidgetDataProcessor {
   // iterates over the mutable columns in the JSON config and will return the thing to mutate them with, will otherwise just return 'plain'
   constructor(deviceConfig){
     this.deviceConfig = deviceConfig
-    
+
   }
-  
+
   getFormat(key) {
     for(let i=0; i<this.deviceConfig.mutatedColumns.length; i++){
       if(key === this.deviceConfig.mutatedColumns[i].key) {
         return this.deviceConfig.mutatedColumns[i].style;
       }
     }
-    
+
     return 'plain';
   }
 
@@ -32,7 +32,7 @@ export default class WidgetDataProcessor {
     let temp = given.split(/(?=[A-Z])/); // split word at capitals
     temp[0] = this.capitalise(temp[0]);
     temp.map(word => this.capitalise(word));
-      
+
     return temp.join(" "); // return completed string
   }
 
@@ -54,6 +54,10 @@ export default class WidgetDataProcessor {
         if(!this.deviceConfig.excludedColumns.includes(key)){
         // add it to the list of data with some prettifying
         // console.log(`${key}, ${value}, ${this.getFormat(key)}, ${this.getRedirect(key, value)}`);
+        // Replace ASCII control characters with a space.
+        if (typeof value === 'string' || value instanceof String){
+          value = value.replace(/[^ -~]+/g, " ");
+        }
         cleanedData.push({
             title : key,
             data : value,
@@ -97,7 +101,7 @@ export default class WidgetDataProcessor {
     // iterates over the data given
     data.map(point => {
       let excluded = false;
-      
+
       // iterates over the list of excluded extension/key pairs
       for (let i=0; i<this.deviceConfig.relation_excludedColumns.length; i++) {
         // if the given point does not match both the given extension AND key
@@ -155,4 +159,3 @@ export default class WidgetDataProcessor {
     return point.redirect;
   }
 }
-
