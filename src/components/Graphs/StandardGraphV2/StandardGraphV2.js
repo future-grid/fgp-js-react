@@ -199,7 +199,14 @@ export class StandardGraphV2 extends Component {
                 };
                 completeConfigs.push(vdConfig)
             });
-            mainGraph = new FgpGraph(document.getElementById(this.state.id), completeConfigs);
+
+            if(this.props.eventHandlers){
+                mainGraph = new FgpGraph(document.getElementById(this.state.id), completeConfigs, this.props.eventHandlers);
+            } else {
+                mainGraph = new FgpGraph(document.getElementById(this.state.id), completeConfigs);
+            }
+
+            
         }
         // render graph
         mainGraph.initGraph();
