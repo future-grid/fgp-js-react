@@ -115,8 +115,7 @@ export class ResultTable extends Component {
     if(!row.value === false){
       // Replace ASCII control characters with a space.
       if (typeof row.value === 'string' || row.value instanceof String){
-        row.value = row.value.replace(/[^ -~]+/g, " ");
-        processedRow = {...row};
+        processedRow.value = row.value.replace(/[^ -~]+/g, " ");
       }
 
       // value mutation
