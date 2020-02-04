@@ -49,9 +49,12 @@ export class SideNavigation extends Component {
         />
         <div className="fgReact_SideNavigationBuildVersion">
           {this.props.isOpen === true && this.props.buildVersion && this.props.buildVersion !== null ? 
+          <a href={this.props.buildVersion.linkTo} >
             <div >
-                <span style={{paddingLeft: '10px'}}>Version: {this.props.buildVersion}</span>
+                <span style={{paddingLeft: '10px'}}>Version: {this.props.buildVersion.version}</span>
             </div>
+          </a>
+            
           : null}
           {this.props.isOpen === true && this.props.buildEnv && this.props.buildEnv !== null ? 
             <div >

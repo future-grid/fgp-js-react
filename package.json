@@ -1,6 +1,6 @@
 {
   "name": "@future-grid/fgp-js-react",
-  "version": "20.02.1-RC13",
+  "version": "20.02.1-RC15",
   "description": "Building the component library for Future-Grid, here first, then making an official released when it is ready under the FGP organisation",
   "main": "build/index.js",
   "module": "build/index.js",
@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@fortawesome/free-solid-svg-icons": "^5.11.2",
-    "@future-grid/fgp-graph": "^20.2.1-RC11",
+    "@future-grid/fgp-graph": "^20.2.1-RC15",
     "axios": "^0.19.0",
     "bootstrap": "^4.3.1",
     "file-loader": "^4.2.0",
