@@ -551,7 +551,7 @@ export class BasicMapFGP extends Component {
             // map.add
             // binding the hover event (popup dialogue)
             map.on('pointermove', this.handleMapHover.bind(this));
-            map.on('click', this.handleMapSelect.bind(this, map));
+            map.on('singleclick', this.handleMapSelect.bind(this, map));// replace with singleclick
 
             map.on('dblclick', this.handleMapClick.bind(this, map));
 
