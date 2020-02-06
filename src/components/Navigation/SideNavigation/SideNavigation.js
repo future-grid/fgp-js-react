@@ -48,21 +48,21 @@ export class SideNavigation extends Component {
           signOutMethod={this.props.signOutMethod}
         />
         <div className="fgReact_SideNavigationBuildVersion">
-          {this.props.isOpen === true && this.props.buildVersion && this.props.buildVersion !== null ? 
-          <a href={this.props.buildVersion.linkTo} >
+          {this.props.isOpen === true && this.props.buildVersion && this.props.buildVersion !== null ?
+          <a href={this.props.buildVersion.linkTo} target="_blank">
             <div >
                 <span style={{paddingLeft: '10px'}}>Version: {this.props.buildVersion.version}</span>
             </div>
           </a>
-            
+
           : null}
-          {this.props.isOpen === true && this.props.buildEnv && this.props.buildEnv !== null ? 
+          {this.props.isOpen === true && this.props.buildEnv && this.props.buildEnv !== null ?
             <div >
                 <span style={{paddingLeft: '10px'}}>Env: {this.props.buildEnv}</span>
             </div>
           : null}
         </div>
-        
+
       </div>
     )
   }
