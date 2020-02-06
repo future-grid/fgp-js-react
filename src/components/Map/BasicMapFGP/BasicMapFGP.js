@@ -868,9 +868,13 @@ export class BasicMapFGP extends Component {
             }
 
             if(this.featureWithProperties.length === 0){
-                callback(["bring all back"]);
+                if(callback){
+                    callback(["bring all back"]);
+                }
             } else {
-                callback(this.featureWithProperties);
+                if(callback){
+                    callback(this.featureWithProperties);
+                }
             }
         } 
         
