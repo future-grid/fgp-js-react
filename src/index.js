@@ -15,8 +15,6 @@ import {DeviceWidget} from './components/ExtensionWidgets/DeviceWidget'
 import {DeviceDataRow} from './components/ExtensionWidgets/DeviceDataRow'
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {BasicMapFGP} from './components/Map/BasicMapFGP/BasicMapFGP'
-import {NwpMapFGP} from './components/Map/NwpMapFGP/NwpMapFGP';
-import {NwpMapFGPV2} from './components/Map/NwpMapFGP/NwpMapFGPV2';
 import {MapPopup} from './components/Map/MapPopUp/MapPopup'
 import {Breadcrumbs} from './components/Breadcrumbs/Breadcrumbs'
 import {Breadcrumb} from './components/Breadcrumbs/Breadcrumbs'
@@ -79,8 +77,6 @@ export {
     Page,
     DevicePage,
     BasicMapFGP,
-    NwpMapFGP,
-    NwpMapFGPV2,
     Auth,
     Search,
     FontAwesomeIcon,
