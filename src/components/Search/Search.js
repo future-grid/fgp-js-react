@@ -25,7 +25,7 @@ export class Search extends Component {
         hz : this.props.searchConfig.hz,
         map : this.props.searchConfig.map,
         mapVisible : false,
-       
+
       },
       rowsPerPage : this.props.defaultPageSize !== undefined ? this.props.defaultPageSize : 25,
       totalRecords : this.props.searchConfig.defaultQtyRecordsToRetrieve ?  this.props.searchConfig.defaultQtyRecordsToRetrieve : 250,
@@ -36,7 +36,7 @@ export class Search extends Component {
       this.props.searchConfig.defaultQtyRecordsToRetrieve + "/" +
       this.props.searchConfig.startFrom + "/" +
       this.props.searchConfig.customer +
-      this.props.searchConfig.searchDirection,      
+      this.props.searchConfig.searchDirection,
       searchRows : [
         { searchingType : this.props.defaultSearchType,
           searchingColumn : this.props.defaultSearchColumn,
@@ -48,7 +48,7 @@ export class Search extends Component {
       data : [],
       showHScroll : false,
       slideValue : 0,
-      scrollInterval : this.props.scrollInterval ? this.props.scrollInterval : 0 
+      scrollInterval : this.props.scrollInterval ? this.props.scrollInterval : 0
     };
 
     // console.log(this.props)
@@ -93,7 +93,7 @@ export class Search extends Component {
     } else {
       this.makeSearch(false)
     }
-    
+
   }
 
   addSearchCriteria() {
@@ -111,7 +111,7 @@ export class Search extends Component {
 
   makeSearchWithCache(isFirstTime){
     var queryString;
-    // using the check query method from the cache 
+    // using the check query method from the cache
     if(isFirstTime === true ){
       // the query string
       queryString = this.props.baseApiUrl + this.props.searchConfig.reference + '/data/' +
@@ -126,7 +126,7 @@ export class Search extends Component {
       })
       // building up the query string
       let query_rsql = [];
-  
+
       this.state.searchRows.forEach(_c => {
         if(_c.searchingType === "==*?*" || _c.searchingType === "==\"*?*\"" ||  _c.searchingType === "!=*?*"){
           // var _tempSearch = _c.searchingKeyword.replace("\"", "\\\"");
@@ -247,7 +247,7 @@ export class Search extends Component {
       }
     }
 
-    
+
     // checking if this search has been made in the session, if it has been, resolve to saved data, else make api call
     if(this.props.sspCache.checkQueryString(queryString) === true){ // is cached
       console.log('checked and true, setting to true')
@@ -274,14 +274,14 @@ export class Search extends Component {
 
   makeSearch(isFirstTime) {
     if(this.props.serverSidePagination === true){
-      //checking if there is not a sessionStorage object, creating one if there is not and making the query, saving the query into the session storage too 
+      //checking if there is not a sessionStorage object, creating one if there is not and making the query, saving the query into the session storage too
       if(this.props.sspCache.checkStorageKey()){
         this.makeSearchWithCache(isFirstTime);
       }else{
         this.props.sspCache.setStorageKey();
         this.makeSearchWithCache(isFirstTime);
       }
-      
+
     }else{
       if(isFirstTime === true){
         axios.get(this.props.baseApiUrl + this.props.searchConfig.reference + '/data/' +
@@ -304,18 +304,19 @@ export class Search extends Component {
           hasLoaded: false
         })
         let query_rsql = [];
-  
+
 
         // http://fgp-api-qa.domain.prd.int.domain.dev.int/ue-neutral-health/
         // meter_lookup_vw/data/350/0/meterSerialNum%20asc?nicMacId==%22*000011*%22,nicMacId==%22*0000135*%22
 
         this.state.searchRows.forEach(_c => {
+
           if(_c.searchingType === "==*?*" || _c.searchingType === "==\"*?*\"" ||  _c.searchingType === "!=*?*"){
             // var _tempSearch = _c.searchingKeyword.replace("\"", "\\\"");
-  
+
             var items = [];
             var newSearch = null;
-  
+
             if(_c.searchingType === "==\"*?*\""){
                 // single like address with comma
               newSearch = _c.searchingKeyword;
@@ -325,7 +326,7 @@ export class Search extends Component {
                 items.push(_c.searchingKeyword.split(',')[i].trim());
               }
             }
-  
+
             if (_c.searchingColumn !== "all") {
               if(_c.searchingType === "==\"*?*\""){
                 // check
@@ -334,16 +335,22 @@ export class Search extends Component {
                 var final = "";
                 items.forEach((_item, _in)=>{
                   var _tempRSQL
-                  _c.searchingType === "!=*?*" ?  _tempRSQL = _c.searchingColumn + "" + "!=\"?\"".replace("?", _item) : _c.searchingColumn + "" + "==\"*?*\"".replace("?", _item);
+                  if(_c.searchingType === "!=*?*"){
+                    _tempRSQL = _c.searchingColumn + "" + "!=\"?\"".replace("?", _item)
+                  } else {
+                    _tempRSQL = _c.searchingColumn + "" + "==\"*?*\"".replace("?", _item);
+                  }
+                  //_c.searchingType === "!=*?*" ?  _tempRSQL = _c.searchingColumn + "" + "!=\"?\"".replace("?", _item) : _c.searchingColumn + "" + "==\"*?*\"".replace("?", _item);
                   if(_in < items.length - 1){
                     _c.searchingType === "!=*?*" ? final += _tempRSQL + ";" : final += _tempRSQL + ",";
                   }else{
                     final += _tempRSQL;
                   }
                 });
+                //console.log("final",final);
                 query_rsql.push(final);
               }
-  
+
           } else if(_c.searchingColumn === "all" && _c.searchingKeyword !== null &&
                     _c.searchingKeyword.trim() !== ""){
             if(_c.searchingType === "==\"*?*\""){
@@ -363,11 +370,11 @@ export class Search extends Component {
             }else if(_c.searchingType === "==*?*" ||  _c.searchingType === "!=*?*"){
                     //
               final = "";
-  
+
               //let _searchConfig = this.state.searchConfig;
               items.forEach((_item, _in)=>{
                 var _tempRSQL = "(";
-  
+
                 this.state.searchConfig.searchingColumns.forEach((_column, _index)=>{
                   if(_column.column !== "all"){
                     if(_index <  this.state.searchConfig.searchingColumns.length -1){
@@ -386,7 +393,7 @@ export class Search extends Component {
               });
               query_rsql.push(final);
             }
-  
+
           }
           }else{
             if (_c.searchingColumn !== "all") {
@@ -416,13 +423,13 @@ export class Search extends Component {
             }
           }
         });
-  
+
         let url =  this.props.baseApiUrl + this.props.searchConfig.reference + '/data/' +
         this.props.searchConfig.defaultQtyRecordsToRetrieve + "/" +
         this.props.searchConfig.startFrom + "/" +
         this.props.searchConfig.customer +
         this.props.searchConfig.searchDirection
-  
+
         if (query_rsql && query_rsql.length > 0) {
           url = url + "?" + query_rsql.join(";");
         }
@@ -495,8 +502,8 @@ export class Search extends Component {
   }
 
   scrollLeft(){
-    document.getElementById('customSliderInput').value = parseInt(document.getElementById('customSliderInput').value) + 1 
-    this.slide(parseInt(document.getElementById('customSliderInput').value), true)  
+    document.getElementById('customSliderInput').value = parseInt(document.getElementById('customSliderInput').value) + 1
+    this.slide(parseInt(document.getElementById('customSliderInput').value), true)
   }
 
   scrollRight(){
@@ -506,9 +513,9 @@ export class Search extends Component {
 
 
   changePage(){
-    
+
     var currentPageFromArgs = arguments[0]
-    var currentPage_frontEnd = this.state.clientPage; // how to get this 
+    var currentPage_frontEnd = this.state.clientPage; // how to get this
     var currentPagesCount_frontend = this.state.totalPages;
     var currentPageSize_frontend = this.state.rowsPerPage;
     var currentPage_serverSide = this.state.serverPage;
@@ -523,9 +530,9 @@ export class Search extends Component {
       if(currentPagesCount_frontend === currentPage_frontEnd + 1 ){
         console.log('reached end ')
         //increasing the count of the page in the query string
-        currentQueryString = currentQueryString.split("/"+currentPage_serverSide+"/")[0] + 
+        currentQueryString = currentQueryString.split("/"+currentPage_serverSide+"/")[0] +
           `/${currentPage_serverSide+1}/` +
-          currentQueryString.split("/"+currentPage_serverSide+"/")[1] 
+          currentQueryString.split("/"+currentPage_serverSide+"/")[1]
         // as changePage() will be primarily used in serverside pagination code, we check the cache for the query first
         if(this.props.sspCache.checkStorageKey()){ // have a key, check the query string
           if(this.props.sspCache.checkQueryString(currentQueryString)){ // have a query string, load in the data from cache
@@ -556,7 +563,7 @@ export class Search extends Component {
               console.error(error)
             });
           }
-        }else{ // set the key and string 
+        }else{ // set the key and string
           this.props.sspCache.setStorageKey()
           this.props.sspCache.setQueryStringData(currentQueryString, res.data)
         }
