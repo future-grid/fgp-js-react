@@ -87,7 +87,9 @@ export class BasicMapFGP extends Component {
                     borderColor: 'orange',
                     radius: 4,
                     borderWidth: 2
-                }
+                },
+            initialLoad : true,
+            lockedDevices : null
         };
         this.featureWithProperties = [];
         // this.buildMap = this.buildMap.bind(this)
@@ -96,6 +98,13 @@ export class BasicMapFGP extends Component {
 
 
     componentWillUpdate(props){
+        if(this.state.initialLoad === true){
+        }else{
+            if(this.props.featuresChildren === this.state.lockedDevices){
+            }else{
+                this.buildMap(); 
+            }
+        }
 
         if(this.props.mapHighlightPoints && this.props.mapHighlightPoints.length > 0){
 
@@ -147,6 +156,7 @@ export class BasicMapFGP extends Component {
         } else {
             
         }
+        
     }
 
 
@@ -449,6 +459,12 @@ export class BasicMapFGP extends Component {
             };
             // get center
             var layerCenter = getCentroid(points);
+            if(this.state.map !== null){
+                let mapElem = document.getElementById(this.state.id);
+                mapElem.innerHTML = "";
+            }else{
+                console.log('map is null')
+            }
             var map = null;
             if (hasChildrenIn === true) {
                 // var totalLayers = [...vectorLayerChildrenArr];
@@ -607,6 +623,9 @@ export class BasicMapFGP extends Component {
             });
             map.updateSize();
         }
+        this.setState({
+            lockedDevices : this.props.featuresChildren
+        })
     }
     addExternalLayers(map, layer){
         if(layer.active && layer.source.type === 'WMTS'){
@@ -667,6 +686,9 @@ export class BasicMapFGP extends Component {
 
     componentDidMount() {
         this.buildMap();
+        this.setState({
+            initialLoad : false
+        })
     }
 
     // different on click handlers
@@ -1020,34 +1042,36 @@ export class BasicMapFGP extends Component {
 
     render() {
         return (
-            <div className={"w-100 map fgpReactMap"} id={this.state.id}>
-            {this.props.mapLayers ?
-                <div className=" fgpReactMapLayer">
-                    <Dropdown>
-                    <Dropdown.Toggle variant="" id="dropdown-basic">
-                        LAYERS
-                    </Dropdown.Toggle>
-                    <Dropdown.Menu style={{padding: '0'}}>
-                        {this.props.mapLayers.map(layer => {
-                        return(
-                            <Dropdown.Item key={layer.name}> <Form.Check type="checkbox" onChange={this.updateExternalLayers} value={layer.name} checked={layer.active} label={layer.name} /></Dropdown.Item>
-                        )
-                        })}
-                    </Dropdown.Menu>
-                    </Dropdown>
-                </div>
-                :""
-            }
-            <MapPopup visibility={this.state.popupVisible} focusedFeatures={this.state.focusedFeatures} mapPopupInfo={this.props.mapPopupInfo} showDescriptionOnHover={this.props.showDescriptionOnHover}
-            />
-            {   this.state.drawInteraction === true ? (
-                    <BasicMapDrawSelector
-                        handleDrawingSelection={this.handleDrawingSelection.bind(this)}
-                        drawType={this.state.drawType}
-                        selectedFeatures={this.state.selectedFeatures}
-                    />
-                ) : null
+            <div className={"d"} style={{"display" : "contents"}}>
+                <div className={"w-100 map fgpReactMap"} id={this.state.id}>
+                {this.props.mapLayers ?
+                    <div className=" fgpReactMapLayer">
+                        <Dropdown>
+                        <Dropdown.Toggle variant="" id="dropdown-basic">
+                            LAYERS
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu style={{padding: '0'}}>
+                            {this.props.mapLayers.map(layer => {
+                            return(
+                                <Dropdown.Item key={layer.name}> <Form.Check type="checkbox" onChange={this.updateExternalLayers} value={layer.name} checked={layer.active} label={layer.name} /></Dropdown.Item>
+                            )
+                            })}
+                        </Dropdown.Menu>
+                        </Dropdown>
+                    </div>
+                    :""
                 }
+                </div>
+                <MapPopup visibility={this.state.popupVisible} focusedFeatures={this.state.focusedFeatures} mapPopupInfo={this.props.mapPopupInfo} showDescriptionOnHover={this.props.showDescriptionOnHover}
+                />
+                {   this.state.drawInteraction === true ? (
+                        <BasicMapDrawSelector
+                            handleDrawingSelection={this.handleDrawingSelection.bind(this)}
+                            drawType={this.state.drawType}
+                            selectedFeatures={this.state.selectedFeatures}
+                        />
+                    ) : null
+                    }
             </div>
         );
     }

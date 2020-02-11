@@ -91,8 +91,21 @@ export class DevicePage extends Component {
     }
   }
 
-  componentDidUpdate(){
-    // this.allResolved();
+  componentDidUpdate(props){
+    
+  }
+
+  componentWillReceiveProps(props){
+    if(props.retainNoChildren === true ){
+      if(this.state.relationChildNames[0] === props.relationChildNames[0]){
+        // do nothing
+      }else{
+        // set the state and trigger a fetched relations call to in-turn refresh the children shown on the map
+        this.setState({
+          relationChildNames : props.relationChildNames
+        }, () => {this.fetchRelations()})
+      }
+    }
   }
 
   getDeviceNameAsMeterLookup(){
@@ -152,7 +165,13 @@ export class DevicePage extends Component {
           response.data.forEach( child => {
             deviceNames.push(child.name);
           })
-          let tmpChildDeviceNames = [...this.state.childDeviceNames]
+          var tmpChildDeviceNames = []
+          if(this.props.retainNoChildren === true){
+            console.log('should be getting here')
+          }else{
+            tmpChildDeviceNames = [...this.state.childDeviceNames]
+            // console.log('looks like getting here though')
+          }
           tmpChildDeviceNames.push({type:childType, deviceNames: deviceNames})
           this.setState({
             childDeviceNames : tmpChildDeviceNames
@@ -221,7 +240,12 @@ export class DevicePage extends Component {
                   childArr.push(temp)
                 }
               })
-              let copyOfChildren = [...this.state.childrenWithLocationAndStyles]
+              var copyOfChildren = [];
+              if(this.props.retainNoChildren === true){
+                console.log('here we are', this.state.childrenWithLocationAndStyles, copyOfChildren)
+              }else{
+                copyOfChildren = [...this.state.childrenWithLocationAndStyles]
+              }
               copyOfChildren.push({
                 deviceType : childType,
                 children : childArr,
@@ -294,7 +318,8 @@ export class DevicePage extends Component {
           additionalDeviceInfo: this.props.additionalDeviceInfo,
           customDeviceInfo: this.props.customDeviceInfo,
           mapLayers: this.props.mapLayers,
-          showDescriptionOnHover: this.state.showDescriptionOnHover
+          showDescriptionOnHover: this.state.showDescriptionOnHover,
+          retainNoChildren : this.props.retainNoChildren
         }))
       }else{
         return child
