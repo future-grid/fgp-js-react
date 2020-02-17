@@ -24,19 +24,19 @@ import {StandardGraphV2} from './components/Graphs/StandardGraphV2/StandardGraph
 import {ChildExtensionList} from './components/TabWidgets/ChildExtensionList/ChildExtensionList';
 import {ExternalLinkPage} from './components/Pages/ExternalLinkPage/ExternalLinkPage'
 import {ExternalLink} from './components/Pages/ExternalLinkPage/ExternalLink'
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+// import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {FilterSearchRow} from './components/MultiTableFilterSearch/FilterSearchRow/FilterSearchRow';
 import {MultiTableFilterSearch} from './components/MultiTableFilterSearch/MultiTableFilterSearch'
 import {MultiReferenceFilterSearch} from './components/MultiReferenceFilterSearch/MultiReferenceFilterSearch'
 import { DatePickerWrapper } from './components/MultiReferenceFilterSearch/DatePickerWrapper/DatePickerWrapper'
-import Map from 'ol/Map.js';
-import View from 'ol/View.js';
-import 'ol/ol.css';
-import GeoJSON from 'ol/format/GeoJSON.js';
-import {defaults as defaultControls, OverviewMap} from 'ol/control.js';
-import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
-import {OSM, Vector as VectorSource} from 'ol/source.js';
-import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style.js';
+// import Map from 'ol/Map.js';
+// import View from 'ol/View.js';
+// import 'ol/ol.css';
+// import GeoJSON from 'ol/format/GeoJSON.js';
+// import {defaults as defaultControls, OverviewMap} from 'ol/control.js';
+// import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
+// import {OSM, Vector as VectorSource} from 'ol/source.js';
+// import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style.js';
 import * as Icons from '@fortawesome/free-solid-svg-icons';
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 
@@ -52,18 +52,18 @@ library.add(...iconList)
    
 export { 
     Navigation,
-    Map,
-    View,
-    GeoJSON,
-    defaultControls,
-    OverviewMap,
-    TileLayer,
-    VectorLayer,
-    CircleStyle,
-    Fill,
-    Stroke,
-    Style,
-    VectorSource,
+    // Map,
+    // View,
+    // GeoJSON,
+    // defaultControls,
+    // OverviewMap,
+    // TileLayer,
+    // VectorLayer,
+    // CircleStyle,
+    // Fill,
+    // Stroke,
+    // Style,
+    // VectorSource,
     TopNavigation,
     SideNavigation,
     SideNavigationItem,
@@ -79,7 +79,7 @@ export {
     BasicMapFGP,
     Auth,
     Search,
-    FontAwesomeIcon,
+    // FontAwesomeIcon,
     SearchRow,
     MapPopup,
     ExternalLinkPage,
