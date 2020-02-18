@@ -4,12 +4,15 @@ pipeline{
     label 'default'
   }
   post {
-    script {
+    success {
       if(['origin/master'].contains(env.GIT_BRANCH) ){
-        slackSend color: 'good', message: "Build and publish for fgp-js-react has succeeded - ${env.VERSION}"
+        slackSend color: 'good', message: "fgp-js-react: build+publish has succeeded - ${env.VERSION}"
       }else{
-        slackSend color: 'good', message: "Build for fgp-js-react has succeeded - ${env.VERSION} (you still need to merge to master)"
+        slackSend color: 'good', message: "fgp-js-react: build has succeeded - ${env.VERSION} (you still need to merge to master to publish)"
       }
+    }
+    failure {
+      slackSend color: 'bad', message: "fgp-js-react: build has failed - ${env.VERSION}"
     }
   }
 
