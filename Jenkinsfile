@@ -6,7 +6,7 @@ pipeline{
   post {
     success {
       script {
-        if(['origin/master'].contains(env.GIT_BRANCH) ){
+        if(['master'].contains(env.GIT_BRANCH) ){
           slackSend color: 'good', message: "*fgp-js-react* build+publish has succeeded - ${env.VERSION} - ${env.GIT_BRANCH}"
         }else{
           slackSend color: 'good', message: "*fgp-js-react* build has succeeded - ${env.VERSION} (you still need to merge to master to publish) - ${env.GIT_BRANCH}"
@@ -67,7 +67,7 @@ pipeline{
 
     stage ('publish'){
       when {
-        expression { ['origin/master'].contains(env.GIT_BRANCH) }
+        expression { ['master'].contains(env.GIT_BRANCH) }
       }
       steps {
         container("docker"){
