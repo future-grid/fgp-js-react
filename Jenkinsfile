@@ -4,11 +4,14 @@ pipeline{
     label 'default'
   }
   post {
-    failure {
-      slackSend color: 'bad', message: "Jenkins build for fgp-js-react has failed. ${env.VERSION}"
-    }
-    success {
-      slackSend color: 'good', message: "Jenkins build for fgp-js-react has succeeded! ${env.VERSION}"
+    steps{
+      script {
+        if(['origin/master'].contains(env.GIT_BRANCH) ){
+          slackSend color: 'good', message: "Build and publish for fgp-js-react has succeeded - ${env.VERSION}"
+        }else{
+          slackSend color: 'good', message: "Build for fgp-js-react has succeeded - ${env.VERSION} (you still need to merge to master)"
+        }
+      }
     }
   }
 
@@ -39,8 +42,8 @@ pipeline{
           }
           echo "CURRENT_VERSION=${env.CURRENT_VERSION}"
           if(env.CURRENT_VERSION == env.VERSION){
-            slackSend color: 'bad', message: "Package version ${env.VERSION} already exists - you need to increment the version in your package.json"
-            error("Docker image ${env.VERSION} already exists - please increment the version in your package.json")
+            slackSend color: 'bad', message: "fgp-js-react: ${env.VERSION} already exists - you need to increment the version in your package.json"
+            error("fgp-js-react: ${env.VERSION} already exists - please increment the version in your package.json")
           }
         }
         
