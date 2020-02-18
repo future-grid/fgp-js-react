@@ -3,7 +3,7 @@ import FgpGraph from '@future-grid/fgp-graph';
 import DataService from './DataService';
 import { Formatters } from '@future-grid/fgp-graph/lib/extras/formatters';
 import moment from 'moment';
-import './standardGraph.css';
+import './StandardGraph.css';
 
 export class StandardGraph extends Component {
     constructor(props){
