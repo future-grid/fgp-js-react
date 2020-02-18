@@ -37,6 +37,7 @@ pipeline{
               returnStdout: true
             ).trim()
           }
+          echo "CURRENT_VERSION=${env.CURRENT_VERSION}"
           if(env.CURRENT_VERSION == env.VERSION){
             slackSend color: 'bad', message: "Package version ${env.VERSION} already exists - you need to increment the version in your package.json"
             error("Docker image ${env.VERSION} already exists - please increment the version in your package.json")
