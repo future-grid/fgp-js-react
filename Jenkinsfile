@@ -32,6 +32,16 @@ pipeline{
           echo "VERSION=${env.VERSION}"
           echo "GIT_TAG=${env.GIT_TAG}"
         }
+        container("docker"){
+          env.CURRENT_VERSION = sh (
+            script: 'docker run --rm -it --entrypoint sh node:10-alpine -c "npm view @future-grid/fgp-js-react version"',
+            returnStdout: true
+          ).trim()
+        }
+        if(env.CURRENT_VERSION == env.VERSION){
+          slackSend color: 'bad', message: "Package version ${env.VERSION} already exists - you need to increment the version in your package.json"
+          error("Docker image ${env.VERSION} already exists - please increment the version in your package.json")
+        }
       }
     }
 
@@ -39,7 +49,7 @@ pipeline{
       steps {
         container("docker"){
           ansiColor('xterm') {
-            sh "docker build --build-arg NPM_TOKEN=${env.NPM_TOKEN} -t fgp-js-react -f Dockerfile ."            
+            sh "docker build -t fgp-js-react -f Dockerfile ."            
           }
         }
       }
