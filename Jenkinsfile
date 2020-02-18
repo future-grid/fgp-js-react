@@ -14,7 +14,7 @@ pipeline{
 
   environment{
     DOCKERHUB = credentials('dockerhub-credentials')
-    NPM = credentials('npm-token')
+    NPM_TOKEN = credentials('npm-token')
     DEPLOYMENTS_REPO = "future-grid.git.beanstalkapp.com/futuregrid-deploy.git"
   }
 
