@@ -7,14 +7,14 @@ pipeline{
     success {
       script {
         if(['origin/master'].contains(env.GIT_BRANCH) ){
-          slackSend color: 'good', message: "fgp-js-react: build+publish has succeeded - ${env.VERSION}"
+          slackSend color: 'good', message: "*fgp-js-react* build+publish has succeeded - ${env.VERSION}"
         }else{
-          slackSend color: 'good', message: "fgp-js-react: build has succeeded - ${env.VERSION} (you still need to merge to master to publish)"
+          slackSend color: 'good', message: "*fgp-js-react* build has succeeded - ${env.VERSION} (you still need to merge to master to publish)"
         }
       }
     }
     failure {
-      slackSend color: 'bad', message: "fgp-js-react: build has failed - ${env.VERSION}"
+      slackSend color: 'bad', message: "*fgp-js-react* build has failed - ${env.VERSION}"
     }
   }
 
@@ -37,6 +37,7 @@ pipeline{
           ).trim()
           echo "VERSION=${env.VERSION}"
           echo "GIT_TAG=${env.GIT_TAG}"
+          echo "GIT_BANCH=${env.GIT_BRANCH}"
           container("docker"){
             env.CURRENT_VERSION = sh (
               script: 'docker run --rm --entrypoint sh node:10-alpine -c "npm view @future-grid/fgp-js-react version"',
@@ -45,7 +46,7 @@ pipeline{
           }
           echo "CURRENT_VERSION=${env.CURRENT_VERSION}"
           if(env.CURRENT_VERSION == env.VERSION){
-            slackSend color: 'bad', message: "fgp-js-react: ${env.VERSION} already exists - you need to increment the version in your package.json"
+            slackSend color: 'bad', message: "*fgp-js-react* ${env.VERSION} already exists - you need to increment the version in your package.json"
             error("fgp-js-react: ${env.VERSION} already exists - please increment the version in your package.json")
           }
         }
