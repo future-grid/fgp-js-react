@@ -33,7 +33,7 @@ pipeline{
           echo "GIT_TAG=${env.GIT_TAG}"
           container("docker"){
             env.CURRENT_VERSION = sh (
-              script: 'docker run --rm -it --entrypoint sh node:10-alpine -c "npm view @future-grid/fgp-js-react version"',
+              script: 'docker run --rm --entrypoint sh node:10-alpine -c "npm view @future-grid/fgp-js-react version"',
               returnStdout: true
             ).trim()
           }
