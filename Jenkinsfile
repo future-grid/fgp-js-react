@@ -44,7 +44,9 @@ pipeline{
       // }
       steps {
         container("docker"){
-          sh "docker build -t fgp-js-react -f Dockerfile ."
+          ansiColor('xterm') {
+            sh "docker build -t fgp-js-react -f Dockerfile ."
+          }
         }
       }
     }
