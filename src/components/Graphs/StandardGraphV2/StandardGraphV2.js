@@ -3,6 +3,7 @@ import { Formatters } from '@future-grid/fgp-graph/lib/extras/formatters';
 import { DataServiceV2 } from './DataServiceV2'
 import moment from 'moment';
 import FgpGraph from '@future-grid/fgp-graph';
+import { DatePickerWrapper } from '../../MultiReferenceFilterSearch/DatePickerWrapper/DatePickerWrapper'
 import './StandardGraphV2.css'
 
 export class StandardGraphV2 extends Component {
@@ -279,6 +280,47 @@ export class StandardGraphV2 extends Component {
     render() {
         return (
             <div className={"container-fluid"}>
+                { this.props.includeDatePicker === "double" ? (
+                        <div className={"row"}>
+                            <div style={{"marginRight":" 10px"}} className={"d-flex align-items-center"}>
+                                Start:
+                            </div>
+                            <div>
+                                <DatePickerWrapper 
+                                    date={this.props.externalDateWindow[0]}
+                                    handleChange={(date) => {
+                                        this.props.handleExternalDateWindow([moment(date).startOf('day').valueOf(), this.props.externalDateWindow[1]])
+                                    }}
+                                />
+                            </div>
+                            <div className={"d-flex align-items-center"}>
+                                End:
+                            </div>
+                            <div>
+                                <DatePickerWrapper 
+                                    date={this.props.externalDateWindow[1]}
+                                    handleChange={(date) => {
+                                        this.props.handleExternalDateWindow([this.props.externalDateWindow[0], moment(date).endOf('day').valueOf()])
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                    ) : this.props.includeDatePicker === "single" ? (
+                        <div className={"row"}>
+                            <div>
+                                <DatePickerWrapper 
+                                    date={this.props.externalDateWindow[0]}
+                                    handleChange={(date) => {
+                                        this.props.handleExternalDateWindow([moment(date).startOf('day').valueOf(), moment(date).endOf('day').valueOf()])
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    ) : (
+                        ''
+                    )
+                }
                 <div className={"w-100"} style={{"marginBottom" : "20px"}}>
                     <div id={this.state.id} style={this.state.graphStyles}>
 
