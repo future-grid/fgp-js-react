@@ -12,7 +12,7 @@
     width: calc(100vw - 130px);
     text-align: center;
     z-index: 999999999;
-    top: calc(100vh - 20px);
+    bottom: 0px;
     padding: 0 30px;
     /* background-color: #f1f1f1; */
   }

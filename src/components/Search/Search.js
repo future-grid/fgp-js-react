@@ -48,7 +48,10 @@ export class Search extends Component {
       data : [],
       showHScroll : false,
       slideValue : 0,
-      scrollInterval : this.props.scrollInterval ? this.props.scrollInterval : 0
+      scrollInterval : 0,
+      scrollIntervalTotal : 0
+      // scrollInterval : this.calculateSliderIntervalSize(this.props.searchConfig.columns),
+      // scrollIntervalTotal : this.calculateSliderTotalSize(this.props.searchConfig.columns)
     };
 
     // console.log(this.props)
@@ -60,9 +63,15 @@ export class Search extends Component {
     this.changePage = this.changePage.bind(this);
     this.changeRowCount = this.changeRowCount.bind(this);
     this.slide = this.slide.bind(this)
+    this.calculateSliderIntervalSize = this.calculateSliderIntervalSize.bind(this);
+    this.calculateSliderTotalSize = this.calculateSliderTotalSize.bind(this);
+    this.handleResize = this.handleResize.bind(this);
   }
 
   componentDidMount(){
+    if(this.props.horizontalScrollBar === true){
+      window.addEventListener("resize", this.handleResize);  
+    }
     let popupInfo = [];
     if(this.props.mapPopupInfo !== undefined ){
       if(this.props.mapPopupInfo === 'all' || this.props.mapPopupInfo === 'ALL'){
@@ -95,6 +104,34 @@ export class Search extends Component {
     }
 
   }
+
+  componentWillUnmount(){
+    if(this.props.horizontalScrollBar === true){
+      window.removeEventListener("resize", this.handleResize);
+    }
+  }
+
+  calculateSliderIntervalSize(columns){
+    let avg;
+    var sum = 0;
+    columns.forEach( column => {
+      sum += column.minWidth
+    })
+    avg = Math.ceil(sum / columns.length);
+    return avg
+  }
+
+  calculateSliderTotalSize(columns){
+    let avg;
+    var sum = 0;
+    columns.forEach( column => {
+      sum += column.minWidth
+    })
+    avg = Math.floor(sum / columns.length);
+    return sum
+  }
+
+
 
   addSearchCriteria() {
     let defaultSearchRow = {
@@ -494,6 +531,9 @@ export class Search extends Component {
   }
 
   slide(val, isButton){
+    if(this.state.scrollInterval === 0 ){
+      this.handleResize()
+    }
     if(isButton){
       document.getElementsByClassName('rt-table')[0].scrollTo(this.state.scrollInterval * val, 0)
     }else{
@@ -508,7 +548,22 @@ export class Search extends Component {
 
   scrollRight(){
     document.getElementById('customSliderInput').value = parseInt(document.getElementById('customSliderInput').value) - 1
-    slide(parseInt(document.getElementById('customSliderInput').value), true)
+    this.slide(parseInt(document.getElementById('customSliderInput').value), true)
+  }
+
+  // allow resize handling so that the scrollbar is actually
+  handleResize() {
+    if(this.state.hasLoaded === true){
+      const resultTableWidth = document.getElementsByClassName('ResultTable')[0].clientWidth //container (smaller)
+      const totalTableWidth = document.getElementsByClassName('rt-thead')[0].clientWidth// content (larger)
+      const offset = totalTableWidth - resultTableWidth;
+      const interval = offset / 100
+      this.setState({
+        scrollInterval : interval,
+        scrollIntervalTotal : offset
+      })
+    }
+    
   }
 
 
@@ -682,7 +737,7 @@ export class Search extends Component {
                <button className={"customSlider-btn"} onClick={this.scrollRight.bind(this, "right")}>
                    &lt;
                </button>
-               <input id="customSliderInput" type="range" onInput={this.slide.bind(slideValue)} className={"customSlider"} min={0} max={100} defaultValue={0}></input>
+               <input id="customSliderInput" type="range" onInput={(e) => this.slide(e)} className={"customSlider"} min={0} max={100} step={1} defaultValue={this.state.slideValue}></input>
                <button className={"customSlider-btn"} onClick={this.scrollLeft.bind(this, "left")}>
                    &gt;
                </button>
@@ -694,7 +749,7 @@ export class Search extends Component {
         }
       </div>
     )
-  }
+  } 
 }
 
 export default Search
