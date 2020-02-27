@@ -5,6 +5,10 @@ export class DataServiceV2{
     constructor(baseUrl){
         this.baseUrl = baseUrl;
 
+        // this.checkData = ( data ) => {
+            
+        // }
+
         this.fetchFirstNLast = (ids, deviceType, interval, fields) => {
             let url = `${this.baseUrl}${deviceType}/${interval}/${ids[0]}/first-last`
             console.log('url', url, "ids", ids, "deviceType", deviceType, "interval",interval) 

@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import { Formatters } from '@future-grid/fgp-graph/lib/extras/formatters';
 import { DataServiceV2 } from './DataServiceV2'
+import { DataServiceV3 } from './DataServiceV3'
+import { GraphLoadHelper } from './GraphLoadHelper';
 import moment from 'moment';
 import FgpGraph from '@future-grid/fgp-graph';
 import { DatePickerWrapper } from '../../MultiReferenceFilterSearch/DatePickerWrapper/DatePickerWrapper'
@@ -115,9 +117,16 @@ export class StandardGraphV2 extends Component {
 
     componentDidMount(){
         let formatter = this.props.timeZone ? new Formatters(this.props.timeZone) : new Formatters('Australia/Melbourne')
-        let dataService = new DataServiceV2(this.props.baseUrl)
+
+        
         let mainGraph;
         if(this.props.debugging === true){
+            if(this.props.newDataService == true){
+                var dataService = new DataServiceV3(this.props.baseUrl, this.props.externalDateWindow, this.state)
+                console.log('loading in new data servicdd')
+            }else{
+                var dataService = new DataServiceV2(this.props.baseUrl)
+            }
             var vdConfig = {
                 name: 'device view',
                 connectSeparatedPoints: true,
@@ -164,6 +173,12 @@ export class StandardGraphV2 extends Component {
             var rawConfigs = [...this.props.configs];
             var completeConfigs = [];
             rawConfigs.forEach(config => {
+                if(this.props.newDataService == true){
+                    var dataService = new DataServiceV3(this.props.baseUrl, this.props.externalDateWindow, config)
+                    console.log('loading in new data servicdd')
+                }else{
+                    var dataService = new DataServiceV2(this.props.baseUrl)
+                }
                 var vdConfig = {
                     name: config.name,
                     connectSeparatedPoints: config.connectSeparatedPoints? config.connectSeparatedPoints : true,
