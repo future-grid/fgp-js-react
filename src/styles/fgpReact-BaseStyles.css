@@ -196,3 +196,11 @@ html, body {
   .react-tabs__tab{
     font-size: 16px !important;
   }
+
+  .m-left-10px{
+    margin-left: 10px;
+  }
+
+  .m-right-2px{
+    margin-right: 2px;
+  }

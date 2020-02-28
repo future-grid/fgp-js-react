@@ -175,7 +175,7 @@ export class StandardGraphV2 extends Component {
             rawConfigs.forEach(config => {
                 if(this.props.newDataService == true){
                     var dataService = new DataServiceV3(this.props.baseUrl, this.props.externalDateWindow, config)
-                    console.log('loading in new data servicdd')
+                    // console.log('loading in new data servicdd')
                 }else{
                     var dataService = new DataServiceV2(this.props.baseUrl)
                 }
@@ -297,10 +297,10 @@ export class StandardGraphV2 extends Component {
             <div className={"container-fluid"}>
                 { this.props.includeDatePicker === "double" ? (
                         <div className={"row"}>
-                            <div style={{"marginRight":" 10px"}} className={"d-flex align-items-center"}>
+                            <div  className={"d-flex align-items-center m-left-10px m-right-2px"}>
                                 Start:
                             </div>
-                            <div>
+                            <div style={{"width": "7rem"}}>
                                 <DatePickerWrapper 
                                     date={this.props.externalDateWindow[0]}
                                     handleChange={(date) => {
@@ -308,7 +308,7 @@ export class StandardGraphV2 extends Component {
                                     }}
                                 />
                             </div>
-                            <div className={"d-flex align-items-center"}>
+                            <div className={"d-flex align-items-center  m-left-10px m-right-2px"}>
                                 End:
                             </div>
                             <div>
