@@ -172,12 +172,13 @@ export class StandardGraphV2 extends Component {
         }else{
             var rawConfigs = [...this.props.configs];
             var completeConfigs = [];
+            var dataService;
             rawConfigs.forEach(config => {
                 if(this.props.newDataService == true){
-                    var dataService = new DataServiceV3(this.props.baseUrl, this.props.externalDateWindow, config)
+                    dataService = new DataServiceV3(this.props.baseUrl, this.props.externalDateWindow, config);
                     // console.log('loading in new data servicdd')
                 }else{
-                    var dataService = new DataServiceV2(this.props.baseUrl)
+                    dataService = new DataServiceV2(this.props.baseUrl);
                 }
                 var vdConfig = {
                     name: config.name,
@@ -199,7 +200,7 @@ export class StandardGraphV2 extends Component {
                         collections: config.graphConfig.collections,
                         filters: config.graphConfig.filters ? config.graphConfig.filters : null
                     },
-                    dataService: config.dataService ? config.dataService : dataService ,
+                    dataService: config.dataService ? config.dataService : dataService,
                     show: config.show,
                     ranges: config.graphConfig.ranges,
                     initRange: this.props.globalDateWindow ? (
@@ -231,6 +232,8 @@ export class StandardGraphV2 extends Component {
             console.log('> Creating child graphs...')
             var childGraphPropertiesArray = [...this.props.childGraphConfigs]
             var childGraphArray = [...this.state.childGraphs];
+            // dataservice for children graphs    Eric 28/02/2020
+            var dataService = new DataServiceV2(this.props.baseUrl);
             childGraphPropertiesArray.forEach( graphConfig => {
                 var childGraphViewConfigs = []
                 graphConfig.viewConfigs.forEach( viewConfig =>{
