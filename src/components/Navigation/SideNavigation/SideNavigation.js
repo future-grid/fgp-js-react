@@ -20,6 +20,24 @@ export class SideNavigation extends Component {
           </div>
         </div>
         {
+          this.props.helperArrow === true ? (
+            <div className={"helperArrowCont"} >
+            {
+              this.props.isOpen === true ? (
+                <div className={"helperArrow helperArrow-extended"} onClick={this.props.handler}>
+                  &lt; <br/> &lt; <br/> &lt; <br/>        
+                </div>
+              ) : (
+                <div className={"helperArrow"} onClick={this.props.handler}>
+                  &gt; <br/> &gt; <br/> &gt; <br/>        
+                </div>
+              )
+            }
+          </div>
+          ) : ""
+        }
+
+        {
           this.props.items.map((item) => {
             return (
             <SideNavigationItem

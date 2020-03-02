@@ -6,8 +6,10 @@ export class DataServiceV3{
     constructor(baseUrl, initialTimeWindow, config){
         console.log("ARGGGGGGs>>\n",arguments)
         this.baseUrl = baseUrl;
-        this.loadedTimeRange = initialTimeWindow;
-        this.storedResult = [];
+        this.savedTimeRange = initialTimeWindow;
+        this.savedResult = [];
+        this.savedInterval = "";
+        this.thresholds = 
         
         // this.timeCache = graphLoadHelper
 
@@ -40,37 +42,59 @@ export class DataServiceV3{
             var reload = true
             var newLoadBefore = false;
             var newLoadAfter = false;
-            console.log("FETCH DATA ARGS >>>", arguments) 
-            console.log(ids, deviceType, interval, range, fields)
+
+            // console.log("FETCH DATA ARGS >>>", arguments) 
+            // console.log(ids, deviceType, interval, range, fields)
 
             // if we request data before the start of the init range
-            if( range.start < this.loadedTimeRange[0] ){
-                reload = true;
-                newLoadBefore = true;
+
+            console.log(
+                `DATASERVICE-V3 logs > \n
+                Interval s/n ${this.savedInterval} / ${interval}\n
+                Start TS s/n ${this.savedTimeRange[0]} / ${range.start}
+                End   TS s/n ${this.savedTimeRange[1]} / ${range.end}
+                Fields   s/n ${fields}`
+            );
+
+
+            if(range.start > this.savedTimeRange[0] && range.end < this.savedTimeRange[1] ){
+                reload = false
+            }else{
+
+                if( range.start < this.savedTimeRange[0] ){
+                    reload = true;
+                    newLoadBefore = true;
+                    this.savedTimeRange[0] = range.start;
+                }
+    
+                if(range.end > this.savedTimeRange[1]){
+                    reload = true;
+                    newLoadAfter = true;
+                    this.savedTimeRange[1] = range.end;
+                }else
+
+                if(interval !== this.savedInterval){
+                    reload = true;
+                    this.savedInterval = interval;
+                }
             }
 
-            if(range.end > this.loadedTimeRange[1]){
-                reload = true;
-                newLoadAfter = true;
-            }
 
             // scrolling in
-            if(range.start > this.loadedTimeRange[0] && range.end < this.loadedTimeRange[1]){
-                reload = false
-            }
+ 
 
             if(reload === false){
                 return new Promise((resolve, reject) => {
-                    resolve(this.storedResult)
+                    resolve(this.savedResult)
                 })
             }else{
-                var savedResult = [];
-                if(newLoadBefore === true && newLoadAfter === false){ // only get data before
-                    savedResult = this.storedResult;
-                    // range.end = savedResult[0].timestamp
-                }else if(newLoadBefore === false && newLoadAfter === true){ // only get data after
+                // var savedResult = [];
+                // if(newLoadBefore === true && newLoadAfter === false){ // only get data before
+                //     savedResult = this.storedResult;
+                //     // range.end = savedResult[0].timestamp
+                // }else if(newLoadBefore === false && newLoadAfter === true){ // only get data after
 
-                }
+                // }
                 return new Promise((resolve, reject) => {
                     axios.post(url,
                     {
@@ -85,9 +109,12 @@ export class DataServiceV3{
                         Object.keys(res.data).forEach(key => {
                             res.data[key].id = key;
                             result.push(res.data[key]);
-                            console.log(res.data[key])
+                            // console.log(res.data[key])
                         });
-                        this.storedResult=result;
+                        this.savedResult=result;
+                        this.savedTimeRange[0] = range.start;
+                        this.savedTimeRange[1] = range.end;
+                        this.savedInterval = interval;
                         resolve(result)
                     });
                 });

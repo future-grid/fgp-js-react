@@ -233,8 +233,13 @@ export class StandardGraphV2 extends Component {
             var childGraphPropertiesArray = [...this.props.childGraphConfigs]
             var childGraphArray = [...this.state.childGraphs];
             // dataservice for children graphs    Eric 28/02/2020
-            var dataService = new DataServiceV2(this.props.baseUrl);
+            var dataService;
             childGraphPropertiesArray.forEach( graphConfig => {
+                if(this.props.newDataService === true){
+                    dataService = new DataServiceV3(this.props.baseUrl, this.props.externalDateWindow, graphConfig);
+                }else{
+                    dataService = new DataServiceV2(this.props.baseUrl);
+                }
                 var childGraphViewConfigs = []
                 graphConfig.viewConfigs.forEach( viewConfig =>{
                     let dateTime = viewConfig.graphConfig.initRange;

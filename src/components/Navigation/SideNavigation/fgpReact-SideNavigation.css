@@ -166,3 +166,32 @@
     height: 70px;
     transition: 0.2s ease 0s;
 }
+
+.helperArrowCont{
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 50%;
+    text-align: right;
+}
+
+
+.helperArrow{
+    height: 50px;
+    width: fit-content;
+    line-height: 12px;
+    position: fixed;
+    left: 66px;
+    background: #007bff;
+    color: white;
+    border-radius: 5px;
+    text-align: right;
+    padding: 5px 2px;
+    opacity: 0.5;
+    user-select: none;
+    cursor: pointer;
+}
+
+.helperArrow-extended{
+    left: 176px !important;
+}

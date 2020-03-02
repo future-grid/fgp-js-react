@@ -42,6 +42,7 @@ export class Navigation extends Component {
           signOutMethod={this.props.signOutMethod}
           buildVersion={this.props.buildVersion}
           buildEnv={this.props.buildEnv}
+          helperArrow={this.props.helperArrow === true ? true : false}
         />    
 
       </header>
