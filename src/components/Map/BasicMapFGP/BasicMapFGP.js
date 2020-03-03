@@ -86,6 +86,7 @@ export class BasicMapFGP extends Component {
     buildMap(){
       this.createInteractions();
 
+      // console.log("this.props.featuresChildren", this.props.featuresChildren);
 
       var hasChildrenIn = this.state.hasChildren
       if(this.props.featuresParent.lat === 0 &&
@@ -95,6 +96,65 @@ export class BasicMapFGP extends Component {
           noMapData : true,
         });
       }else{
+
+        const pointStyler = (point) => {
+
+          const ret = CircleStyle({
+            radius: 4,
+            fill: new Fill({
+              color: point.values && point.values.fillColor ? point.values.fillColor : 'black'
+            }),
+            stroke: new Stroke({
+              color: point.values && point.values.strokeColor ? point.values.strokeColor : 'black', 
+              width: point.values && point.values.strokeWidth ? point.values.strokeWidth : 1
+            })
+          });
+          console.log('Returning CircleStyle', ret);
+          return ret;
+          // switch(point.values.type){
+          //   case "parent": 
+          //     return new CircleStyle({
+          //       radius: 4,
+          //       fill: new Fill({color: point.values.fillColor}),
+          //       stroke: new Stroke({color: point.values.strokeColor, width: point.values.strokeWidth ? point.values.strokeColor : 1})
+          //     })
+          //   case "child": 
+          //     return new CircleStyle({
+          //       radius: 4,
+          //       fill: new Fill({color: this.props.featuresChildren[index].style.fillColor}),
+          //       stroke: new Stroke({color: this.props.featuresChildren[index].style.borderColor, width: 1})
+          //     })
+          //   case "selectedFeatures": 
+          //     return new CircleStyle({
+          //       radius: 4,
+          //       fill: new Fill({color: this.state.selectedFeaturesStyle.fillColor}),
+          //       stroke: new Stroke({color: this.state.selectedFeaturesStyle.borderColor, width: 1})
+          //     })
+          //   default:
+          //     return new CircleStyle({
+          //       radius: 4,
+          //       fill: new Fill({color: this.state.selectedFeaturesStyle.fillColor}),
+          //       stroke: new Stroke({color: this.state.selectedFeaturesStyle.borderColor, width: 1})
+          //     })
+          //   break;
+          // }
+        }
+        const styleFunctionChildren = (idx) => {
+          const currentLayer = this.props.featuresChildren[idx];              
+          const style = currentLayer.style;
+          const fillColour = style.fillColor ? style.fillColor : 'black';
+          const strokeColour = style.borderColor ?  style.borderColor : 'black';
+          console.log(`idx=${idx}, fillColor=${fillColour}, strokeColour=${strokeColour}`);
+          const ret = new Style({
+            image: new CircleStyle({
+              radius: 4,
+              fill: new Fill({color: fillColour}),
+              stroke: new Stroke({color: strokeColour, width: 1})
+            })
+          });
+          return ret;
+        };
+        
         function styleZoomer(type, radius, index){
           if(type === "parent"){
             return new CircleStyle({
@@ -103,6 +163,7 @@ export class BasicMapFGP extends Component {
               stroke: new Stroke({color: this.props.featuresParentStyles.borderColor, width: 1})
             })
           }else if(type === "child"){
+            // console.log(`index=${index},   colour=${this.props.featuresChildren[index].style.fillColor}`)
             return new CircleStyle({
               radius: radius,
               fill: new Fill({color: this.props.featuresChildren[index].style.fillColor}),
@@ -140,7 +201,7 @@ export class BasicMapFGP extends Component {
         };     
         this.setState({
           compiledSelectedFeatureStyle : styleFunctionSelectedFeatures,
-          styleFunctionParent : styleFunctionParent
+          styleFunctionParent: styleFunctionParent
         })
   
         // intitializing the geojson
@@ -158,18 +219,8 @@ export class BasicMapFGP extends Component {
   
           //iterating through the types of children
           for(var x = 0; x < this.props.featuresChildren.length; x++ ){
-            // creating styles of the children
-            var image = styleZoomer("child", 4, x)
-            var styles = {
-              'Point': new Style({
-                image: image
-              })
-            };
-            var styleFunctionChildren = function(feature) {
-              return styles[feature.getGeometry().getType()];
-            };
             this.props.featuresChildren[x].children.forEach( child =>{
-              console.log('plotting child', child)
+              // console.log(`idx: ${x}, plotting child`, child);
               // console.log(child)
               let featureObj = {
                 'type' : "Feature",
@@ -189,14 +240,15 @@ export class BasicMapFGP extends Component {
                 },
                 "geometry_name": "geom",
                 "properties": {
+                  "childLayerIndex": x,
                   "lat":  child.lat,
                   "lng": child.lng,
-                  "type": this.props.featuresChildren[x].deviceType,
+                  // "type": this.props.featuresChildren[x].deviceType,
                   "id": '_' + Math.random().toString(36).substr(2, 11),
                   "name": child.name,
-                  "borderColor": this.props.featuresChildren[x].style.borderColor,
-                  "borderWidth": this.props.featuresChildren[x].style.borderWidth,
-                  "fillColor": this.props.featuresChildren[x].style.fillColor,
+                  // "borderColor": this.props.featuresChildren[x].style.borderColor,
+                  // "borderWidth": this.props.featuresChildren[x].style.borderWidth,
+                  // "fillColor": this.props.featuresChildren[x].style.fillColor,
                 }
               }
               if(isNaN(child.lat) === false && isNaN(child.lng) === false &&
@@ -210,10 +262,12 @@ export class BasicMapFGP extends Component {
             });
             var vectorLayerChildren = new VectorLayer({
               source: vectorSourceChildren,
-              style: styleFunctionChildren
+              style: function (feature){ 
+                const idx = feature && feature.values_ ? feature.values_.childLayerIndex : 0;
+                return styleFunctionChildren(idx); 
+              }
             });
             this.setState({
-              styleFunctionChildren : styleFunctionChildren,
               vectorSourceChildren: vectorSourceChildren
             })
             vectorLayerChildrenArr.push(vectorLayerChildren)
@@ -341,7 +395,7 @@ export class BasicMapFGP extends Component {
         if(hasChildrenIn === true){
             this.setState({
               map:map,
-              featuresLayerChildren:vectorLayerChildrenArr,
+              // featuresLayerChildren:vectorLayerChildrenArr,
               featuresLayerParent:vectorLayerParent,
               vectorLayerSelectedFeatures:vectorLayerSelectedFeatures
             })
@@ -381,8 +435,8 @@ export class BasicMapFGP extends Component {
   
           if(hasChildrenIn === true){
             for(var x = 0; x < vectorLayerChildrenArr.length; x ++){
-              var stylesChild = new Style({image: styleZoomer("child", radius, x)});
-              vectorLayerChildrenArr[x].setStyle(stylesChild)
+              console.log('setStyleFunctionChildren(',x,')');
+              vectorLayerChildrenArr[x].setStyle(styleFunctionChildren(x));
             }
           }
         });     

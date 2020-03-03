@@ -122,7 +122,7 @@ export class DevicePage extends Component {
         hasDeviceExtensionLoaded: true
       })
     }).catch( err => {
-      console.log("Here is your error, Dev -_-`", err)
+      console.error("Here is your error, Dev -_-`", err)
     }) 
   }
 
@@ -135,7 +135,7 @@ export class DevicePage extends Component {
         response.data["relationName"] = relation
         relationObj.parents.push(response.data);
       }).catch(err => {
-        console.log("Here is your error, Dev -_-`", err)
+        console.error("Here is your error, Dev -_-`", err)
       })
     });
 
@@ -194,7 +194,7 @@ export class DevicePage extends Component {
                 })
               }
             }).catch(err => {
-              console.log("Here is your error, Dev -_-` circa copy children loop pre 1910", err)
+              console.error("Here is your error, Dev -_-` circa copy children loop pre 1910", err)
             })
           }else{  
             axios.post(
@@ -205,7 +205,7 @@ export class DevicePage extends Component {
                 "timestamp" : new Date().getTime()
               }
             ).then(response =>{
-              console.log(response)
+              // console.log(response)
               let childArr = [];
               response.data.forEach( child => {
                 if(child === null || !child["location"] === true){
@@ -216,7 +216,7 @@ export class DevicePage extends Component {
                     lng: child.location["lng"] ? child.location.lng : child.location["longitude"] ? child.location.longitude: null,
                     name : child.device.name
                   }                    
-                  console.log("Temp => ", temp)
+                  // console.log("Temp => ", temp)
                   childArr.push(temp)
                 }
               })
@@ -235,18 +235,18 @@ export class DevicePage extends Component {
                 })
               }
             }).catch(err => {
-              console.log("Here is your error, Dev -_-`", err)
+              console.error("Here is your error, Dev -_-`", err)
             }) 
           }
         }else{
-          console.log('we out baby')
+          // console.log('we out baby')
           this.setState({
             childrenWithLocationAndStylesLoaded : true
           });
         }
         console.log("Here is your relations, Dev -_-`", response.data)
       }).catch(err => {
-        console.log("Here is your error, Dev -_-`", err)
+        console.error("Here is your error, Dev -_-`", err)
       })
     }
     
