@@ -1,17 +1,21 @@
 import axios from 'axios';
 import moment from 'moment';
-import graphLoadHelper from './GraphLoadHelper';
+import GraphLoadHelper from './GraphLoadHelper';
 
 export class DataServiceV3{
-    constructor(baseUrl, initialTimeWindow, config){
+    constructor(baseUrl, initialTimeWindow, config, graphServiceId){
         console.log("ARGGGGGGs>>\n",arguments)
         this.baseUrl = baseUrl;
         this.savedTimeRange = initialTimeWindow;
         this.savedResult = [];
         this.savedInterval = "";
-        this.thresholds = 
-        
-        // this.timeCache = graphLoadHelper
+        this.id = graphServiceId
+        this.graphLoadHelper = new GraphLoadHelper(initialTimeWindow, config, graphServiceId)
+
+        // if we have no cache configured for this graph in this session yet, init one(there should never be one intit'd already unless there is conflict with IDs)
+        if(!this.graphLoadHelper.checkStorageKey()){
+            this.graphLoadHelper.setStorageKey();
+        }
 
         this.fetchFirstNLast = (ids, deviceType, interval, fields) => {
             let url = `${this.baseUrl}${deviceType}/${interval}/${ids[0]}/first-last`
@@ -115,6 +119,7 @@ export class DataServiceV3{
                         this.savedTimeRange[0] = range.start;
                         this.savedTimeRange[1] = range.end;
                         this.savedInterval = interval;
+                        this.graphLoadHelper.loadInData(result, this.savedTimeRange, this.savedInterval);
                         resolve(result)
                     });
                 });

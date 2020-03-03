@@ -11,6 +11,10 @@
     box-shadow: none;
 }
 
+.fgReact_home .isLeftBugged{
+    left: 0 !important
+}
+
 .tooltipText{
     display: none;
 }

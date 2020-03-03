@@ -173,9 +173,9 @@ export class StandardGraphV2 extends Component {
             var rawConfigs = [...this.props.configs];
             var completeConfigs = [];
             var dataService;
-            rawConfigs.forEach(config => {
+            rawConfigs.forEach((config, index) => {
                 if(this.props.newDataService == true){
-                    dataService = new DataServiceV3(this.props.baseUrl, this.props.externalDateWindow, config);
+                    dataService = new DataServiceV3(this.props.baseUrl, this.props.externalDateWindow, config, this.state.id+"_DSV3_P"+index);
                     // console.log('loading in new data servicdd')
                 }else{
                     dataService = new DataServiceV2(this.props.baseUrl);
@@ -235,13 +235,13 @@ export class StandardGraphV2 extends Component {
             // dataservice for children graphs    Eric 28/02/2020
             var dataService;
             childGraphPropertiesArray.forEach( graphConfig => {
-                if(this.props.newDataService === true){
-                    dataService = new DataServiceV3(this.props.baseUrl, this.props.externalDateWindow, graphConfig);
-                }else{
-                    dataService = new DataServiceV2(this.props.baseUrl);
-                }
                 var childGraphViewConfigs = []
-                graphConfig.viewConfigs.forEach( viewConfig =>{
+                graphConfig.viewConfigs.forEach( (viewConfig, index) =>{
+                    if(this.props.newDataService === true){
+                        dataService = new DataServiceV3(this.props.baseUrl, this.props.externalDateWindow, graphConfig, this.state.id+"_DSV3_C"+index);
+                    }else{
+                        dataService = new DataServiceV2(this.props.baseUrl);
+                    }
                     let dateTime = viewConfig.graphConfig.initRange;
                     var graphConf = {
                         name: viewConfig.name,
@@ -308,7 +308,7 @@ export class StandardGraphV2 extends Component {
                             <div  className={"d-flex align-items-center m-left-10px m-right-2px"}>
                                 Start:
                             </div>
-                            <div style={{"width": "7rem"}}>
+                            <div style={{"width":  "120px"}}>
                                 <DatePickerWrapper 
                                     date={this.props.externalDateWindow[0]}
                                     handleChange={(date) => {
@@ -319,7 +319,7 @@ export class StandardGraphV2 extends Component {
                             <div className={"d-flex align-items-center  m-left-10px m-right-2px"}>
                                 End:
                             </div>
-                            <div>
+                            <div style={{"width":  "120px"}}>
                                 <DatePickerWrapper 
                                     date={this.props.externalDateWindow[1]}
                                     handleChange={(date) => {
