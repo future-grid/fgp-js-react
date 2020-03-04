@@ -436,7 +436,17 @@ export class BasicMapFGP extends Component {
           if(hasChildrenIn === true){
             for(var x = 0; x < vectorLayerChildrenArr.length; x ++){
               console.log('setStyleFunctionChildren(',x,')');
-              vectorLayerChildrenArr[x].setStyle(styleFunctionChildren(x));
+              if(vectorLayerChildrenArr[x].getSource()){
+                var sf = vectorLayerChildrenArr[x].getSource().getFeatures();
+                //console.log(sf)
+                sf.forEach(function(feature){
+                  const idx = feature && feature.values_ ? feature.values_.childLayerIndex : 0;
+                  var childImage = styleFunctionChildren(idx).getImage();
+                  childImage.setRadius(radius);
+                  var stylesChild = new Style({image: childImage});
+                  feature.setStyle(stylesChild);
+                });
+              }
             }
           }
         });     
