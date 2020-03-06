@@ -36,9 +36,6 @@
         "file-loader": "^4.2.0",
         "find-up": "^4.1.0"
     },
-    "dependencies": {
-        "webpack-node-externals": "^1.7.2"
-    },
     "devDependencies": {
         "babel-cli": "^6.26.0",
         "babel-core": "^6.26.3",
@@ -74,7 +71,8 @@
         "react-moment": "^0.9.6",
         "react-router-dom": "^5.1.2",
         "resolve-from": "^5.0.0",
-        "moment-timezone": "^0.5.26"
+        "moment-timezone": "^0.5.26",
+        "webpack-node-externals": "^1.7.2"
     },
     "bugs": {
         "url": "https://github.com/future-grid/fgp-js-react/issues"
