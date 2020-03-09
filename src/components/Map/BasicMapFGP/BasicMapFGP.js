@@ -102,7 +102,7 @@ export class BasicMapFGP extends Component {
         }else{
             if(this.props.featuresChildren === this.state.lockedDevices){
             }else{
-                this.buildMap(); 
+                this.buildMap();
             }
         }
 
@@ -123,7 +123,7 @@ export class BasicMapFGP extends Component {
             const layers = this.state.featuresLayerChildren;
             // demo data
             // props.mapHighlightPoints = ["001350030033dfe4"];
-            
+
             // clear layer
 
             console.info("clear highlight layer");
@@ -131,7 +131,7 @@ export class BasicMapFGP extends Component {
             if(highlightLayer){
                 highlightLayer.getSource().clear();
             }
-            
+
             console.info("highlight points : ", this.props.mapHighlightPoints);
 
             this.featureWithProperties= [];
@@ -154,9 +154,9 @@ export class BasicMapFGP extends Component {
                 });
             });
         } else {
-            
+
         }
-        
+
     }
 
 
@@ -196,6 +196,35 @@ export class BasicMapFGP extends Component {
                 noMapData: true
             });
         } else {
+          const pointStyler = (point) => {
+            const ret = CircleStyle({
+              radius: 4,
+              fill: new Fill({
+                color: point.values && point.values.fillColor ? point.values.fillColor : 'black'
+              }),
+              stroke: new Stroke({
+                color: point.values && point.values.strokeColor ? point.values.strokeColor : 'black',
+                width: point.values && point.values.strokeWidth ? point.values.strokeWidth : 1
+              })
+            });
+            console.log('Returning CircleStyle', ret);
+            return ret;
+          }
+          const styleFunctionChildren = (idx) => {
+            const currentLayer = this.props.featuresChildren[idx];
+            const style = currentLayer.style;
+            const fillColour = style.fillColor ? style.fillColor : 'black';
+            const strokeColour = style.borderColor ?  style.borderColor : 'black';
+            console.log(`idx=${idx}, fillColor=${fillColour}, strokeColour=${strokeColour}`);
+            const ret = new Style({
+              image: new CircleStyle({
+                radius: 4,
+                fill: new Fill({color: fillColour}),
+                stroke: new Stroke({color: strokeColour, width: 1})
+              })
+            });
+            return ret;
+          };
             function styleZoomer(type, radius, index) {
                 if (type === 'parent') {
                     return new CircleStyle({
@@ -275,16 +304,6 @@ export class BasicMapFGP extends Component {
 
                 //iterating through the types of children
                 for (var x = 0; x < this.props.featuresChildren.length; x++) {
-                    // creating styles of the children
-                    var image = styleZoomer('child', 4, x);
-                    var styles = {
-                        Point: new Style({
-                            image: image
-                        })
-                    };
-                    var styleFunctionChildren = function(feature) {
-                        return styles[feature.getGeometry().getType()];
-                    };
                     this.props.featuresChildren[x].children.forEach(child => {
                         //console.log('plotting child', child)
                         // console.log(child)
@@ -308,9 +327,10 @@ export class BasicMapFGP extends Component {
                             },
                             geometry_name: 'geom',
                             properties: {
+                                childLayerIndex: x,
                                 lat: child.lat,
                                 lng: child.lng,
-                                type: this.props.featuresChildren[x].deviceType,
+                                //type: this.props.featuresChildren[x].deviceType,
                                 id:
                                     '_' +
                                     Math.random()
@@ -318,12 +338,12 @@ export class BasicMapFGP extends Component {
                                         .substr(2, 11),
                                 name: child.name,
                                 description: child.description,
-                                borderColor: this.props.featuresChildren[x]
-                                    .style.borderColor,
-                                borderWidth: this.props.featuresChildren[x]
-                                    .style.borderWidth,
-                                fillColor: this.props.featuresChildren[x].style
-                                    .fillColor,
+                                // borderColor: this.props.featuresChildren[x]
+                                //     .style.borderColor,
+                                // borderWidth: this.props.featuresChildren[x]
+                                //     .style.borderWidth,
+                                // fillColor: this.props.featuresChildren[x].style
+                                //     .fillColor,
                                 additionalInfo: child
                             }
                         };
@@ -344,11 +364,13 @@ export class BasicMapFGP extends Component {
                         )
                     });
                     var vectorLayerChildren = new VectorLayer({
-                        source: vectorSourceChildren,
-                        style: styleFunctionChildren
+                      source: vectorSourceChildren,
+                      style: function (feature){
+                        const idx = feature && feature.values_ ? feature.values_.childLayerIndex : 0;
+                        return styleFunctionChildren(idx);
+                      }
                     });
                     this.setState({
-                        styleFunctionChildren: styleFunctionChildren,
                         vectorSourceChildren: vectorSourceChildren
                     });
                     vectorLayerChildrenArr.push(vectorLayerChildren);
@@ -510,7 +532,7 @@ export class BasicMapFGP extends Component {
                 map.addLayer(layer);
             });
 
-            
+
 
 
             // add highlight layer
@@ -548,7 +570,7 @@ export class BasicMapFGP extends Component {
             if (hasChildrenIn === true) {
                 this.setState({
                     map: map,
-                    featuresLayerChildren: vectorLayerChildrenArr,
+                    //featuresLayerChildren: vectorLayerChildrenArr,
                     featuresLayerParent: vectorLayerParent,
                     vectorLayerSelectedFeatures: vectorLayerSelectedFeatures
                 });
@@ -562,7 +584,7 @@ export class BasicMapFGP extends Component {
             map.addLayer(vectorLayerParent);
             map.addLayer(vectorLayerSelectedFeatures);
 
-            
+
 
             // map.add
             // binding the hover event (popup dialogue)
@@ -597,13 +619,29 @@ export class BasicMapFGP extends Component {
                 vectorLayerParent.setStyle(stylesParent);
                 vectorLayerSelectedFeatures.setStyle(stylesSelectedFeatures);
 
-                if (hasChildrenIn === true) {
-                    for (var x = 0; x < vectorLayerChildrenArr.length; x++) {
-                        var stylesChild = new Style({
-                            image: styleZoomer('child', radius, x)
-                        });
-                        vectorLayerChildrenArr[x].setStyle(stylesChild);
+                // if (hasChildrenIn === true) {
+                //     for (var x = 0; x < vectorLayerChildrenArr.length; x++) {
+                //         var stylesChild = new Style({
+                //             image: styleZoomer('child', radius, x)
+                //         });
+                //         vectorLayerChildrenArr[x].setStyle(stylesChild);
+                //     }
+                // }
+                if(hasChildrenIn === true){
+                  for(var x = 0; x < vectorLayerChildrenArr.length; x ++){
+                    console.log('setStyleFunctionChildren(',x,')');
+                    if(vectorLayerChildrenArr[x].getSource()){
+                      var sf = vectorLayerChildrenArr[x].getSource().getFeatures();
+                      //console.log(sf)
+                      sf.forEach(function(feature){
+                        const idx = feature && feature.values_ ? feature.values_.childLayerIndex : 0;
+                        var childImage = styleFunctionChildren(idx).getImage();
+                        childImage.setRadius(radius);
+                        var stylesChild = new Style({image: childImage});
+                        feature.setStyle(stylesChild);
+                      });
                     }
+                  }
                 }
 
                 // change radius size for highlight layers
@@ -815,11 +853,11 @@ export class BasicMapFGP extends Component {
                 console.info("same feature found, ignroe ", foundExistFeature);
             }
         });
-        
+
         if(selectedFeatures.length > 0){
-            
+
             let coordinates = [];
-            // 
+            //
             console.info("start adding feature into highlight array!");
             let featuresNeedRemove = [];
             selectedFeatures.forEach(_feature => {
@@ -829,7 +867,7 @@ export class BasicMapFGP extends Component {
                 const featureExist = this.featureWithProperties.filter(_f => {
                     return _f.name === newFeature.name;
                 });
-                
+
                 if(featureExist.length === 0){
                     console.info("highlight device not found, create one!", _feature);
                     this.featureWithProperties.push(_feature.getProperties());
@@ -837,9 +875,9 @@ export class BasicMapFGP extends Component {
                     console.info("highlight device exist! ", featureExist);
                     featuresNeedRemove = featuresNeedRemove.concat(featureExist);
                 }
-                
+
             });
-            // 
+            //
             if(featuresNeedRemove.length > 0){
                 console.info("need to remove:  ", featuresNeedRemove);
                 let newHighlightArray = [];
@@ -854,7 +892,7 @@ export class BasicMapFGP extends Component {
                     });
 
                     if(!needsToRemove){
-                        newHighlightArray.push(_f); 
+                        newHighlightArray.push(_f);
                     }
                 });
 
@@ -898,8 +936,8 @@ export class BasicMapFGP extends Component {
                     callback(this.featureWithProperties);
                 }
             }
-        } 
-        
+        }
+
 
 
 
@@ -992,7 +1030,7 @@ export class BasicMapFGP extends Component {
                 });
             }
         } else if (this.state.redirectInteraction === true && this.state.drawType == "None") {
-            
+
 
             let selectedFeatures = [...this.state.selectedFeatures];
             let resettingFeatures = [];
@@ -1011,7 +1049,7 @@ export class BasicMapFGP extends Component {
                     );
 
                 }
-                
+
             });
         }
     }
@@ -1024,7 +1062,7 @@ export class BasicMapFGP extends Component {
                 if(prop && prop.name){
                     featureArr.push(feature.values_);
                 }
-                
+
             });
             if (featureArr.length > 0) {
                 this.setState({
