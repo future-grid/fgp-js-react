@@ -25,11 +25,11 @@
     transition: 0.2s ease 0s;
     cursor: pointer;
     float: left;
-    padding-left: 22px;
+    padding-left: 8px;
 }
 
 .fgReact_SideNavigationItemIcon-active{
-    padding-left: 18px !important;
+    padding-left: 0px !important;
 }
 
 .fgReact_SideNavigationItemIcon:hover{
