@@ -12,6 +12,9 @@
     "author": "support@future-grid.com.au",
     "license": "Apache-2.0",
     "repository": "https://github.com/future-grid/fgp-js-react.git",
+    "dependencies": {
+        "webpack-node-externals": "^1.7.2"
+    },
     "peerDependencies": {
         "@fortawesome/fontawesome-svg-core": "^1.2.25",
         "@fortawesome/react-fontawesome": "^0.1.4",
@@ -71,8 +74,7 @@
         "react-moment": "^0.9.6",
         "react-router-dom": "^5.1.2",
         "resolve-from": "^5.0.0",
-        "moment-timezone": "^0.5.26",
-        "webpack-node-externals": "^1.7.2"
+        "moment-timezone": "^0.5.26"
     },
     "bugs": {
         "url": "https://github.com/future-grid/fgp-js-react/issues"

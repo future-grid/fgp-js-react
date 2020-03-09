@@ -2,11 +2,11 @@
 .closedheader{
     position: fixed;
     top: 0;
-    left: 70px;
-    width: calc(100% - 70px);
+    left: 50px;
+    width: calc(100% - 50px);
     background: var(--fgReact_v0_pureWhite);
     border-bottom: 1px solid var(--fgReact_v0_borderGrey);
-    height: 70px;
+    height: 50px;
     transition: 0.2s ease;
     user-select: none;
 }
@@ -24,8 +24,8 @@
     text-align: left;
     color: var(--fgReact_v0_boldBlack);
     float: left;
-    line-height: 70px;
-    padding-left: 70px;
+    line-height: 50px;
+    padding-left: 50px;
     overflow: hidden;
 }
 
