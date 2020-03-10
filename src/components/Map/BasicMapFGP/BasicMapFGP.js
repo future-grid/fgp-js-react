@@ -330,7 +330,7 @@ export class BasicMapFGP extends Component {
                                 childLayerIndex: x,
                                 lat: child.lat,
                                 lng: child.lng,
-                                //type: this.props.featuresChildren[x].deviceType,
+                                type: this.props.featuresChildren[x].deviceType,
                                 id:
                                     '_' +
                                     Math.random()
@@ -532,8 +532,20 @@ export class BasicMapFGP extends Component {
                 map.addLayer(layer);
             });
 
-
-
+            let highlightColour = 'red';
+            let highlightWidth = 1;
+            let highlightRadius = 4;
+            if(this.props.highlightStyle){
+              if(this.props.highlightStyle.color){
+                highlightColour = this.props.highlightStyle.color
+              }
+              if(this.props.highlightStyle.width){
+                highlightWidth = this.props.highlightStyle.width
+              }
+              if(this.props.highlightStyle.radius){
+                highlightRadius = this.props.highlightStyle.radius
+              }
+            }
 
             // add highlight layer
             let highlightLayer = new VectorLayer({
@@ -542,13 +554,13 @@ export class BasicMapFGP extends Component {
                 }),
                 style: new Style({
                     image: new Circle({
-                        radius: 4,
+                        radius: highlightRadius,
                         stroke: new Stroke({
-                            color: 'red',
-                            width: 1
+                            color: highlightColour,
+                            width: highlightWidth
                         }),
                         fill: new Fill({
-                            color: 'red'
+                            color: highlightColour
                         })
                     })
                 })
