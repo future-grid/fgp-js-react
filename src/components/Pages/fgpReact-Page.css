@@ -8,7 +8,7 @@
     color: var(--fgReact_v0_boldBlack);
     z-index: 1;
     overflow-x: hidden;
-    padding: 70px 0 0 70px;
+    padding: 50px 0 0 50px;
   }
 .fgReact_home-ext {
     width: calc(100vw - 140px);

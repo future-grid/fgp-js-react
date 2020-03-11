@@ -12,6 +12,9 @@
     "author": "support@future-grid.com.au",
     "license": "Apache-2.0",
     "repository": "https://github.com/future-grid/fgp-js-react.git",
+    "dependencies": {
+        "webpack-node-externals": "^1.7.2"
+    },
     "peerDependencies": {
         "@fortawesome/fontawesome-svg-core": "^1.2.25",
         "@fortawesome/react-fontawesome": "^0.1.4",
@@ -32,11 +35,10 @@
         "react-router-dom": "^5.1.2",
         "recharts": "^1.6.2",
         "@future-grid/fgp-auth": "^19.10.1",
-        "@future-grid/fgp-graph": "^20.2.3-RC9",
+        "@future-grid/fgp-graph": "^20.2.3-RC12",
         "file-loader": "^4.2.0",
         "find-up": "^4.1.0"
     },
-    "dependencies": {},
     "devDependencies": {
         "babel-cli": "^6.26.0",
         "babel-core": "^6.26.3",
@@ -52,7 +54,7 @@
         "@fortawesome/react-fontawesome": "^0.1.6",
         "@fortawesome/free-solid-svg-icons": "^5.11.2",
         "@future-grid/fgp-auth": "^19.10.1",
-        "@future-grid/fgp-graph": "^20.2.3-RC9",
+        "@future-grid/fgp-graph": "^20.2.3-R12",
         "axios": "^0.19.0",
         "bootstrap": "^4.3.1",
         "file-loader": "^4.2.0",

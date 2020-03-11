@@ -1,5 +1,5 @@
 .fgReact-SideNavigation{
-    width: 70px;
+    width: 50px;
     position: fixed;
     left: 0px;
     top: 0px;
@@ -27,23 +27,23 @@
     font-size: 32px;
     cursor: pointer;
     transition: all 0.2s ease 0s;
-    margin-bottom: 70px;
+    margin-bottom: 25px;
 }
 
 .fgReact_compass2{
     text-align: left;
-    padding-left: 10px;
+    padding-left: 0px;
     -webkit-user-select: none;
     -moz-user-select: none;
     user-select: none;
-    width: 70px;
-    height: 70px;
-    line-height: 68px;
+    width: 50px;
+    height: 50px;
+    line-height: 48px;
     color: rgb(51, 51, 51);
     font-size: 32px;
     cursor: pointer;
     transition: all 0.2s ease 0s;
-    margin-bottom: 70px;
+    margin-bottom: 25px;
 }
 
 .fgReact_compass svg{
@@ -66,7 +66,7 @@
 .fgReact_compass-active2{
     /* transform: rotate(360deg) scale(1.1);  */
     color: var(--fgReact_V0_boldGreen);
-    padding-left: 10px;
+    padding-left: 0px;
     width: 180px;
 }
 .fgReact_logo{
@@ -80,7 +80,7 @@
     width: 57px;
     top: 2px;
     margin-left: 12px;
-    height: 66px;
+    height: 46px;
     -webkit-animation: App-links-fade-in 1s none; /* Safari 4.0 - 8.0 */
     animation: App-links-fade-in 1s none;
 }
@@ -97,7 +97,7 @@
     width: 48px;
     top: 4px;
     /* margin-left: 28px; */
-    height: 66px;
+    height: 46px;
     /* animation: App-links-fade-in 1s none; */
 }
 
@@ -128,11 +128,11 @@
     transition: 0.2s ease 0s;
     cursor: pointer;
     float: left;
-    padding-left: 22px;
+    padding-left: 10px;
 }
 
 .fgReact_SideNavigationItemIcon-active{
-    padding-left: 18px !important;
+    padding-left: 4px !important;
 }
 
 .fgReact_SideNavigationItemIcon:hover{
