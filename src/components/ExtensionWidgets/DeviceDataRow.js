@@ -11,10 +11,11 @@ export class DeviceDataRow extends Component {
     render () {
         return (
             <span >
-                {`${this.props.title}  : `} 
+                {`${this.props.title}  : `}
                 <label className="fgReact_assetLabel" >{
                     this.props.style === 'datetime' ? <Moment date={this.props.data} format={"lll"}></Moment> : // date time style
                     this.props.style === 'currency' ? <span>{`A$${this.props.data}`}</span> : // currency style
+                    this.props.style === 'decimal' ? <span>{`${this.props.data.toFixed(this.props.styleValue)}`}</span> :
                                                <span>{this.props.data}</span> // default style
                 }</label>
             </span>
