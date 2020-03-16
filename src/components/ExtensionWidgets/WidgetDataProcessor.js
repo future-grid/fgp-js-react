@@ -16,6 +16,16 @@ export default class WidgetDataProcessor {
     return 'plain';
   }
 
+  getStyleValue(key) {
+    for(let i=0; i<this.deviceConfig.mutatedColumns.length; i++){
+      if(key === this.deviceConfig.mutatedColumns[i].key) {
+        return this.deviceConfig.mutatedColumns[i].styleValue;
+      }
+    }
+
+    return 2;
+  }
+
   // iterates over the redirectable columns in the JSON config and will return its given redirect.
   // also replaces all asterisks with the given value (for things like employeeID or whatever)
   getRedirect(key, value) {
@@ -62,6 +72,7 @@ export default class WidgetDataProcessor {
             title : key,
             data : value,
             style : this.getFormat(key),
+            styleValue : this.getStyleValue(key),
             key : Date.now() + Math.random(), // key to make React happier :)
             redirect : this.getRedirect(key, value),
             extension: category.relationship
@@ -84,6 +95,7 @@ export default class WidgetDataProcessor {
       // passes relevant values through functions configured by the JSON file
       newpoint.title = this.relationshipRename(point);
       newpoint.style = this.relationshipFormat(point);
+      newpoint.styleValue = point.styleValue;
       newpoint.redirect = this.relationshipRedirect(point);
       newpoint.data = point.data;
       newpoint.extension = point.extension;

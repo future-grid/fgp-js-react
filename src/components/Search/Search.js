@@ -10,6 +10,7 @@ export class Search extends Component {
   constructor(props){
     super(props);
     this.state = {
+      firstTouchScroll : true,
       popupInfo: [],
       searchConfig : {
         searchingTypes : this.props.searchConfig.searchingTypes,
@@ -497,7 +498,6 @@ export class Search extends Component {
     this.setState({
       mapVisible : !this.state.mapVisible
     })
-    console.log('toggled', this.state.mapVisible)
   }
 
   updateDateTime(key, rowKey, value){
@@ -523,21 +523,29 @@ export class Search extends Component {
   }
 
   updateSearchingType(key, rowKey, value) {
-
     let resultRow = this.state.searchRows.findIndex(p => p.indexKey === rowKey);
     let temp = [...this.state.searchRows];
     temp[resultRow][key] = value.target.value
     this.setState({searchRows: temp})
   }
 
+  resizeCallBack(val){
+      document.getElementsByClassName('rt-table')[0].scrollTo(this.state.scrollInterval * val, 0)
+  }
+
   slide(val, isButton){
     if(this.state.scrollInterval === 0 ){
-      this.handleResize()
-    }
-    if(isButton){
-      document.getElementsByClassName('rt-table')[0].scrollTo(this.state.scrollInterval * val, 0)
+      if(!isButton){
+        this.handleResize([val.target.value, isButton])
+      }else{
+        this.handleResize([val, isButton])
+      }
     }else{
+      if(isButton){
+        document.getElementsByClassName('rt-table')[0].scrollTo(this.state.scrollInterval * val, 0)
+      }else{
         document.getElementsByClassName('rt-table')[0].scrollTo(this.state.scrollInterval * val.target.value,0)
+      }
     }
   }
 
@@ -552,16 +560,26 @@ export class Search extends Component {
   }
 
   // allow resize handling so that the scrollbar is actually
-  handleResize() {
+  handleResize(scroll) {
     if(this.state.hasLoaded === true){
       const resultTableWidth = document.getElementsByClassName('ResultTable')[0].clientWidth //container (smaller)
       const totalTableWidth = document.getElementsByClassName('rt-thead')[0].clientWidth// content (larger)
       const offset = totalTableWidth - resultTableWidth;
       const interval = offset / 100
-      this.setState({
-        scrollInterval : interval,
-        scrollIntervalTotal : offset
-      })
+      if(scroll === undefined){
+        this.setState({
+          scrollInterval : interval,
+          scrollIntervalTotal : offset
+        })
+      }else{
+        this.setState({
+          scrollInterval : interval,
+          scrollIntervalTotal : offset
+        }, () => {
+          this.resizeCallBack(scroll[0], scroll[1])
+        })
+      }
+
     }
     
   }

@@ -7,13 +7,12 @@
 
 .customScrollBar-cont {
     position: fixed;
-    top: calc(100vh-80px);
     height: 20px;
-    width: calc(100vw - 130px);
+    width: calc(100vw - 86px);
     text-align: center;
     z-index: 999999999;
     bottom: 0px;
-    padding: 0 30px;
+    padding: 0px 30px;
     /* background-color: #f1f1f1; */
   }
   

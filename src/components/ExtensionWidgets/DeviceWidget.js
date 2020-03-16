@@ -155,13 +155,13 @@ export class DeviceWidget extends Component {
                                                 if(row.redirect) {
                                                 return ( // if there is a redirect, render the row with the redirect
                                                     <li key={row.key}>
-                                                        <a className="fgReact_assetRedirect" href={row.redirect}> <DeviceDataRow key={row.key} title={row.title} data={row.data} style={row.style} /> </a>
+                                                        <a className="fgReact_assetRedirect" href={row.redirect}> <DeviceDataRow key={row.key} title={row.title} data={row.data} style={row.style} styleValue={row.styleValue}/> </a>
                                                     </li>
                                                 )
                                                 } else {
                                                 return ( // if there is no redirect, render the row on its own
                                                     <li key={row.key}>
-                                                    <DeviceDataRow key={row.key} title={row.title} data={row.data} style={row.style} />
+                                                    <DeviceDataRow key={row.key} title={row.title} data={row.data} style={row.style} styleValue={row.styleValue}/>
                                                     </li>
                                                 )
                                                 }
@@ -223,13 +223,13 @@ export class DeviceWidget extends Component {
                                             if(row.redirect) {
                                             return ( // if there is a redirect, render the row with the redirect
                                                 <li key={row.key}>
-                                                    <a className="fgReact_assetRedirect" href={row.redirect}> <DeviceDataRow key={row.key} title={row.title} data={row.data} style={row.style} /> </a>
+                                                    <a className="fgReact_assetRedirect" href={row.redirect}> <DeviceDataRow key={row.key} title={row.title} data={row.data} style={row.style}  styleValue={row.styleValue}/> </a>
                                                 </li>
                                             )
                                             } else {
                                             return ( // if there is no redirect, render the row on its own
                                                 <li key={row.key}>
-                                                <DeviceDataRow key={row.key} title={row.title} data={row.data} style={row.style} />
+                                                <DeviceDataRow key={row.key} title={row.title} data={row.data} style={row.style} styleValue={row.styleValue}/>
                                                 </li>
                                             )
                                             }

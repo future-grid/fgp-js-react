@@ -78,8 +78,16 @@ export class StandardGraphV2 extends Component {
                 height: '300px', 
                 padding: '10px'
             },
-            id : this.props.id  ? this.props.id :`sg_${Math.random().toString(36).substr(2, 11)}`
+            id : this.props.id  ? this.props.id :`sg_${Math.random().toString(36).substr(2, 11)}`,
+            heldDates : [
+                this.props.globalDateWindow[0]?this.props.globalDateWindow[0]:
+                this.props.externalDateWindow[0]?this.props.globalDateWindow[0]:moment().startOf('day').subtract(7,'days'), 
+                this.props.globalDateWindow[1]?this.props.globalDateWindow[1]:
+                this.props.externalDateWindow[1]?this.props.globalDateWindow[1]:moment().endOf('day')
+            ],
         }
+        this.confirmDate = this.confirmDate.bind(this);
+        this.holdPreconfirmDate = this.holdPreconfirmDate.bind(this);
     }
 
 
@@ -102,6 +110,12 @@ export class StandardGraphV2 extends Component {
             }
         }
 
+        // if(props.externalDateWindow){
+        //    this.setState({
+        //        heldDates : props.externalDateWindow
+        //    })
+        // }
+
         // else if(props.highlight && props.highlight.length == 0) {
         //     if(this.state.mainGraph){
         //         console.info("highlights:", props.highlight);
@@ -111,13 +125,16 @@ export class StandardGraphV2 extends Component {
         if(this.props.externalDateWindow !== props.externalDateWindow ){
             if(props.externalDateWindow !== null && props.externalDateWindow !== undefined && props.externalDateWindow.length === 2 && props.externalDateWindow[0] < props.externalDateWindow[1])
             this.state.mainGraph.updateDatewinow(props.externalDateWindow);
+            this.setState({
+                heldDates : props.externalDateWindow
+            })
         }
     }
 
 
     componentDidMount(){
         let formatter = this.props.timeZone ? new Formatters(this.props.timeZone) : new Formatters('Australia/Melbourne')
-
+        // console.log(this.props, this,state)
         
         let mainGraph;
         if(this.props.debugging === true){
@@ -296,6 +313,21 @@ export class StandardGraphV2 extends Component {
         })
     }
 
+    // for use with double-confirm datepicker graph
+    confirmDate(){
+        console.log(' cconfirm date has been trigggered')
+        this.props.handleExternalDateWindow([moment(this.state.heldDates[0]).startOf('day').valueOf(), moment(this.state.heldDates[1]).endOf('day').valueOf()])
+
+    }
+
+    holdPreconfirmDate(dateWindow){
+        console.log("Datewindow has changed, new one is ",dateWindow)
+        console.log("Datewindow has changed, old one is ",this.props.globalDateWindow, this.state.externalDateWindow)
+        this.setState({
+            heldDates : dateWindow
+        })
+    }
+
    
 
 
@@ -340,8 +372,38 @@ export class StandardGraphV2 extends Component {
                                 />
                             </div>
                         </div>
+                    ) : this.props.includeDatePicker === "double-confirm" ? (
+                        <div className={"row"}>
+                            <div  className={"d-flex align-items-center m-left-10px m-right-2px"}>
+                                Start:
+                            </div>
+                            <div style={{"width":  "120px"}}>
+                                <DatePickerWrapper 
+                                    date={this.state.heldDates[0]}
+                                    handleChange={(date) => {
+                                        this.holdPreconfirmDate([moment(date).startOf('day').valueOf(), this.state.heldDates[1]])
+                                    }}
+                                />
+                            </div>
+                            <div className={"d-flex align-items-center  m-left-10px m-right-2px"}>
+                                End:
+                            </div>
+                            <div style={{"width":  "120px"}}>
+                                <DatePickerWrapper 
+                                    date={this.state.heldDates[1]}
+                                    handleChange={(date) => {
+                                        this.holdPreconfirmDate([this.state.heldDates[0], moment(date).endOf('day').valueOf()])
+                                    }}
+                                />
+                            </div>
+                            <div style={{"width":  "120px"}}>
+                                <button className={"btn btn-primary"} onClick={this.confirmDate}>
+                                   Confirm
+                                </button>
+                            </div>
+                        </div>
                     ) : (
-                        ''
+                        ""
                     )
                 }
                 <div className={"w-100"} style={{"marginBottom" : "20px"}}>
