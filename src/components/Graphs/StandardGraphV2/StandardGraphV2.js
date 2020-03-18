@@ -123,10 +123,13 @@ export class StandardGraphV2 extends Component {
         //     }
         // }
         if(this.props.externalDateWindow !== props.externalDateWindow ){
-            if(props.externalDateWindow !== null && props.externalDateWindow !== undefined && props.externalDateWindow.length === 2 && props.externalDateWindow[0] < props.externalDateWindow[1])
-            this.state.mainGraph.updateDatewinow(props.externalDateWindow);
+            if(props.externalDateWindow !== null && props.externalDateWindow !== undefined && props.externalDateWindow.length === 2 && props.externalDateWindow[0] < props.externalDateWindow[1])  
             this.setState({
                 heldDates : props.externalDateWindow
+            }, () => {
+                setTimeout( () => {
+                    this.state.mainGraph.updateDatewinow(this.state.heldDates)
+                }, 100);
             })
         }
     }
@@ -222,8 +225,8 @@ export class StandardGraphV2 extends Component {
                     ranges: config.graphConfig.ranges,
                     initRange: this.props.globalDateWindow ? (
                         {
-                            start : this.props.globalDateWindow[0],
-                            end : this.props.globalDateWindow[1],
+                            start : this.state.heldDates[0],
+                            end : this.state.heldDates[1],
                         }
                     ) : (
                         config.graphConfig.initRange
@@ -246,7 +249,7 @@ export class StandardGraphV2 extends Component {
         mainGraph.initGraph();
         
         if(this.props.isParent === true){
-            console.log('> Creating child graphs...')
+            // console.log('> Creating child graphs...')
             var childGraphPropertiesArray = [...this.props.childGraphConfigs]
             var childGraphArray = [...this.state.childGraphs];
             // dataservice for children graphs    Eric 28/02/2020
@@ -285,8 +288,8 @@ export class StandardGraphV2 extends Component {
                         ranges: viewConfig.graphConfig.ranges,
                         initRange: this.props.globalDateWindow ? (
                             {
-                                start : this.props.globalDateWindow[0],
-                                end : this.props.globalDateWindow[1],
+                                start : this.state.heldDates[0],
+                                end : this.state.heldDates[1],
                             }
                         ) : (
                             dateTime
@@ -296,7 +299,11 @@ export class StandardGraphV2 extends Component {
                     };
                     childGraphViewConfigs.push(graphConf);
                 });
-                var graphX = new FgpGraph(document.getElementById(graphConfig.id), childGraphViewConfigs);
+                if(this.props.eventHandlers){
+                    var graphX = new FgpGraph(document.getElementById(graphConfig.id), childGraphViewConfigs, this.props.eventHandlers);
+                }else{
+                    var graphX = new FgpGraph(document.getElementById(graphConfig.id), childGraphViewConfigs);
+                }
                 graphX.initGraph();
                 childGraphArray.push(graphX)
             })
@@ -315,14 +322,11 @@ export class StandardGraphV2 extends Component {
 
     // for use with double-confirm datepicker graph
     confirmDate(){
-        console.log(' cconfirm date has been trigggered')
         this.props.handleExternalDateWindow([moment(this.state.heldDates[0]).startOf('day').valueOf(), moment(this.state.heldDates[1]).endOf('day').valueOf()])
 
     }
 
     holdPreconfirmDate(dateWindow){
-        console.log("Datewindow has changed, new one is ",dateWindow)
-        console.log("Datewindow has changed, old one is ",this.props.globalDateWindow, this.state.externalDateWindow)
         this.setState({
             heldDates : dateWindow
         })
