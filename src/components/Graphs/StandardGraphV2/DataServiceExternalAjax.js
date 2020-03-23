@@ -1,7 +1,7 @@
 import axios from 'axios';
 import moment from 'moment';
 
-export class DataServiceV2{
+export class DataServiceExternalAjax{
     constructor(baseUrl){
         this.baseUrl = baseUrl;
 

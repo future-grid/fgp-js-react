@@ -16,6 +16,9 @@ export class DatePickerWrapper extends React.Component {
                 selected={this.props.date}
                 dateFormat={this.props.dateFormat ? this.props.dateFormat : "yyyy-MM-dd"}
                 onChange={this.props.handleChange}
+                fixedHeight
+                showMonthDropdown
+                showYearDropdown
             />
         </div>
       );

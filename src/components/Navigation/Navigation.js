@@ -39,6 +39,10 @@ export class Navigation extends Component {
           handler={this.toggleNav}
           items={this.props.items}
           sideNavLogo={this.props.sideNavLogo ? this.props.sideNavLogo : fgLogo}
+          signOutMethod={this.props.signOutMethod}
+          buildVersion={this.props.buildVersion}
+          buildEnv={this.props.buildEnv}
+          helperArrow={this.props.helperArrow === true ? true : false}
         />    
 
       </header>

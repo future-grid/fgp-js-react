@@ -1,10 +1,12 @@
+const nodeExternals = require("webpack-node-externals");
+const package = require("./package.json");
 var path = require('path');
 module.exports = {
   entry: './src/index.js',
   output: {
     path: path.resolve(__dirname, 'build'),
     filename: 'index.js',
-    libraryTarget: 'commonjs2'
+    libraryTarget: 'commonjs'
   },
   module: {
     rules: [
@@ -15,7 +17,7 @@ module.exports = {
             use: {
                 loader: 'babel-loader',
                 options: {
-                presets: ['env']
+                  presets: ['env']
                 }
             }
         },
@@ -29,7 +31,9 @@ module.exports = {
         }
     ]
   },
-  externals: {
-    'react': 'commonjs react' 
-  }
+  externals: [
+    nodeExternals({
+      whitelist: Object.keys(package.dependencies)
+    })
+  ]
 };

@@ -20,6 +20,24 @@ export class SideNavigation extends Component {
           </div>
         </div>
         {
+          this.props.helperArrow === true ? (
+            <div className={"helperArrowCont"} >
+            {
+              this.props.isOpen === true ? (
+                <div className={"helperArrow helperArrow-extended"} onClick={this.props.handler}>
+                  &lt; <br/> &lt; <br/> &lt; <br/>        
+                </div>
+              ) : (
+                <div className={"helperArrow"} onClick={this.props.handler}>
+                  &gt; <br/> &gt; <br/> &gt; <br/>        
+                </div>
+              )
+            }
+          </div>
+          ) : ""
+        }
+
+        {
           this.props.items.map((item) => {
             return (
             <SideNavigationItem
@@ -45,8 +63,24 @@ export class SideNavigation extends Component {
           fontAwesomeLib="fa"
           description="Sign Out"
           isSignOut={true}
+          signOutMethod={this.props.signOutMethod}
         />
-        
+        <div className="fgReact_SideNavigationBuildVersion">
+          {this.props.isOpen === true && this.props.buildVersion && this.props.buildVersion !== null ?
+          <a href={this.props.buildVersion.linkTo} target="_blank">
+            <div >
+                <span style={{paddingLeft: '10px'}}>Version: {this.props.buildVersion.version}</span>
+            </div>
+          </a>
+
+          : null}
+          {this.props.isOpen === true && this.props.buildEnv && this.props.buildEnv !== null ?
+            <div >
+                <span style={{paddingLeft: '10px'}}>Env: {this.props.buildEnv}</span>
+            </div>
+          : null}
+        </div>
+
       </div>
     )
   }

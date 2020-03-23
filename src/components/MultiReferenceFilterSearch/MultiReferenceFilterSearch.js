@@ -12,8 +12,8 @@ export class MultiReferenceFilterSearch extends Component {
     this.state = {
       hasLoaded : false,
       data : [],
-      fromDate: moment().subtract(7, 'd').startOf('day').valueOf(),
-      toDate: moment().startOf('day').valueOf(),
+      fromDate: this.props.fromDate ? this.props.fromDate :  moment().subtract(7, 'd').startOf('day').valueOf(),
+      toDate: this.props.toDate ? this.props.toDate : moment().startOf('day').valueOf(),
       currentReference : `${this.props.searchingReferences[0].referenceName}/data/${this.props.searchingReferences[0].noOfRecords}/0/${this.props.searchingReferences[0].startTimeStampColumn}%20asc`,
       currentColumns: this.props.searchingReferences[0].columnsToShow,
       currentFromColumn : this.props.searchingReferences[0].startTimeStampColumn,

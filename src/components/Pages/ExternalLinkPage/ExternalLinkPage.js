@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import {ExternalLink} from './ExternalLink';
+import "./ExternalLink.css"
 export class ExternalLinkPage extends Component {
     constructor(props){
         super(props);
@@ -12,7 +13,7 @@ export class ExternalLinkPage extends Component {
     render() {
         return (
             <div className={ "fgReact_home "}>
-                <div className={"fgReact_workingArea"}>
+                <div className={this.props.isLeftBugged === true ?"fgReact_workingArea isLeftBugged" : "fgReact_workingArea"}>
                     <div className={"fgReact_SearchPageTitle "  +  (this.props.isFluid === true ? " container-fluid " : " container ")}>
                         {this.state.title}
                     </div>

@@ -19,6 +19,7 @@ export class DevicePage extends Component {
       mapProjection: this.props.mapProjection ? this.props.mapProjection : "EPSG:4326",
       mapParentColors: this.props.mapParentColors ? this.props.mapParentColors : {fillColor: "pink", borderColor : "red"},
       mapChildrenColors: this.props.mapChildrenColors ? this.props.mapChildrenColors : [{fillColor: "lightblue", borderColor : "blue"}, {fillColor: "lightyellow", borderColor : "yellow"}, {fillColor: "lightgreen", borderColor : "green"}, {fillColor: "lightslategray", borderColor : "purple"}, {fillColor: "lightsalmon", borderColor : "orange"}],
+      showDescriptionOnHover: this.props.showDescriptionOnHover ? this.props.showDescriptionOnHover : false,
 
       breadCrumbPath: this.props.breadCrumbPath ? this.props.breadCrumbPath : null,
       hasBreadCrumbs: this.props.hasBreadCrumbs && this.props.breadCrumbPath ? this.props.hasBreadCrumbs : false,
@@ -30,7 +31,7 @@ export class DevicePage extends Component {
       lookupKey : this.props.lookupKey ? this.props.lookupKey : "name",
 
       showWidget : this.props.showWidget ? this.props.showWidget : "show",
-      
+
       baseUrl: this.props.baseUrl,
       deviceTypeTitleCasing : this.props.deviceTypeTitleCasing ? this.props.deviceTypeTitleCasing : "none",
 
@@ -46,10 +47,10 @@ export class DevicePage extends Component {
       extensions: null,
       hasDeviceExtensionLoaded : false,
 
-      fauxNavItems : this.props.isLoadingNavItems ? 
+      fauxNavItems : this.props.isLoadingNavItems ?
         this.props.isLoadingNavItems :
         [
-          {      
+          {
             key:"home01",
             linkTo:"/",
             fontAwesomeIcon:"home",
@@ -90,8 +91,21 @@ export class DevicePage extends Component {
     }
   }
 
-  componentDidUpdate(){
-    // this.allResolved();  
+  componentDidUpdate(props){
+    
+  }
+
+  componentWillReceiveProps(props){
+    if(props.retainNoChildren === true ){
+      if(this.state.relationChildNames[0] === props.relationChildNames[0]){
+        // do nothing
+      }else{
+        // set the state and trigger a fetched relations call to in-turn refresh the children shown on the map
+        this.setState({
+          relationChildNames : props.relationChildNames
+        }, () => {this.fetchRelations()})
+      }
+    }
   }
 
   getDeviceNameAsMeterLookup(){
@@ -113,7 +127,7 @@ export class DevicePage extends Component {
   }
 
   fetchExtensions(){
-    
+
     axios.post(`${this.state.baseUrl}${this.state.deviceType}/${this.state.lookupKey}/${this.state.deviceName}`,{
       "extensions" : this.state.extensionNames
     }).then( response => {
@@ -123,14 +137,14 @@ export class DevicePage extends Component {
       })
     }).catch( err => {
       console.log("Here is your error, Dev -_-`", err)
-    }) 
+    })
   }
 
 
   fetchRelations(){
     let relationObj = {...this.state.relations};
     this.state.relationParentNames.forEach( relation =>{
-      axios.get(`${this.state.baseUrl}${this.state.deviceType}/${this.state.deviceName}/relation/${relation}?isParent=true`    
+      axios.get(`${this.state.baseUrl}${this.state.deviceType}/${this.state.deviceName}/relation/${relation}?isParent=true`
       ).then( response => {
         response.data["relationName"] = relation
         relationObj.parents.push(response.data);
@@ -141,7 +155,7 @@ export class DevicePage extends Component {
 
     for(var x = 0; x < this.state.relationChildNames.length; x++){
       let iteratorZ = 0;
-      axios.get(`${this.state.baseUrl}${this.state.deviceType}/${this.state.deviceName}/relation/${this.state.relationChildNames[x]}`    
+      axios.get(`${this.state.baseUrl}${this.state.deviceType}/${this.state.deviceName}/relation/${this.state.relationChildNames[x]}`
       ).then( response => {
         response.data["relationName"] = this.state.relationChildNames[iteratorZ]
         if(response.data.length > 0){
@@ -151,7 +165,13 @@ export class DevicePage extends Component {
           response.data.forEach( child => {
             deviceNames.push(child.name);
           })
-          let tmpChildDeviceNames = [...this.state.childDeviceNames]
+          var tmpChildDeviceNames = []
+          if(this.props.retainNoChildren === true){
+            console.log('should be getting here')
+          }else{
+            tmpChildDeviceNames = [...this.state.childDeviceNames]
+            // console.log('looks like getting here though')
+          }
           tmpChildDeviceNames.push({type:childType, deviceNames: deviceNames})
           this.setState({
             childDeviceNames : tmpChildDeviceNames
@@ -169,20 +189,20 @@ export class DevicePage extends Component {
               let childArr = [];
               response.data.forEach( child => {
                 if(child === null ){
-  
+
                 }else{
                   var temp = {
                     lat: child["lat"] ? child.lat : null,
                     lng: child["lng"] ? child.lng : null,
-                    name : child.deviceName              
+                    name : child.deviceName
                   };
                   childArr.push(temp)
                 }
               })
-             
+
               copyOfChildren.push({
-                deviceType : childType, 
-                children : childArr, 
+                deviceType : childType,
+                children : childArr,
                 style: this.state.mapChildrenColors[iteratorZ]})
               this.setState({
                 childrenWithLocationAndStyles: copyOfChildren
@@ -196,7 +216,7 @@ export class DevicePage extends Component {
             }).catch(err => {
               console.log("Here is your error, Dev -_-` circa copy children loop pre 1910", err)
             })
-          }else{  
+          }else{
             axios.post(
               `${this.state.baseUrl}${childType}`,
               {
@@ -209,21 +229,26 @@ export class DevicePage extends Component {
               let childArr = [];
               response.data.forEach( child => {
                 if(child === null || !child["location"] === true){
-  
+
                 }else{
                   var temp = {
                     lat: child.location["lat"] ? child.location.lat : child.location["latitude"] ? child.location.latitude: null,
                     lng: child.location["lng"] ? child.location.lng : child.location["longitude"] ? child.location.longitude: null,
                     name : child.device.name
-                  }                    
+                  }
                   console.log("Temp => ", temp)
                   childArr.push(temp)
                 }
               })
-              let copyOfChildren = [...this.state.childrenWithLocationAndStyles]
+              var copyOfChildren = [];
+              if(this.props.retainNoChildren === true){
+                console.log('here we are', this.state.childrenWithLocationAndStyles, copyOfChildren)
+              }else{
+                copyOfChildren = [...this.state.childrenWithLocationAndStyles]
+              }
               copyOfChildren.push({
-                deviceType : childType, 
-                children : childArr, 
+                deviceType : childType,
+                children : childArr,
                 style: this.state.mapChildrenColors[iteratorZ]})
               this.setState({
                 childrenWithLocationAndStyles: copyOfChildren
@@ -236,7 +261,7 @@ export class DevicePage extends Component {
               }
             }).catch(err => {
               console.log("Here is your error, Dev -_-`", err)
-            }) 
+            })
           }
         }else{
           console.log('we out baby')
@@ -249,7 +274,7 @@ export class DevicePage extends Component {
         console.log("Here is your error, Dev -_-`", err)
       })
     }
-    
+
     this.setState({
       relations : relationObj,
       hasDeviceRelationsLoaded : true
@@ -258,7 +283,7 @@ export class DevicePage extends Component {
 
   render() {
     const childrenWithProps = React.Children.map(this.props.children, child =>{
-      // passing props through to children by cloning the element if the `dataLink` attribute is set to true 
+      // passing props through to children by cloning the element if the `dataLink` attribute is set to true
       if(child.props["dataLink"] === true){
         return( React.cloneElement(child, {
           isDataLinked: true,
@@ -289,26 +314,31 @@ export class DevicePage extends Component {
           childDeviceNames: this.state.childDeviceNames,
           lookupKey : this.state.lookupKey,
           deviceNameAsMeterLookup : this.state.deviceNameAsMeterLookup,
-          mapInteractions : this.props.mapInteractions ? this.props.mapInteractions : []
+          mapInteractions : this.props.mapInteractions ? this.props.mapInteractions : [],
+          additionalDeviceInfo: this.props.additionalDeviceInfo,
+          customDeviceInfo: this.props.customDeviceInfo,
+          mapLayers: this.props.mapLayers,
+          showDescriptionOnHover: this.state.showDescriptionOnHover,
+          retainNoChildren : this.props.retainNoChildren
         }))
       }else{
         return child
       }
     })
     return (
-      <div className={(this.props.noFgHome === true ? " ": " fgReact_home ") + (this.props.isOpen === true ? " fgReact_home-ext " : "  ")}>      
-        { 
-          this.state.hasDeviceExtensionLoaded === true && 
+      <div className={(this.props.noFgHome === true ? " ": " fgReact_home ") + (this.props.isOpen === true ? " fgReact_home-ext " : "  ")}>
+        {
+          this.state.hasDeviceExtensionLoaded === true &&
           this.state.hasDeviceRelationsLoaded === true &&
           this.state.childrenWithLocationAndStylesLoaded === true ? (
             // Rendering children with passed through props after extensions are loaded
             <div className="col-12">
               {childrenWithProps}
-            </div>            
-          ) : 
-            // loads a false navigation to simulate a working page 
+            </div>
+          ) :
+            // loads a false navigation to simulate a working page
             <div>
-              <Navigation 
+              <Navigation
                 handler={this.props.handler}
                 topNavTitle={this.state.fauxNavTitle}
                 sideNavLogo={this.state.fauxNavLogo}

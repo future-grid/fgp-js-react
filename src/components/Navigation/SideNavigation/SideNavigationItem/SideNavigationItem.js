@@ -25,11 +25,7 @@ export class SideNavigationItem extends Component {
           this.state.isSignOut === true ? (
             <div>
               <div className={"fgReact_SideNavigationItemIcon " + (this.props.linkTo === this.props.currentPage ? "fgReact_SideNavigationItemIcon-active" : "") }
-                onClick={()=> {
-                  auth.logout(() => {
-                    this.props.history.push("/");
-                  })
-                }}
+                onClick={this.props.signOutMethod}
               > 
                   <FontAwesomeIcon icon={[this.props.fontAwesomeLib, this.props.fontAwesomeIcon]}/>
               </div>

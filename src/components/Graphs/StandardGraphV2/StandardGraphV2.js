@@ -1,14 +1,19 @@
 import React, { Component } from 'react'
 import { Formatters } from '@future-grid/fgp-graph/lib/extras/formatters';
 import { DataServiceV2 } from './DataServiceV2'
+import { DataServiceV3 } from './DataServiceV3'
+import { GraphLoadHelper } from './GraphLoadHelper';
 import moment from 'moment';
 import FgpGraph from '@future-grid/fgp-graph';
+import { DatePickerWrapper } from '../../MultiReferenceFilterSearch/DatePickerWrapper/DatePickerWrapper'
 import './StandardGraphV2.css'
 
 export class StandardGraphV2 extends Component {
+
     constructor(props){
         super(props);
         this.state = {
+            mainGraph: null,
             childGraphs: [],
             sampleEntities : [
                 {
@@ -73,25 +78,84 @@ export class StandardGraphV2 extends Component {
                 height: '300px', 
                 padding: '10px'
             },
-            id : this.props.id  ? this.props.id :`sg_${Math.random().toString(36).substr(2, 11)}`
+            id : this.props.id  ? this.props.id :`sg_${Math.random().toString(36).substr(2, 11)}`,
+            heldDates : [
+                this.props.globalDateWindow[0]?this.props.globalDateWindow[0]:
+                this.props.externalDateWindow[0]?this.props.globalDateWindow[0]:moment().startOf('day').subtract(7,'days'), 
+                this.props.globalDateWindow[1]?this.props.globalDateWindow[1]:
+                this.props.externalDateWindow[1]?this.props.globalDateWindow[1]:moment().endOf('day')
+            ],
+        }
+        this.confirmDate = this.confirmDate.bind(this);
+        this.holdPreconfirmDate = this.holdPreconfirmDate.bind(this);
+    }
+
+
+    /**
+     * 
+     * @param {*} props 
+     */
+    // componentWillReceiveProps(props){
+
+        
+
+    // }
+
+
+    componentWillReceiveProps(props){
+        if(props.highlight && props.highlight.length > 0){
+            if(this.state.mainGraph){
+                console.info("highlights:", props.highlight);
+                this.state.mainGraph.highlightSeries(props.highlight);
+            }
+        }
+
+        // if(props.externalDateWindow){
+        //    this.setState({
+        //        heldDates : props.externalDateWindow
+        //    })
+        // }
+
+        // else if(props.highlight && props.highlight.length == 0) {
+        //     if(this.state.mainGraph){
+        //         console.info("highlights:", props.highlight);
+        //         this.state.mainGraph.highlightSeries([]);
+        //     }
+        // }
+        if(this.props.externalDateWindow !== props.externalDateWindow ){
+            if(props.externalDateWindow !== null && props.externalDateWindow !== undefined && props.externalDateWindow.length === 2 && props.externalDateWindow[0] < props.externalDateWindow[1])  
+            this.setState({
+                heldDates : props.externalDateWindow
+            }, () => {
+                setTimeout( () => {
+                    this.state.mainGraph.updateDatewinow(this.state.heldDates)
+                }, 100);
+            })
         }
     }
 
 
-
     componentDidMount(){
         let formatter = this.props.timeZone ? new Formatters(this.props.timeZone) : new Formatters('Australia/Melbourne')
-        let dataService = new DataServiceV2(this.props.baseUrl)
-
+        // console.log(this.props, this,state)
+        
+        let mainGraph;
         if(this.props.debugging === true){
+            if(this.props.newDataService == true){
+                var dataService = new DataServiceV3(this.props.baseUrl, this.props.externalDateWindow, this.state)
+                console.log('loading in new data servicdd')
+            }else{
+                var dataService = new DataServiceV2(this.props.baseUrl)
+            }
             var vdConfig = {
                 name: 'device view',
+                connectSeparatedPoints: true,
                 graphConfig: {
                     features: { 
                         zoom: true,
                         scroll: true,
                         rangeBar: true,
-                        legend: formatter.legendForAllSeries
+                        legend: formatter.legendForAllSeries,
                     },
                     entities: this.state.sampleEntities,
                     rangeEntity: this.state.sampleEntities[0],
@@ -122,34 +186,47 @@ export class StandardGraphV2 extends Component {
                 timezone: 'Australia/Melbourne'
                 // timezone: 'Pacific/Auckland'
             };
-            var graph1 = new FgpGraph(document.getElementById(this.state.id), [
+            mainGraph = new FgpGraph(document.getElementById(this.state.id), [
                 vdConfig
             ]);
         }else{
             var rawConfigs = [...this.props.configs];
             var completeConfigs = [];
-            rawConfigs.forEach(config => {
+            var dataService;
+            rawConfigs.forEach((config, index) => {
+                if(this.props.newDataService == true){
+                    dataService = new DataServiceV3(this.props.baseUrl, this.props.externalDateWindow, config, this.state.id+"_DSV3_P"+index);
+                    // console.log('loading in new data servicdd')
+                }else{
+                    dataService = new DataServiceV2(this.props.baseUrl);
+                }
                 var vdConfig = {
                     name: config.name,
+                    connectSeparatedPoints: config.connectSeparatedPoints? config.connectSeparatedPoints : true,
                     graphConfig: {
+                        hideHeader: config.graphConfig.hideHeader? config.graphConfig.hideHeader: false,
                         features: { 
                             zoom: config.graphConfig.features.zoom === false ? false : true ,
                             scroll: config.graphConfig.features.scroll === false ? false : true ,
-                            rangeBar: config.graphConfig.features.rangeBar === false ? false : true ,
-                            legend: formatter.legendForAllSeries
+                            rangeBar: config.graphConfig.features.rangeBar ? config.graphConfig.features.rangeBar : false ,
+                            legend: config.graphConfig.features.legend ? config.graphConfig.features.legend : formatter.legendForAllSeries,
+                            exports: ["data"],
+                            rangeLocked: config.graphConfig.features.rangeLocked ? config.graphConfig.features.rangeLocked : false,
+                            toolbar: config.graphConfig.features.toolbar 
                         },
                         entities: config.graphConfig.entities,
                         rangeEntity: config.graphConfig.rangeEntity,
                         rangeCollection: config.graphConfig.rangeCollection,
-                        collections: config.graphConfig.collections
+                        collections: config.graphConfig.collections,
+                        filters: config.graphConfig.filters ? config.graphConfig.filters : null
                     },
-                    dataService: dataService,
+                    dataService: config.dataService ? config.dataService : dataService,
                     show: config.show,
                     ranges: config.graphConfig.ranges,
                     initRange: this.props.globalDateWindow ? (
                         {
-                            start : this.props.globalDateWindow[0],
-                            end : this.props.globalDateWindow[1],
+                            start : this.state.heldDates[0],
+                            end : this.state.heldDates[1],
                         }
                     ) : (
                         config.graphConfig.initRange
@@ -159,40 +236,60 @@ export class StandardGraphV2 extends Component {
                 };
                 completeConfigs.push(vdConfig)
             });
-            var graph1 = new FgpGraph(document.getElementById(this.state.id), completeConfigs);
+
+            if(this.props.eventHandlers){
+                mainGraph = new FgpGraph(document.getElementById(this.state.id), completeConfigs, this.props.eventHandlers);
+            } else {
+                mainGraph = new FgpGraph(document.getElementById(this.state.id), completeConfigs);
+            }
+
+            
         }
         // render graph
-        graph1.initGraph();
+        mainGraph.initGraph();
         
         if(this.props.isParent === true){
-            console.log('> Creating child graphs...')
+            // console.log('> Creating child graphs...')
             var childGraphPropertiesArray = [...this.props.childGraphConfigs]
             var childGraphArray = [...this.state.childGraphs];
+            // dataservice for children graphs    Eric 28/02/2020
+            var dataService;
             childGraphPropertiesArray.forEach( graphConfig => {
                 var childGraphViewConfigs = []
-                graphConfig.viewConfigs.forEach( viewConfig =>{
-                    let dateTime = viewConfig.graphConfig.initRange
+                graphConfig.viewConfigs.forEach( (viewConfig, index) =>{
+                    if(this.props.newDataService === true){
+                        dataService = new DataServiceV3(this.props.baseUrl, this.props.externalDateWindow, graphConfig, this.state.id+"_DSV3_C"+index);
+                    }else{
+                        dataService = new DataServiceV2(this.props.baseUrl);
+                    }
+                    let dateTime = viewConfig.graphConfig.initRange;
                     var graphConf = {
                         name: viewConfig.name,
+                        connectSeparatedPoints: viewConfig.connectSeparatedPoints? viewConfig.connectSeparatedPoints : true,
                         graphConfig: {
+                            hideHeader: viewConfig.graphConfig.hideHeader? viewConfig.graphConfig.hideHeader: false,
                             features: { 
                                 zoom: viewConfig.graphConfig.features.zoom === false ? false : true ,
                                 scroll: viewConfig.graphConfig.features.scroll === false ? false : true ,
-                                rangeBar: viewConfig.graphConfig.features.rangeBar === false ? false : true ,
-                                legend: formatter.legendForAllSeries
+                                rangeBar: viewConfig.graphConfig.features.rangeBar ? viewConfig.graphConfig.features.rangeBar : false ,
+                                legend: viewConfig.graphConfig.features.legend ? viewConfig.graphConfig.features.legend : formatter.legendForAllSeries,
+                                exports: ["data"],
+                                rangeLocked: viewConfig.graphConfig.features.rangeLocked ? viewConfig.graphConfig.features.rangeLocked : false,
+                                toolbar: viewConfig.graphConfig.features.toolbar
                             },
                             entities: viewConfig.graphConfig.entities,
                             rangeEntity: viewConfig.graphConfig.rangeEntity,
                             rangeCollection: viewConfig.graphConfig.rangeCollection,
-                            collections: viewConfig.graphConfig.collections
+                            collections: viewConfig.graphConfig.collections,
+                            filters: viewConfig.graphConfig.filters ? viewConfig.graphConfig.filters : null
                         },
-                        dataService: dataService,
+                        dataService: viewConfig.dataService ? viewConfig.dataService : dataService ,
                         show: viewConfig.show === false ? false : true,
                         ranges: viewConfig.graphConfig.ranges,
                         initRange: this.props.globalDateWindow ? (
                             {
-                                start : this.props.globalDateWindow[0],
-                                end : this.props.globalDateWindow[1],
+                                start : this.state.heldDates[0],
+                                end : this.state.heldDates[1],
                             }
                         ) : (
                             dateTime
@@ -200,22 +297,38 @@ export class StandardGraphV2 extends Component {
                         interaction: viewConfig.graphConfig.interaction,
                         timezone: viewConfig.graphConfig.timezone
                     };
-                    childGraphViewConfigs.push(graphConf)
-                })
-                var graphX = new FgpGraph(document.getElementById(graphConfig.id), childGraphViewConfigs);
+                    childGraphViewConfigs.push(graphConf);
+                });
+                if(this.props.eventHandlers){
+                    var graphX = new FgpGraph(document.getElementById(graphConfig.id), childGraphViewConfigs, this.props.eventHandlers);
+                }else{
+                    var graphX = new FgpGraph(document.getElementById(graphConfig.id), childGraphViewConfigs);
+                }
                 graphX.initGraph();
                 childGraphArray.push(graphX)
             })
             this.setState({
                 childGraphs:childGraphArray
             })
-            graph1.setChildren(childGraphArray)
+            mainGraph.setChildren(childGraphArray)
         }
     
         this.setState({
             formatters : formatter,
             dataService : dataService,
-            graph1 : graph1
+            mainGraph : mainGraph
+        })
+    }
+
+    // for use with double-confirm datepicker graph
+    confirmDate(){
+        this.props.handleExternalDateWindow([moment(this.state.heldDates[0]).startOf('day').valueOf(), moment(this.state.heldDates[1]).endOf('day').valueOf()])
+
+    }
+
+    holdPreconfirmDate(dateWindow){
+        this.setState({
+            heldDates : dateWindow
         })
     }
 
@@ -226,9 +339,80 @@ export class StandardGraphV2 extends Component {
     render() {
         return (
             <div className={"container-fluid"}>
+                { this.props.includeDatePicker === "double" ? (
+                        <div className={"row"}>
+                            <div  className={"d-flex align-items-center m-left-10px m-right-2px"}>
+                                Start:
+                            </div>
+                            <div style={{"width":  "120px"}}>
+                                <DatePickerWrapper 
+                                    date={this.props.externalDateWindow[0]}
+                                    handleChange={(date) => {
+                                        this.props.handleExternalDateWindow([moment(date).startOf('day').valueOf(), this.props.externalDateWindow[1]])
+                                    }}
+                                />
+                            </div>
+                            <div className={"d-flex align-items-center  m-left-10px m-right-2px"}>
+                                End:
+                            </div>
+                            <div style={{"width":  "120px"}}>
+                                <DatePickerWrapper 
+                                    date={this.props.externalDateWindow[1]}
+                                    handleChange={(date) => {
+                                        this.props.handleExternalDateWindow([this.props.externalDateWindow[0], moment(date).endOf('day').valueOf()])
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                    ) : this.props.includeDatePicker === "single" ? (
+                        <div className={"row"}>
+                            <div>
+                                <DatePickerWrapper 
+                                    date={this.props.externalDateWindow[0]}
+                                    handleChange={(date) => {
+                                        this.props.handleExternalDateWindow([moment(date).startOf('day').valueOf(), moment(date).endOf('day').valueOf()])
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    ) : this.props.includeDatePicker === "double-confirm" ? (
+                        <div className={"row"}>
+                            <div  className={"d-flex align-items-center m-left-10px m-right-2px"}>
+                                Start:
+                            </div>
+                            <div style={{"width":  "120px"}}>
+                                <DatePickerWrapper 
+                                    date={this.state.heldDates[0]}
+                                    handleChange={(date) => {
+                                        this.holdPreconfirmDate([moment(date).startOf('day').valueOf(), this.state.heldDates[1]])
+                                    }}
+                                />
+                            </div>
+                            <div className={"d-flex align-items-center  m-left-10px m-right-2px"}>
+                                End:
+                            </div>
+                            <div style={{"width":  "120px"}}>
+                                <DatePickerWrapper 
+                                    date={this.state.heldDates[1]}
+                                    handleChange={(date) => {
+                                        this.holdPreconfirmDate([this.state.heldDates[0], moment(date).endOf('day').valueOf()])
+                                    }}
+                                />
+                            </div>
+                            <div style={{"width":  "120px"}}>
+                                <button className={"btn btn-primary"} onClick={this.confirmDate}>
+                                   Confirm
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        ""
+                    )
+                }
                 <div className={"w-100"} style={{"marginBottom" : "20px"}}>
                     <div id={this.state.id} style={this.state.graphStyles}>
-                        
+
                     </div>
                 </div>
                 {
@@ -236,7 +420,7 @@ export class StandardGraphV2 extends Component {
                         this.state.childGraphConfigs.map( childGraph => {
                             return(
                                 <div className={"w-100"} style={{"marginBottom" : "20px"}}>
-                                    <div id={childGraph.id} style={this.state.graphStyles}> 
+                                    <div id={childGraph.id} style={this.state.graphStyles}>
 
                                     </div>
                                 </div>

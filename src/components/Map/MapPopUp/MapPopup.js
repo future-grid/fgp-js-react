@@ -5,7 +5,7 @@ export class MapPopup extends Component {
     constructor(props){
         super(props);
         this.state = {
-          
+
         };
     }
 
@@ -15,17 +15,17 @@ export class MapPopup extends Component {
 
        visibility={this.state.popupVisible}
        focusedFeatures={this.state.focusedFeatures}
-       propertiesToDisplay={this.props.popupDisplayValues} where there `propertiesToDisplay` is as follows below  
+       propertiesToDisplay={this.props.popupDisplayValues} where there `propertiesToDisplay` is as follows below
         propertiesToDisplay={ [{label:"yourLabel", data:"yourDataAttributeName"}]} are defined in wherever the map is hosted eg.welnetExample.js
             propertiesToDisplay={[
                 {
                   label: "Lat",
                   data: "lat"
-                }, 
+                },
                 {
                   label: "Lng",
                   data: "lng"
-                }, 
+                },
                 {
                   label: "Original Parent",
                   data: "originParent"
@@ -39,7 +39,7 @@ export class MapPopup extends Component {
             <div className={ this.props.visibility === true ? ("d-block fgpReactMapPopup") : ("d-none")}>
                 {/* <span>{this.props.focusedFeature ? this.props.focusedFeature.type : ""}: {this.props.focusedFeature ? this.props.focusedFeature.name : ""}</span>
                 {
-                    this.props.propertiesToDisplay && this.props.visibility === true ? 
+                    this.props.propertiesToDisplay && this.props.visibility === true ?
                     this.props.propertiesToDisplay.map(function(prop, index ){
                         return <div key={index}><span>{this.props.focusedFeature[prop] ? prop + ": " : ""}</span><span>{this.props.focusedFeature[prop] ? this.props.focusedFeature[prop] : ""}</span></div>
                     },this) :
@@ -47,12 +47,27 @@ export class MapPopup extends Component {
                 } */}
                 {
                     this.props.focusedFeatures ?
-                        this.props.focusedFeatures.map(function(feature, index){
+                        this.props.focusedFeatures.map((feature, index)=>{
                             return (
                                 <div className={"fgpReactMapPopupFocusItem"} key={index}>
-                                    <span>{feature.type}: {feature.name}</span>
-                                    {
-                                        this.props.propertiesToDisplay && this.props.visibility === true ? 
+                                    {feature.type ?
+                                    <span>{feature.type}: {feature.name}</span> : ""}
+                                    {this.props.showDescriptionOnHover ?
+                                      <div className={"fgpReactMapPopupInfo"} key={"desc_key"}>
+                                        <span> Description: {feature.description}</span> 
+                                      </div>
+                                      : ""}
+                                    { this.props.mapPopupInfo ?
+                                        this.props.mapPopupInfo.map((col)=>{
+                                            return (
+                                                <div className={"fgpReactMapPopupInfo"} key={col.colName}>
+                                                    <span>{col.label}: {feature.additionalInfo[col.colName]}</span>
+                                                </div>
+                                            )
+                                         }) : ""
+                                    }
+                                    {/* {
+                                        this.props.propertiesToDisplay && this.props.visibility === true ?
                                             this.props.propertiesToDisplay.map(function(displayProperty, index ){
                                                 return (
                                                     <div key={index}>
@@ -62,14 +77,15 @@ export class MapPopup extends Component {
                                             })
                                         :
                                         null
-                                    }
-                                </div>    
+                                    } */}
+                                </div>
                             )
                         },this) :
                         // console.log(this.props.focusedFeatures)
                         // :
                         false
                 }
+
             </div>
         )
     }
