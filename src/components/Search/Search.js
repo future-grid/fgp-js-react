@@ -519,6 +519,16 @@ export class Search extends Component {
     let resultRow = this.state.searchRows.findIndex(p => p.indexKey === rowKey);
     let temp = [...this.state.searchRows];
     temp[resultRow][key] = value.target.value
+    // check if searching column isTs == true, then change the searchingType
+    this.props.searchConfig.searchingColumns.forEach((_col) =>{
+      if(_col.column === value.target.value && _col.isTs !== undefined && _col.isTs === true){
+        if(this.props.searchConfig.dateSearchingTypes !== undefined && this.props.searchConfig.dateSearchingTypes[0] !== undefined){
+          temp[resultRow].searchingType = this.props.searchConfig.dateSearchingTypes[0].key
+        }else{
+          temp[resultRow].searchingType = "<?";
+        }
+      }
+    })
     this.setState({searchRows: temp})
   }
 
