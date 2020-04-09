@@ -307,6 +307,17 @@ export class ResultTable extends Component {
             )
           }
         }
+      }else if(element["fgpExternalLink"]){
+        var link = element["fgpExternalLink"];
+        var splitValue = element["fgpExternalLinkValue"].split(",");
+        for(var i=1; i<=splitValue.length; i++){
+          link = link.replace("$"+i, processedRow.row[splitValue[i-1]]);
+        }
+        return (
+          <a target={"_blank"} href={link}>
+            {String(processedRow.value)}
+          </a>
+        )
       }else{
         return(<div> {String(processedRow.value)} </div>)
       }
