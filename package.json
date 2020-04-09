@@ -1,6 +1,6 @@
 {
     "name": "@future-grid/fgp-js-react",
-    "version": "20.2.1-RC05",
+    "version": "20.2.1-RC06",
     "description": "Building the component library for Future-Grid, here first, then making an official released when it is ready under the FGP organisation",
     "main": "build/index.js",
     "module": "build/index.js",
@@ -35,7 +35,7 @@
         "react-router-dom": "^5.1.2",
         "recharts": "^1.6.2",
         "@future-grid/fgp-auth": "^19.10.1",
-        "@future-grid/fgp-graph": "20.6.1-RC3",
+        "@future-grid/fgp-graph": "20.6.1-RC4",
         "file-loader": "^4.2.0",
         "find-up": "^4.1.0"
     },

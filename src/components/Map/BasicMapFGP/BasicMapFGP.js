@@ -582,7 +582,7 @@ export class BasicMapFGP extends Component {
             if (hasChildrenIn === true) {
                 this.setState({
                     map: map,
-                    //featuresLayerChildren: vectorLayerChildrenArr,
+                    featuresLayerChildren: vectorLayerChildrenArr,
                     featuresLayerParent: vectorLayerParent,
                     vectorLayerSelectedFeatures: vectorLayerSelectedFeatures
                 });
